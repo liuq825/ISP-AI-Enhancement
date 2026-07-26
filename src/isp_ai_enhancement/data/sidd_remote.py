@@ -415,3 +415,80 @@ def fetch_sidd_raw_subset(
     )
     temporary.replace(receipt_path)
     return receipt_path
+
+
+def sidd_subset_status(
+    *,
+    config: str | Path,
+    output_dir: str | Path,
+) -> dict[str, Any]:
+    """快速汇总长时间 SIDD 获取进度，不重新计算数百个大文件哈希。
+
+    每个 pair 收据只会在大小、CRC 和 SHA256 已验证后生成，因此状态检查只需确认
+    收据身份、记录大小与当前 MAT 大小仍一致。最终发布前仍以获取器重跑或完整收据
+    为准；本函数主要供后台进度与异常文件发现使用。
+    """
+
+    config_path = Path(config)
+    frame_indices, scenes = _validate_subset_spec(config_path)
+    output = Path(output_dir)
+    completed_pairs = 0
+    completed_scene_names: set[str] = set()
+    errors: list[str] = []
+    for scene in scenes:
+        instance = scene["scene"].split("_", 1)[0]
+        scene_dir = output / scene["scene"]
+        scene_complete = True
+        for frame_index in frame_indices:
+            frame = f"{frame_index:03d}"
+            receipt_path = scene_dir / f"{instance}_RAW_{frame}.receipt.json"
+            if not receipt_path.is_file():
+                scene_complete = False
+                continue
+            try:
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                if (
+                    receipt.get("scene_name") != scene["scene"]
+                    or receipt.get("frame_index") != frame_index
+                ):
+                    raise ValueError("收据场景或帧编号不匹配")
+                for role, marker in (("noisy", "NOISY"), ("ground_truth", "GT")):
+                    details = receipt[role]
+                    mat_path = scene_dir / f"{instance}_{marker}_RAW_{frame}.MAT"
+                    expected_bytes = int(details["member_bytes"])
+                    if not mat_path.is_file() or mat_path.stat().st_size != expected_bytes:
+                        raise ValueError(f"{role} MAT 缺失或大小不匹配")
+                    if len(str(details["sha256"])) != 64:
+                        raise ValueError(f"{role} SHA256 字段非法")
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+                scene_complete = False
+                errors.append(f"{receipt_path}: {error}")
+                continue
+            completed_pairs += 1
+        if scene_complete:
+            completed_scene_names.add(scene["scene"])
+
+    partials = sorted(
+        path.relative_to(output).as_posix()
+        for path in output.rglob("*.partial")
+        if path.is_file()
+    ) if output.is_dir() else []
+    expected_pairs = len(scenes) * len(frame_indices)
+    return {
+        "format_version": 1,
+        "config": str(config_path),
+        "config_sha256": _sha256_and_crc32(config_path)[0],
+        "output": str(output),
+        "expected_scenes": len(scenes),
+        "completed_scenes": len(completed_scene_names),
+        "expected_pairs": expected_pairs,
+        "completed_pairs": completed_pairs,
+        "completion_percent": 100.0 * completed_pairs / expected_pairs,
+        "partial_files": partials,
+        "errors": errors,
+        "status": (
+            "complete"
+            if completed_pairs == expected_pairs and not errors and not partials
+            else "in_progress"
+        ),
+    }

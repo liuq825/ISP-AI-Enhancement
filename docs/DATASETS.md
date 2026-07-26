@@ -70,7 +70,8 @@ SIDD Medium 相同但帧选择由本项目显式固定。配置保存两份来�
 双帧获取时，同一场景的 noisy/GT 归档各只打开一次，再在归档内依次校验两个成员；
 相比逐配对打开可少 320 次中央目录请求。长时间后台任务可用
 `--progress-file outputs/sidd_medium_download.log` 记录已完成场景。预计 RAW 本体
-约 20 GB，仍由 `.gitignore` 隔离。
+约 20 GB，仍由 `.gitignore` 隔离。`sidd-fetch-status` 利用已完成 pair 收据快速
+报告场景/配对百分比、残留 partial 和结构错误，不为查看进度重复计算数百个大文件哈希。
 
 训练导入使用 `--patch-size 256 --patches-per-pair 16`。每个 noisy/GT 源配对只加载
 和 CFA 打包一次，再按 `patch_seed` 生成 16 个不重复 packed RAW 坐标，避免训练时

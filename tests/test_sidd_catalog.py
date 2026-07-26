@@ -106,8 +106,11 @@ def test_versioned_medium_config_and_training_thresholds_are_achievable() -> Non
         "S6",
     }
     source_pairs = {"train": 0, "val": 0, "test": 0}
+    train_sensors: set[str] = set()
+    train_iso_buckets: set[str] = set()
     for row in scenes:
-        scene_id = row["scene"].split("_")[1]
+        fields = row["scene"].split("_")
+        scene_id = fields[1]
         split = _split_for_scene(
             scene_id,
             seed=20260726,
@@ -115,6 +118,18 @@ def test_versioned_medium_config_and_training_thresholds_are_achievable() -> Non
             val_ratio=0.1,
         )
         source_pairs[split] += len(acquisition["frame_indices"])
+        if split == "train":
+            train_sensors.add(f"sidd_{fields[2]}")
+            iso = int(fields[3])
+            train_iso_buckets.add(
+                "low"
+                if iso <= 200
+                else "medium"
+                if iso <= 800
+                else "high"
+                if iso <= 3200
+                else "extreme"
+            )
     assert source_pairs == {"train": 206, "val": 6, "test": 108}
 
     requirements = load_yaml("configs/train_student_public_baseline.yaml")[
@@ -124,3 +139,5 @@ def test_versioned_medium_config_and_training_thresholds_are_achievable() -> Non
     assert source_pairs["val"] >= requirements["min_val_source_pairs"]
     assert source_pairs["train"] * 16 >= requirements["min_train_records"]
     assert source_pairs["val"] * 16 >= requirements["min_val_records"]
+    assert train_sensors == set(requirements["required_train_sensors"])
+    assert train_iso_buckets == set(requirements["required_train_iso_buckets"])

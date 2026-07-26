@@ -13,6 +13,7 @@ from isp_ai_enhancement import cli
 from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
+    sidd_subset_status,
 )
 
 
@@ -161,6 +162,11 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
         "https://example.test/noisy.zip",
         "https://example.test/target.zip",
     ]
+    status = sidd_subset_status(config=config, output_dir=tmp_path / "output")
+    assert status["status"] == "complete"
+    assert status["completed_scenes"] == 1
+    assert status["completed_pairs"] == 1
+    assert status["completion_percent"] == 100.0
     assert progress == [
         f"[1/1] 开始获取 {scene} frames [010]",
         f"[1/1] 已校验 {scene} frames [010]",

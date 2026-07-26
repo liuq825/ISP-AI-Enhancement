@@ -19,6 +19,7 @@ from .sidd_remote import (
     fetch_sidd_raw_frames,
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
+    sidd_subset_status,
 )
 
 __all__ = [
@@ -36,6 +37,7 @@ __all__ = [
     "fetch_sidd_raw_subset",
     "load_context_config",
     "read_manifest",
+    "sidd_subset_status",
     "validate_data_policy",
     "validate_data_requirements",
     "validate_manifest",

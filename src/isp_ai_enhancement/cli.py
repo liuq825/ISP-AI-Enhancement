@@ -24,6 +24,7 @@ from isp_ai_enhancement.data.sidd_catalog import (
 from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
+    sidd_subset_status,
 )
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
 from isp_ai_enhancement.evaluation import evaluate_manifest
@@ -243,6 +244,20 @@ def _build_sidd_range_config(args: argparse.Namespace) -> int:
     return 0
 
 
+def _sidd_fetch_status(args: argparse.Namespace) -> int:
+    """打印无需联网和重算大文件哈希的 SIDD 获取进度 JSON。"""
+
+    print(
+        json.dumps(
+            sidd_subset_status(config=args.config, output_dir=args.output),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
 def _train(args: argparse.Namespace) -> int:
     """调用配置驱动训练入口并打印最终检查点位置。"""
 
@@ -429,6 +444,11 @@ def build_parser() -> argparse.ArgumentParser:
     sidd_catalog.add_argument("--source-page", default=SIDD_SCENE_PAGE)
     sidd_catalog.add_argument("--mirror-list", default=SIDD_MIRROR2_LIST)
     sidd_catalog.set_defaults(function=_build_sidd_range_config)
+
+    sidd_status = commands.add_parser("sidd-fetch-status")
+    sidd_status.add_argument("--config", required=True)
+    sidd_status.add_argument("--output", required=True)
+    sidd_status.set_defaults(function=_sidd_fetch_status)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)
