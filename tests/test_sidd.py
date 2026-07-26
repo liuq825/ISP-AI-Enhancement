@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.io import savemat
 
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
 from isp_ai_enhancement.data.sidd import (
@@ -11,7 +12,9 @@ from isp_ai_enhancement.data.sidd import (
     SIDDScene,
     discover_sidd_pairs,
     import_sidd_dataset,
+    import_sidd_validation_blocks,
     load_sidd_nlf,
+    load_sidd_scene_order,
 )
 
 
@@ -81,3 +84,50 @@ def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:
     path.write_text("scene_instance_id,beta1_r\nx,1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="invalid SIDD NLF"):
         load_sidd_nlf(path)
+
+
+def test_import_sidd_validation_blocks_binds_versioned_scene_cfa(
+    tmp_path: Path,
+) -> None:
+    """验证块第一维应绑定版本化场景顺序，并按各相机 CFA 打包。"""
+
+    scene_order = tmp_path / "scenes.yaml"
+    scene_order.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        "  - 0009_001_S6_00800_00350_3200_L\n"
+        "  - 0021_001_GP_10000_05000_5500_N\n",
+        encoding="utf-8",
+    )
+    noisy = np.arange(2 * 2 * 8 * 8, dtype=np.float32).reshape(2, 2, 8, 8)
+    noisy /= float(noisy.max())
+    target = np.clip(noisy + 0.01, 0.0, 1.0)
+    noisy_mat = tmp_path / "noisy.mat"
+    target_mat = tmp_path / "target.mat"
+    savemat(noisy_mat, {"ValidationNoisyBlocksRaw": noisy})
+    savemat(target_mat, {"ValidationGtBlocksRaw": target})
+
+    scenes = load_sidd_scene_order(scene_order)
+    assert [scene.camera_id for scene in scenes] == ["S6", "GP"]
+    manifest = import_sidd_validation_blocks(
+        noisy_mat,
+        target_mat,
+        tmp_path / "converted",
+        scene_order=scene_order,
+    )
+    records = read_manifest(manifest)
+    assert len(records) == 4
+    assert {record.split for record in records} == {"test"}
+    assert records[0].metadata["cfa_pattern"] == "GRBG"
+    assert records[2].metadata["cfa_pattern"] == "BGGR"
+    assert validate_manifest(records, root=manifest.parent) == []
+    with np.load(manifest.parent / records[0].input_path) as archive:
+        assert archive["raw"].shape == (4, 4, 4)
+
+
+def test_versioned_official_validation_scene_order_is_complete() -> None:
+    """仓库固化的官方 held-out 顺序应恰含 40 场景和五款相机。"""
+
+    scenes = load_sidd_scene_order("resources/sidd_validation_scenes.yaml")
+    assert len(scenes) == 40
+    assert {scene.camera_id for scene in scenes} == set(SIDD_CFA_PATTERNS)

@@ -31,6 +31,18 @@ CFA 与逐场景 NLF。数据切分使用三位 `scene_id` 分组；同一物理
 `sqrt(mean(beta1*0.18 + beta2))`。它只是 16 通道上下文的可复现标量摘要，完整
 六个 NLF 系数仍保存在 Manifest 元数据中。
 
+### SIDD RAW 验证块
+
+官方 `ValidationNoisyBlocksRaw.mat` 与 `ValidationGtBlocksRaw.mat` 的变量形状均为
+`40×32×256×256`：40 个 held-out 场景、每场景 32 个 Bayer block。MAT 文件本身
+没有携带相机代号或 CFA，直接把全部块当 RGGB 会污染 4/5 的相机数据。
+
+`resources/sidd_validation_scenes.yaml` 按官方场景页面的展示顺序固化 40 个
+“Held for benchmark”场景。`import-sidd-blocks` 先核验两个 MAT 的变量名、shape、
+有限值和 `[0,1]` 范围，再按每个场景的相机 CFA 转换为 `4×128×128` canonical
+packed RAW，并记录两个源 MAT 及场景顺序文件的 SHA256。转换时 noisy 与 GT 分开
+加载，避免同时常驻约 670 MB 未压缩数组。
+
 ## 为什么公开集不能替代产品数据
 
 公开集无法覆盖目标设备的 CFA、黑电平、模拟/数字增益链、行列噪声、温度漂移、

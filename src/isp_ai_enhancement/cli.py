@@ -1,6 +1,6 @@
 """项目统一命令行入口。
 
-命令覆盖模型统计、结构化剪枝检查、数据生成/导入、清单验证、训练、
+命令覆盖模型统计、结构化剪枝检查、数据生成/导入、清单验证、训练、评测、
 ONNX 导出与算子审计；自动化脚本应调用这些稳定子命令而不是复制内部逻辑。
 """
 
@@ -11,8 +11,12 @@ import json
 from pathlib import Path
 
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
-from isp_ai_enhancement.data.sidd import import_sidd_dataset
+from isp_ai_enhancement.data.sidd import (
+    import_sidd_dataset,
+    import_sidd_validation_blocks,
+)
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
+from isp_ai_enhancement.evaluation import evaluate_manifest
 from isp_ai_enhancement.export import export_onnx
 from isp_ai_enhancement.models.factory import build_model_from_file
 from isp_ai_enhancement.onnx_audit import audit_onnx
@@ -121,10 +125,46 @@ def _import_sidd(args: argparse.Namespace) -> int:
     return 0
 
 
+def _import_sidd_blocks(args: argparse.Namespace) -> int:
+    """转换官方 SIDD 验证块，并打印生成的测试清单路径。"""
+
+    print(
+        import_sidd_validation_blocks(
+            args.noisy,
+            args.ground_truth,
+            args.output,
+            scene_order=args.scene_order,
+            nlf_csv=args.nlf_csv,
+            split=args.split,
+        )
+    )
+    return 0
+
+
 def _train(args: argparse.Namespace) -> int:
     """调用配置驱动训练入口并打印最终检查点位置。"""
 
     print(train_from_config(args.config))
+    return 0
+
+
+def _evaluate(args: argparse.Namespace) -> int:
+    """运行治理感知的 RAW 评测，并打印完整 JSON 报告。"""
+
+    report = evaluate_manifest(
+        manifest=args.manifest,
+        split=args.split,
+        context_config=args.context_config,
+        catalog=args.catalog,
+        purpose=args.purpose,
+        model_config=args.model_config,
+        checkpoint=args.checkpoint,
+        output=args.output,
+        device_name=args.device,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
     return 0
 
 
@@ -190,9 +230,39 @@ def build_parser() -> argparse.ArgumentParser:
     sidd.add_argument("--val-ratio", type=float, default=0.1)
     sidd.set_defaults(function=_import_sidd)
 
+    sidd_blocks = commands.add_parser("import-sidd-blocks")
+    sidd_blocks.add_argument("--noisy", required=True)
+    sidd_blocks.add_argument("--ground-truth", required=True)
+    sidd_blocks.add_argument("--output", required=True)
+    sidd_blocks.add_argument(
+        "--scene-order",
+        default="resources/sidd_validation_scenes.yaml",
+    )
+    sidd_blocks.add_argument("--nlf-csv")
+    sidd_blocks.add_argument(
+        "--split",
+        choices=("val", "test", "golden"),
+        default="test",
+    )
+    sidd_blocks.set_defaults(function=_import_sidd_blocks)
+
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)
     train.set_defaults(function=_train)
+
+    evaluate = commands.add_parser("evaluate")
+    evaluate.add_argument("--manifest", required=True)
+    evaluate.add_argument("--split", default="test")
+    evaluate.add_argument("--context-config", default="configs/context.yaml")
+    evaluate.add_argument("--catalog", default="resources/datasets.yaml")
+    evaluate.add_argument("--purpose", default="commercial_grade")
+    evaluate.add_argument("--model-config")
+    evaluate.add_argument("--checkpoint")
+    evaluate.add_argument("--output")
+    evaluate.add_argument("--device", default="cpu")
+    evaluate.add_argument("--batch-size", type=int, default=1)
+    evaluate.add_argument("--num-workers", type=int, default=0)
+    evaluate.set_defaults(function=_evaluate)
 
     onnx = commands.add_parser("export-onnx")
     onnx.add_argument("--config", required=True)

@@ -16,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from isp_ai_enhancement.config import load_yaml
+
 from .context import canonical_pack_bayer
 from .manifest import ManifestRecord, write_manifest
 
@@ -33,6 +35,8 @@ _SCENE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 _RAW_SUFFIXES = {".mat", ".npy"}
+_VALIDATION_NOISY_VARIABLE = "ValidationNoisyBlocksRaw"
+_VALIDATION_GT_VARIABLE = "ValidationGtBlocksRaw"
 
 
 @dataclass(frozen=True)
@@ -199,6 +203,95 @@ def load_sidd_nlf(path: str | Path) -> dict[str, tuple[float, ...]]:
     return result
 
 
+def load_sidd_scene_order(path: str | Path) -> list[SIDDScene]:
+    """读取版本化 SIDD 验证场景顺序，并严格拒绝重复或非法场景名。
+
+    官方验证块 MAT 只有 ``40×32×256×256`` 数组，不携带相机/CFA 字段；
+    因此第一维与场景表的绑定本身就是数据契约，必须作为仓库资源审计。
+    """
+
+    values = load_yaml(path)
+    raw_scenes = values.get("scenes")
+    if not isinstance(raw_scenes, list) or not raw_scenes:
+        raise ValueError(f"{path}: 'scenes' must be a non-empty list")
+    scenes = [SIDDScene.from_directory(Path(str(value))) for value in raw_scenes]
+    names = [str(value) for value in raw_scenes]
+    if len(names) != len(set(names)):
+        raise ValueError(f"{path}: scene order contains duplicate names")
+    return scenes
+
+
+def _sidd_mat_shape(path: Path, variable: str) -> tuple[int, ...]:
+    """只读 MAT 目录并返回指定变量形状，避免为预检加载数百 MB 数组。"""
+
+    try:
+        from scipy.io import whosmat
+    except ImportError as error:
+        raise RuntimeError(
+            "reading SIDD validation blocks requires: pip install -e '.[data]'"
+        ) from error
+    matches = [shape for name, shape, _dtype in whosmat(path) if name == variable]
+    if len(matches) != 1:
+        raise ValueError(f"{path}: expected exactly one MAT variable {variable!r}")
+    return tuple(int(value) for value in matches[0])
+
+
+def _load_sidd_block_array(path: Path, variable: str) -> np.ndarray:
+    """加载一个 SIDD 验证块变量并执行形状、有限值和归一化范围校验。"""
+
+    try:
+        from scipy.io import loadmat
+    except ImportError as error:
+        raise RuntimeError(
+            "reading SIDD validation blocks requires: pip install -e '.[data]'"
+        ) from error
+    values = loadmat(path, variable_names=[variable])
+    if variable not in values:
+        raise ValueError(f"{path}: MAT variable {variable!r} is missing")
+    blocks = np.asarray(values[variable], dtype=np.float32)
+    if blocks.ndim != 4 or blocks.shape[1] <= 0:
+        raise ValueError(
+            f"{path}: {variable} must have shape images×blocks×H×W, got {blocks.shape}"
+        )
+    if blocks.shape[-2] % 2 or blocks.shape[-1] % 2:
+        raise ValueError(f"{path}: validation block dimensions must be even")
+    if not np.isfinite(blocks).all():
+        raise ValueError(f"{path}: validation blocks contain NaN or infinity")
+    if float(blocks.min()) < -1e-6 or float(blocks.max()) > 1.0 + 1e-6:
+        raise ValueError(f"{path}: validation blocks must be normalized to [0, 1]")
+    return np.clip(blocks, 0.0, 1.0)
+
+
+def _save_raw_npz(path: Path, raw: np.ndarray) -> None:
+    """原子写入单个 packed RAW NPZ，避免中断后留下貌似完整的文件。"""
+
+    temporary = path.with_name(f"{path.name}.tmp.npz")
+    np.savez_compressed(temporary, raw=np.asarray(raw, dtype=np.float32))
+    temporary.replace(path)
+
+
+def _write_sidd_block_role(
+    blocks: np.ndarray,
+    scenes: list[SIDDScene],
+    sample_dir: Path,
+    role: str,
+) -> None:
+    """按每个场景的 CFA 打包验证块，并写成输入或目标 NPZ 文件。"""
+
+    if blocks.shape[0] != len(scenes):
+        raise ValueError(
+            f"validation block image count {blocks.shape[0]} "
+            f"does not match scene order {len(scenes)}"
+        )
+    for scene_index, scene in enumerate(scenes):
+        cfa = SIDD_CFA_PATTERNS[scene.camera_id]
+        # 一次打包同场景的全部 block，避免 1,280 次单独创建 Torch 张量。
+        packed = canonical_pack_bayer(torch.from_numpy(blocks[scene_index]), cfa).numpy()
+        for block_index, raw in enumerate(packed, start=1):
+            sample_id = f"sidd_val_{scene.instance_id}_{block_index:02d}"
+            _save_raw_npz(sample_dir / f"{sample_id}_{role}.npz", raw)
+
+
 def _noise_sigma(nlf: tuple[float, ...] | None, reference_level: float = 0.18) -> float:
     """在参考灰度处把 RGB 三组 NLF 系数折算为单一噪声强度条件。"""
 
@@ -324,6 +417,98 @@ def import_sidd_dataset(
                         "nlf": list(nlf) if nlf is not None else None,
                         "source_input_sha256": _sha256(noisy_path),
                         "source_target_sha256": _sha256(target_path),
+                    },
+                )
+            )
+    manifest_path = output / "manifest.jsonl"
+    write_manifest(records, manifest_path)
+    return manifest_path
+
+
+def import_sidd_validation_blocks(
+    noisy_mat: str | Path,
+    ground_truth_mat: str | Path,
+    output_dir: str | Path,
+    *,
+    scene_order: str | Path,
+    nlf_csv: str | Path | None = None,
+    split: str = "test",
+) -> Path:
+    """把官方 SIDD RAW 验证块转换为带 CFA/场景来源的项目清单。
+
+    为控制峰值内存，先加载并写出全部 noisy block，释放数组后再处理 GT。
+    输入/GT 的 MAT 变量形状在加载前必须完全一致；第一维必须匹配版本化的
+    40 场景顺序，第二维通常为官方规定的 32 个 256×256 Bayer block。
+    """
+
+    if split not in {"val", "test", "golden"}:
+        raise ValueError("SIDD validation split must be val, test, or golden")
+    noisy_path = Path(noisy_mat)
+    target_path = Path(ground_truth_mat)
+    scene_order_path = Path(scene_order)
+    scenes = load_sidd_scene_order(scene_order_path)
+    noisy_shape = _sidd_mat_shape(noisy_path, _VALIDATION_NOISY_VARIABLE)
+    target_shape = _sidd_mat_shape(target_path, _VALIDATION_GT_VARIABLE)
+    if noisy_shape != target_shape:
+        raise ValueError(
+            f"SIDD validation noisy/GT shape mismatch: {noisy_shape} != {target_shape}"
+        )
+    if len(noisy_shape) != 4 or noisy_shape[0] != len(scenes):
+        raise ValueError(
+            f"SIDD validation shape {noisy_shape} does not match {len(scenes)} scenes"
+        )
+
+    output = Path(output_dir)
+    sample_dir = output / "samples"
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    noisy_blocks = _load_sidd_block_array(noisy_path, _VALIDATION_NOISY_VARIABLE)
+    _write_sidd_block_role(noisy_blocks, scenes, sample_dir, "input")
+    del noisy_blocks
+    target_blocks = _load_sidd_block_array(target_path, _VALIDATION_GT_VARIABLE)
+    _write_sidd_block_role(target_blocks, scenes, sample_dir, "target")
+    del target_blocks
+
+    nlf_values = load_sidd_nlf(nlf_csv) if nlf_csv is not None else {}
+    noisy_sha256 = _sha256(noisy_path)
+    target_sha256 = _sha256(target_path)
+    order_sha256 = _sha256(scene_order_path)
+    block_count = noisy_shape[1]
+    records: list[ManifestRecord] = []
+    for scene in scenes:
+        scene_name = (
+            f"{scene.instance_id}_{scene.scene_id}_{scene.camera_id}_{scene.iso:05d}_"
+            f"{scene.shutter_denominator:05d}_{scene.cct:04d}_{scene.brightness}"
+        )
+        nlf = nlf_values.get(scene_name)
+        for block_index in range(1, block_count + 1):
+            sample_id = f"sidd_val_{scene.instance_id}_{block_index:02d}"
+            records.append(
+                ManifestRecord(
+                    sample_id=sample_id,
+                    dataset_id="sidd",
+                    input_path=(Path("samples") / f"{sample_id}_input.npz").as_posix(),
+                    target_path=(Path("samples") / f"{sample_id}_target.npz").as_posix(),
+                    split=split,
+                    sensor_id=f"sidd_{scene.camera_id}",
+                    mode="single",
+                    session_id="sidd_validation",
+                    scene_id=scene.scene_id,
+                    iso_bucket=_iso_bucket(scene.iso),
+                    metadata={
+                        "noise_sigma": _noise_sigma(nlf),
+                        "exposure_ratio": 1.0,
+                        "wb_rg": 1.0,
+                        "wb_bg": 1.0,
+                        "cfa_pattern": SIDD_CFA_PATTERNS[scene.camera_id],
+                        "iso": scene.iso,
+                        "shutter_denominator": scene.shutter_denominator,
+                        "cct": scene.cct,
+                        "illuminant_brightness": scene.brightness,
+                        "validation_block_index": block_index,
+                        "nlf": list(nlf) if nlf is not None else None,
+                        "source_input_sha256": noisy_sha256,
+                        "source_target_sha256": target_sha256,
+                        "source_scene_order_sha256": order_sha256,
                     },
                 )
             )

@@ -125,6 +125,7 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         input_raw, target, extras = self._crop(input_raw, target, extras)
         input_raw, target, extras = self._augment(input_raw, target, extras)
         metadata_values = record.metadata
+        embedding_value = metadata_values.get("camera_embedding")
         metadata = RawMetadata(
             sensor_id=record.sensor_id,
             mode=record.mode,
@@ -132,9 +133,12 @@ class RawPairDataset(Dataset[dict[str, Any]]):
             exposure_ratio=float(metadata_values.get("exposure_ratio", 1.0)),
             wb_rg=float(metadata_values.get("wb_rg", 1.0)),
             wb_bg=float(metadata_values.get("wb_bg", 1.0)),
-            camera_embedding=tuple(
-                float(value)
-                for value in metadata_values.get("camera_embedding", (0.0, 0.0, 0.0, 0.0))
+            # 清单未显式覆盖时必须传 None，让 ContextBuilder 使用传感器注册表；
+            # 若擅自填零向量，会静默绕过已经通过治理门禁的相机嵌入。
+            camera_embedding=(
+                tuple(float(value) for value in embedding_value)  # type: ignore[arg-type]
+                if embedding_value is not None
+                else None
             ),
         )
         # 上下文构建放在裁剪和增强之后，可避免先生成 12 个大尺寸条件平面。

@@ -27,10 +27,43 @@ def psnr(
     mask: Tensor | None = None,
     data_range: float = 1.0,
 ) -> Tensor:
-    """由带 mask 的 MSE 计算 PSNR，并使用 dtype epsilon 避免无穷值。"""
+    """计算批内逐样本 PSNR 的算术平均，避免批大小影响统计权重。"""
 
-    error = mse(prediction, target, mask).clamp_min(torch.finfo(prediction.dtype).eps)
-    return 10 * torch.log10(torch.tensor(data_range**2, device=error.device) / error)
+    return psnr_per_sample(prediction, target, mask, data_range).mean()
+
+
+def psnr_per_sample(
+    prediction: Tensor,
+    target: Tensor,
+    mask: Tensor | None = None,
+    data_range: float = 1.0,
+) -> Tensor:
+    """返回形状为 ``N`` 的逐样本 PSNR，可用于 Sensor/ISO 分桶统计。
+
+    mask 接受 ``N×1×H×W`` 或 ``N×H×W`` 并广播到 RAW 四通道。每个样本独立
+    归一化，防止最后一个不足 batch 的批次或不同有效面积改变样本权重。
+    """
+
+    if prediction.shape != target.shape or prediction.ndim < 2:
+        raise ValueError("prediction and target must have the same batched shape")
+    error = (prediction - target).square()
+    reduce_dimensions = tuple(range(1, error.ndim))
+    if mask is None:
+        per_sample_mse = error.mean(dim=reduce_dimensions)
+    else:
+        if mask.ndim == prediction.ndim - 1:
+            mask = mask.unsqueeze(1)
+        try:
+            expanded_mask = mask.to(
+                device=error.device, dtype=error.dtype
+            ).expand_as(error)
+        except RuntimeError as runtime_error:
+            raise ValueError("mask cannot be broadcast to prediction shape") from runtime_error
+        denominator = expanded_mask.sum(dim=reduce_dimensions).clamp_min(1.0)
+        per_sample_mse = (error * expanded_mask).sum(dim=reduce_dimensions) / denominator
+    per_sample_mse = per_sample_mse.clamp_min(torch.finfo(prediction.dtype).eps)
+    peak = torch.tensor(data_range**2, device=error.device, dtype=error.dtype)
+    return 10 * torch.log10(peak / per_sample_mse)
 
 
 def psnr_drop(reference: float, candidate: float) -> float:

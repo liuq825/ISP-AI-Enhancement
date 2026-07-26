@@ -25,7 +25,7 @@ from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
 from isp_ai_enhancement.distillation import FeatureDistiller
 from isp_ai_enhancement.export import load_checkpoint_state
 from isp_ai_enhancement.losses import LossWeights, RawRestorationLoss
-from isp_ai_enhancement.metrics import psnr
+from isp_ai_enhancement.metrics import psnr_per_sample
 from isp_ai_enhancement.models.factory import build_model_from_file
 
 
@@ -77,7 +77,12 @@ def _evaluate(
         inputs = batch["input"].to(device)
         target = batch["target"].to(device)
         enhanced = torch.clamp(inputs[:, :4] + model(inputs), 0.0, 1.0)
-        values.append(float(psnr(enhanced, target).item()))
+        values.extend(
+            float(value)
+            for value in psnr_per_sample(
+                enhanced, target, inputs[:, 15:16]
+            ).cpu().tolist()
+        )
     return sum(values) / max(1, len(values))
 
 

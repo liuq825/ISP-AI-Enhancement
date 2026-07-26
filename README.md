@@ -32,6 +32,22 @@ py -m venv .venv
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/sidd/manifest.jsonl
 ```
 
+导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe import-sidd-blocks `
+  --noisy datasets/SIDD_Blocks/ValidationNoisyBlocksRaw.mat `
+  --ground-truth datasets/SIDD_Blocks/ValidationGtBlocksRaw.mat `
+  --output data/sidd_validation `
+  --nlf-csv datasets/SIDD_Blocks/noise_level_functions.csv
+.\.venv\Scripts\isp-ai.exe validate-manifest `
+  --manifest data/sidd_validation/manifest.jsonl
+.\.venv\Scripts\isp-ai.exe evaluate `
+  --manifest data/sidd_validation/manifest.jsonl `
+  --split test --purpose commercial_grade `
+  --output outputs/sidd_validation_noisy_baseline.json
+```
+
 训练与导出入口：
 
 ```powershell
@@ -52,7 +68,7 @@ py -m venv .venv
   `clip(raw + residual, 0, 1)`。
 
 精确定义见 `docs/INPUT_CONTRACT.md`；量产边界与端侧路线见
-`docs/DEPLOYMENT_KIRIN9000.md`。
+`docs/DEPLOYMENT_KIRIN9000.md`；统一 PSNR 与分桶口径见 `docs/EVALUATION.md`。
 
 ## 代码注释与剪枝
 
