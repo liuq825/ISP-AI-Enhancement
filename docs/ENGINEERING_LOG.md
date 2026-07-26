@@ -223,3 +223,20 @@
 - 处理：新增 `qat_config` 和 `initial_checkpoint` 路径，从剪枝 FP32 权重构建 QAT
   图，按 global step 冻结观察器，并把量化 buffer 保存进 v2 checkpoint。
 - 边界：层数/权重元素覆盖率只用于代码审计，不能替代目标 OM 的按计算量 INT8 落点。
+
+## 2026-07-26：剪枝产物工作流
+
+### 上层 checkpoint 工作流的 inference_mode 会让 DepGraph 失败
+
+- 现象：底层适配器已按要求开启 Autograd，但新增的 `prune-checkpoint` 外层最初使用
+  `@torch.inference_mode()`，DepGraph 仍检测到全局梯度关闭并立即拒绝构图。
+- 处理：物理剪枝函数外层保持梯度开启，只在剪枝完成后的重建输出对照局部使用
+  `torch.inference_mode()`。
+- 防复发：checkpoint 级测试实际调用默认 Torch-Pruning 后端，不用 mock 绕过构图。
+
+### 内存中能运行的剪枝图不一定可交付
+
+- 风险：DepGraph 会修改普通模块属性；若目标 YAML 与结果不一致，重启进程后可能无法加载。
+- 处理：保存前从目标配置重新创建模型、`strict=True` 加载全部权重，并要求随机输入输出
+  逐元素完全相同；伴生 manifest 记录三份源文件哈希和剪枝统计。
+- 交叉验证：同一小模型上，手工重建与 Torch-Pruning 的全部权重逐元素一致。

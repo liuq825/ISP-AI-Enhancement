@@ -42,6 +42,22 @@ Python 属性不在依赖图的修改范围内。
 这些数值只验证结构。最终 P1/P2/P3 必须从已训练 P0 权重出发，以真实验证集做逐域敏感度
 分析和剪枝后微调，不能把随机初始化权重的重要性排序作为商用品质结论。
 
+## 剪枝已训练权重
+
+```powershell
+.\.venv\Scripts\isp-ai.exe prune-checkpoint `
+  --source-config configs/model_student.yaml `
+  --source-checkpoint checkpoints/student_p0.pt `
+  --target-config configs/model_student_pruned15.yaml `
+  --output checkpoints/student_pruned15.pt `
+  --backend torch-pruning
+```
+
+产物包含源/目标配置和源 checkpoint 的 SHA256、真实参数量、剪枝率与 DepGraph 统计，
+并生成 `.pt.manifest.json`。保存前会从目标 YAML 重新创建一个独立模型、严格加载剪枝
+权重并逐元素比较输出，证明计算图可由配置重建。随后使用
+`configs/train_pruned15.yaml` 微调画质，通过 P0 对照后才进入 `configs/train_qat.yaml`。
+
 ## 已知坑
 
 1. DepGraph 构建需要全局 Autograd 开启，但示例输入本身无需 `requires_grad=True`。当前
@@ -50,6 +66,8 @@ Python 属性不在依赖图的修改范围内。
    `importlib.metadata.version("torch-pruning")`，以安装发行包元数据为准。
 3. DepGraph 只修改张量相关模块，不会自动更新 SimpleGate 保存的 Python 整数属性。
 4. 剪枝率必须以物理图参数量或目标 NPU profiler 为依据，不能使用 mask 中零元素比例。
+5. 调用 DepGraph 的外层工作流也不能使用 `torch.no_grad`/`torch.inference_mode` 装饰；
+   只能在依赖图完成后对重建模型的数值比较局部关闭梯度。
 
 参考：[Torch-Pruning 官方仓库](https://github.com/VainF/Torch-Pruning)、
 [PyPI 发行页](https://pypi.org/project/torch-pruning/)。

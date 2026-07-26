@@ -24,6 +24,7 @@ from isp_ai_enhancement.pruning.physical import physical_prune
 from isp_ai_enhancement.pruning.torch_pruning_adapter import (
     torch_pruning_physical_prune,
 )
+from isp_ai_enhancement.pruning.workflow import prune_checkpoint
 from isp_ai_enhancement.training.engine import train_from_config
 
 
@@ -75,6 +76,27 @@ def _pruning_summary(args: argparse.Namespace) -> int:
                 "target_parameters": report.target_parameters,
                 "physical_pruning_ratio": report.pruning_ratio,
             },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+def _prune_checkpoint(args: argparse.Namespace) -> int:
+    """物理剪枝已训练 checkpoint，并打印产物及来源元数据。"""
+
+    output, metadata = prune_checkpoint(
+        source_config=args.source_config,
+        source_checkpoint=args.source_checkpoint,
+        target_config=args.target_config,
+        output=args.output,
+        backend=args.backend,
+    )
+    print(
+        json.dumps(
+            {"output": str(output), **metadata},
+            ensure_ascii=False,
             indent=2,
             sort_keys=True,
         )
@@ -208,6 +230,18 @@ def build_parser() -> argparse.ArgumentParser:
         default="torch-pruning",
     )
     pruning.set_defaults(function=_pruning_summary)
+
+    prune = commands.add_parser("prune-checkpoint")
+    prune.add_argument("--source-config", required=True)
+    prune.add_argument("--source-checkpoint", required=True)
+    prune.add_argument("--target-config", required=True)
+    prune.add_argument("--output", required=True)
+    prune.add_argument(
+        "--backend",
+        choices=("manual", "torch-pruning"),
+        default="torch-pruning",
+    )
+    prune.set_defaults(function=_prune_checkpoint)
 
     smoke = commands.add_parser("make-smoke-data")
     smoke.add_argument("--output", required=True)

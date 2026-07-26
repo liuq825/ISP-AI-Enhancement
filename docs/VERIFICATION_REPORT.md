@@ -30,7 +30,7 @@
 
 | 检查 | 结果 |
 |---|---|
-| Pytest | 39 passed |
+| Pytest | 41 passed |
 | 中文说明自动门禁 | 覆盖 `src/` 与 `tests/` 的模块、类和函数 |
 | Torch-Pruning 发行包 | 1.6.1 |
 | DepGraph 参考剪枝 | 40 个剪枝组、260 个组内联动操作，删除 1,536 个逻辑门控通道 |
@@ -40,6 +40,7 @@
 | 统一评测 | 逐样本 mask PSNR、noisy 基线、Sensor/ISO 分桶与哈希报告测试通过 |
 | 训练恢复 | 从 epoch 1 恢复的 epoch 2 与连续训练权重逐元素完全一致 |
 | QAT 训练 | FP32 初始权重转换、首批观察器初始化、eval 冻结与量化 buffer 保存通过 |
+| 剪枝 checkpoint | 双后端权重一致，目标 YAML 严格重建与来源 manifest 通过 |
 
 相对误差最大值受接近零的输出影响，绝对误差满足 `atol=1e-4, rtol=1e-3`。
 

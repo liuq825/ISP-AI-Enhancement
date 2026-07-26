@@ -17,6 +17,12 @@ py -m venv .venv
 .\.venv\Scripts\isp-ai.exe model-summary --config configs/model_student.yaml
 .\.venv\Scripts\isp-ai.exe pruning-summary --source configs/model_student.yaml `
   --target configs/model_student_pruned15.yaml --backend torch-pruning
+# P0 权重收敛后生成可重建的物理剪枝 checkpoint：
+.\.venv\Scripts\isp-ai.exe prune-checkpoint `
+  --source-config configs/model_student.yaml `
+  --source-checkpoint checkpoints/student_p0.pt `
+  --target-config configs/model_student_pruned15.yaml `
+  --output checkpoints/student_pruned15.pt
 .\.venv\Scripts\isp-ai.exe make-smoke-data --output data/smoke --samples 16
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/smoke/manifest.jsonl
 .\.venv\Scripts\python.exe -m pytest

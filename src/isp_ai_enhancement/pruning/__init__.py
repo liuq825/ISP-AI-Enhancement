@@ -2,10 +2,12 @@
 
 from .physical import PruningReport, physical_prune
 from .torch_pruning_adapter import TorchPruningReport, torch_pruning_physical_prune
+from .workflow import prune_checkpoint
 
 __all__ = [
     "PruningReport",
     "TorchPruningReport",
     "physical_prune",
+    "prune_checkpoint",
     "torch_pruning_physical_prune",
 ]
