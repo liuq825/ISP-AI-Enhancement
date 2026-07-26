@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 from zipfile import ZipFile
 
 import pytest
 
 from isp_ai_enhancement import cli
+from isp_ai_enhancement.data import sidd_remote
 from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
@@ -22,6 +25,33 @@ def _create_zip(path: Path, member: str, payload: bytes) -> None:
 
     with ZipFile(path, "w") as archive:
         archive.writestr(f"nested/{member}", payload)
+
+
+def test_default_remote_zip_uses_split_connect_and_read_timeouts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """默认远程归档应快速放弃失效连接，同时保留大成员读取窗口。"""
+
+    captured: dict[str, object] = {}
+    sentinel = object()
+
+    def fake_remote_zip(url: str, **kwargs: object) -> object:
+        """记录传给可选依赖的参数，不发起真实网络请求。"""
+
+        captured["url"] = url
+        captured.update(kwargs)
+        return sentinel
+
+    monkeypatch.setitem(
+        sys.modules,
+        "remotezip",
+        SimpleNamespace(RemoteZip=fake_remote_zip),
+    )
+    result = sidd_remote._default_archive_factory("https://example.test/archive.zip")
+    assert result is sentinel
+    assert captured["timeout"] == (20, 120)
+    assert captured["initial_buffer_size"] == 256 * 1024
+    assert captured["support_suffix_range"] is True
 
 
 def test_fetch_sidd_pair_extracts_members_and_reuses_verified_files(

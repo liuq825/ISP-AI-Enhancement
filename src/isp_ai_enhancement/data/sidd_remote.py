@@ -50,9 +50,11 @@ def _default_archive_factory(url: str) -> ZipFile:
         ) from error
     # support_suffix_range=True 避免先对 Codalab 的预签名 GET URL 发 HEAD；
     # 该镜像的 HEAD 会因方法不同触发签名错误，但 Range GET 已实际验证可用。
+    # requests 接受 ``(connect, read)`` 二元超时：失效端点 20 秒内切到备用镜像，
+    # 正常的大成员流式读取仍允许单次 socket 等待 120 秒。
     return RemoteZip(
         url,
-        timeout=120,
+        timeout=(20, 120),
         initial_buffer_size=256 * 1024,
         support_suffix_range=True,
     )
