@@ -13,9 +13,12 @@ import shutil
 import time
 import zlib
 from collections.abc import Callable
+from datetime import date
 from pathlib import Path
 from typing import Any
 from zipfile import ZipFile, ZipInfo
+
+import yaml
 
 from isp_ai_enhancement.config import load_yaml
 
@@ -625,3 +628,168 @@ def sidd_subset_status(
             else "in_progress"
         ),
     }
+
+
+def write_sidd_subset_audit_receipt(
+    *,
+    config: str | Path,
+    output_dir: str | Path,
+    destination: str | Path,
+) -> Path:
+    """完整复核已获取子集并生成可提交 Git 的逐配对 YAML 审计收据。
+
+    该入口只接受已经生成 ``subset.receipt.json`` 的完整集合。它重新计算每个 MAT
+    的 SHA256/CRC32，核对集合收据列出的逐配对收据哈希，并确认实际 URL 属于当前
+    版本配置的主/备镜像。输出包含数据统计和逐配对内容摘要，不复制受 ``.gitignore``
+    隔离的数十 GB 数据本体。
+    """
+
+    config_path = Path(config)
+    source = Path(output_dir)
+    target = Path(destination)
+    frame_indices, scenes = _validate_subset_spec(config_path)
+    config_sha256 = _sha256_and_crc32(config_path)[0]
+    collection_path = source / "subset.receipt.json"
+    if not collection_path.is_file():
+        raise ValueError(f"缺少完整集合收据：{collection_path}")
+    try:
+        collection = json.loads(collection_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"{collection_path}: JSON 非法：{error}") from error
+
+    expected_pair_count = len(scenes) * len(frame_indices)
+    if (
+        collection.get("format_version") != 2
+        or collection.get("config_sha256") != config_sha256
+        or collection.get("scene_count") != len(scenes)
+        or collection.get("pair_count") != expected_pair_count
+        or collection.get("frame_indices") != frame_indices
+        or not isinstance(collection.get("pairs"), list)
+    ):
+        raise ValueError("集合收据版本、配置 SHA 或规模与当前配置不一致")
+
+    collection_index: dict[tuple[str, int], dict[str, Any]] = {}
+    for raw_item in collection["pairs"]:
+        if not isinstance(raw_item, dict):
+            raise ValueError("集合收据 pairs 必须全部为映射")
+        try:
+            identity = (str(raw_item["scene_name"]), int(raw_item["frame_index"]))
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"集合收据 pair 身份非法：{raw_item}") from error
+        if identity in collection_index:
+            raise ValueError(f"集合收据含重复 pair：{identity}")
+        collection_index[identity] = raw_item
+    if len(collection_index) != expected_pair_count:
+        raise ValueError(
+            f"集合收据唯一 pair 应为 {expected_pair_count}，实际 {len(collection_index)}"
+        )
+
+    pair_summaries: list[dict[str, Any]] = []
+    source_usage = {"primary": 0, "fallback": 0}
+    raw_mat_bytes = 0
+    compressed_member_bytes = 0
+    for scene in scenes:
+        receipt_paths = _verified_local_scene_receipts(
+            scene=scene,
+            frame_indices=frame_indices,
+            output=source,
+        )
+        if receipt_paths is None:
+            raise ValueError(f"{scene['scene']}: pair 收据不完整")
+        candidates = _scene_sources(scene)
+        for frame_index, receipt_path in zip(
+            frame_indices,
+            receipt_paths,
+            strict=True,
+        ):
+            collection_item = collection_index.get((scene["scene"], frame_index))
+            if collection_item is None:
+                raise ValueError(f"集合收据缺少 {scene['scene']} frame {frame_index:03d}")
+            expected_relative = receipt_path.relative_to(source).as_posix()
+            receipt_sha256 = _sha256_and_crc32(receipt_path)[0]
+            if (
+                collection_item.get("receipt") != expected_relative
+                or collection_item.get("receipt_sha256") != receipt_sha256
+            ):
+                raise ValueError(f"{receipt_path}: 路径或 SHA256 与集合收据不一致")
+
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            actual_source = (
+                str(receipt["noisy_zip_url"]),
+                str(receipt["ground_truth_zip_url"]),
+            )
+            try:
+                source_index = candidates.index(actual_source)
+            except ValueError as error:
+                raise ValueError(f"{receipt_path}: 实际来源不在当前主备配置中") from error
+            source_name = "primary" if source_index == 0 else "fallback"
+            source_usage[source_name] += 1
+            roles: dict[str, dict[str, Any]] = {}
+            for role in ("noisy", "ground_truth"):
+                details = receipt[role]
+                member_bytes = int(details["member_bytes"])
+                member_compressed_bytes = int(details["compressed_bytes"])
+                raw_mat_bytes += member_bytes
+                compressed_member_bytes += member_compressed_bytes
+                roles[role] = {
+                    "bytes": member_bytes,
+                    "compressed_bytes": member_compressed_bytes,
+                    "crc32": str(details["crc32"]),
+                    "sha256": str(details["sha256"]),
+                }
+            pair_summaries.append(
+                {
+                    "scene": scene["scene"],
+                    "frame_index": frame_index,
+                    "source": source_name,
+                    "receipt_sha256": receipt_sha256,
+                    **roles,
+                }
+            )
+
+    config_values = load_yaml(config_path)
+    source_evidence = {
+        key: config_values[key]
+        for key in (
+            "source_page",
+            "source_page_sha256",
+            "mirror_list",
+            "mirror_list_sha256",
+            "fallback_mirror_list",
+            "fallback_mirror_list_sha256",
+        )
+        if key in config_values
+    }
+    audit = {
+        "receipt_version": 1,
+        "checked_on": date.today().isoformat(),
+        "dataset_id": "sidd",
+        "source_evidence": source_evidence,
+        "acquisition": {
+            "config": str(config_path),
+            "config_sha256": config_sha256,
+            "local_collection_receipt": str(collection_path),
+            "local_collection_receipt_sha256": _sha256_and_crc32(collection_path)[0],
+            "scene_count": len(scenes),
+            "pair_count": expected_pair_count,
+            "raw_mat_count": expected_pair_count * 2,
+            "raw_mat_bytes": raw_mat_bytes,
+            "compressed_member_bytes": compressed_member_bytes,
+            "source_usage_pairs": source_usage,
+        },
+        "pairs": pair_summaries,
+        "limitations": [
+            "收据证明公开 SIDD RAW 获取完整性，不代表目标 Sensor 域覆盖",
+            "公开数据技术验证不等于麒麟 9000 实机画质、性能或稳定性放行",
+        ],
+    }
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(f"{target.name}.tmp")
+    temporary.write_text(
+        "# SIDD Medium 规模 RAW 的逐配对审计收据；数据本体不进入 Git。\n"
+        + yaml.safe_dump(audit, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+        newline="\n",
+    )
+    temporary.replace(target)
+    return target

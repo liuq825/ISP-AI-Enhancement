@@ -59,6 +59,11 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
 .\.venv\Scripts\isp-ai.exe sidd-fetch-status `
   --config resources/sidd_medium_range.yaml `
   --output datasets/SIDD_Medium_Range
+# 320 对全部完成后重新哈希所有 MAT，生成可提交 Git 的逐配对审计收据：
+.\.venv\Scripts\isp-ai.exe audit-sidd-subset `
+  --config resources/sidd_medium_range.yaml `
+  --source datasets/SIDD_Medium_Range `
+  --output resources/sidd_medium_receipt.yaml
 .\.venv\Scripts\isp-ai.exe import-sidd `
   --source datasets/SIDD_Medium_Range `
   --output data/sidd_training `

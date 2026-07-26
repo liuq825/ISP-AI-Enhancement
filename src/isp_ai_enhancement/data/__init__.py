@@ -20,6 +20,7 @@ from .sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
     sidd_subset_status,
+    write_sidd_subset_audit_receipt,
 )
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "load_context_config",
     "read_manifest",
     "sidd_subset_status",
+    "write_sidd_subset_audit_receipt",
     "validate_data_policy",
     "validate_data_requirements",
     "validate_manifest",

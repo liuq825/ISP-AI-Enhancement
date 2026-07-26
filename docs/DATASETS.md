@@ -77,6 +77,11 @@ frame 010/020，共 320 对，规模与官方 SIDD Medium 相同但帧选择由�
 实际使用的一对 URL。离线恢复只接受当前版本配置列出的主/备 URL 对，不能把任意第三方
 镜像混入已验证数据。
 
+全部完成后运行 `audit-sidd-subset`。它重新计算 640 个 MAT 的 SHA256/CRC32，核对
+集合收据中的 320 个逐配对收据哈希和实际主/备来源，再写
+`resources/sidd_medium_receipt.yaml`。该 YAML 可进入 Git，数十 GB MAT 本体仍只保留
+在本地；集合不完整、配置 SHA 漂移或任一文件被改写时均拒绝出具最终收据。
+
 训练导入使用 `--patch-size 256 --patches-per-pair 16`。每个 noisy/GT 源配对只加载
 和 CFA 打包一次，再按 `patch_seed` 生成 16 个不重复 packed RAW 坐标，避免训练时
 每取一个小 crop 都重新解压约 50 MB 的全分辨率 NPZ。Manifest 同时记录

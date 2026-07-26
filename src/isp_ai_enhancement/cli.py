@@ -26,6 +26,7 @@ from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
     sidd_subset_status,
+    write_sidd_subset_audit_receipt,
 )
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
 from isp_ai_enhancement.evaluation import evaluate_manifest
@@ -260,6 +261,19 @@ def _sidd_fetch_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _audit_sidd_subset(args: argparse.Namespace) -> int:
+    """完整复核 SIDD 子集并写入可提交版本库的逐配对审计收据。"""
+
+    print(
+        write_sidd_subset_audit_receipt(
+            config=args.config,
+            output_dir=args.source,
+            destination=args.output,
+        )
+    )
+    return 0
+
+
 def _train(args: argparse.Namespace) -> int:
     """调用配置驱动训练入口并打印最终检查点位置。"""
 
@@ -456,6 +470,12 @@ def build_parser() -> argparse.ArgumentParser:
     sidd_status.add_argument("--config", required=True)
     sidd_status.add_argument("--output", required=True)
     sidd_status.set_defaults(function=_sidd_fetch_status)
+
+    sidd_audit = commands.add_parser("audit-sidd-subset")
+    sidd_audit.add_argument("--config", required=True)
+    sidd_audit.add_argument("--source", required=True)
+    sidd_audit.add_argument("--output", required=True)
+    sidd_audit.set_defaults(function=_audit_sidd_subset)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)

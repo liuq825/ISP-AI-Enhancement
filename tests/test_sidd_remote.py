@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from zipfile import ZipFile
 
 import pytest
+import yaml
 
 from isp_ai_enhancement import cli
 from isp_ai_enhancement.data import sidd_remote
@@ -17,6 +18,7 @@ from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
     sidd_subset_status,
+    write_sidd_subset_audit_receipt,
 )
 
 
@@ -478,3 +480,74 @@ def test_fetch_sidd_subset_falls_back_and_reuses_fallback_receipt(
         archive_factory=forbidden_factory,
     )
     assert second == receipt_path
+
+
+def test_write_sidd_subset_audit_receipt_rehashes_every_raw_file(
+    tmp_path: Path,
+) -> None:
+    """最终 YAML 应汇总逐对哈希，并在任一 MAT 被改写后拒绝重新出具收据。"""
+
+    scene = "0001_001_S6_00100_00060_3200_L"
+    noisy_zip = tmp_path / "noisy.zip"
+    target_zip = tmp_path / "target.zip"
+    _create_zip(noisy_zip, "0001_NOISY_RAW_010.MAT", b"audit-noisy")
+    _create_zip(target_zip, "0001_GT_RAW_010.MAT", b"audit-target")
+    held_out = tmp_path / "held_out.yaml"
+    held_out.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        "  - 0009_001_S6_00800_00350_3200_L\n",
+        encoding="utf-8",
+    )
+    config = tmp_path / "subset.yaml"
+    config.write_text(
+        "frame_index: 10\n"
+        "scenes:\n"
+        f"  - scene: {scene}\n"
+        "    noisy_url: https://example.test/noisy.zip\n"
+        "    ground_truth_url: https://example.test/target.zip\n",
+        encoding="utf-8",
+    )
+    archives = {
+        "https://example.test/noisy.zip": noisy_zip,
+        "https://example.test/target.zip": target_zip,
+    }
+
+    def factory(url: str) -> ZipFile:
+        """把审计测试 URL 映射为本地归档。"""
+
+        return ZipFile(archives[url])
+
+    source = tmp_path / "download"
+    fetch_sidd_raw_subset(
+        config=config,
+        output_dir=source,
+        held_out_scenes=held_out,
+        archive_factory=factory,
+    )
+    destination = tmp_path / "audit.yaml"
+    result = write_sidd_subset_audit_receipt(
+        config=config,
+        output_dir=source,
+        destination=destination,
+    )
+    audit = yaml.safe_load(result.read_text(encoding="utf-8"))
+    assert audit["acquisition"]["scene_count"] == 1
+    assert audit["acquisition"]["pair_count"] == 1
+    assert audit["acquisition"]["raw_mat_count"] == 2
+    assert audit["acquisition"]["source_usage_pairs"] == {
+        "primary": 1,
+        "fallback": 0,
+    }
+    assert len(audit["pairs"]) == 1
+    assert len(audit["pairs"][0]["noisy"]["sha256"]) == 64
+    assert len(audit["pairs"][0]["ground_truth"]["sha256"]) == 64
+
+    tampered = source / scene / "0001_NOISY_RAW_010.MAT"
+    tampered.write_bytes(b"audit-noisX")
+    with pytest.raises(ValueError, match="离线复核失败"):
+        write_sidd_subset_audit_receipt(
+            config=config,
+            output_dir=source,
+            destination=destination,
+        )

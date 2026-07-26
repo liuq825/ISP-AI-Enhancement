@@ -10,7 +10,7 @@
 
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
-| M0 工程烟雾测试 | 已完成 | 64 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
+| M0 工程烟雾测试 | 已完成 | 65 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
 | M1 公开验证域 | 已完成 | 官方 SIDD 两个 MAT 校验、1,280 块导入及真实 noisy baseline |
 | M1 训练数据 | 进行中 | 6 对 smoke 已完成；160 场景×2 帧、官方主备镜像均已核验，320 对 Range 获取正断点执行 |
 | P0 Student FP32 | 训练器就绪 | 数据充分性门禁及真实 RAW smoke 通过；正式 P0 等待 ≥3,200 个训练 patch、≥200 个独立训练源配对和 CUDA |
