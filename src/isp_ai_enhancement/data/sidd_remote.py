@@ -63,18 +63,47 @@ def _default_archive_factory(url: str) -> ZipFile:
     )
 
 
-def _find_member(archive: ZipFile, basename: str) -> ZipInfo:
-    """按不区分大小写的 basename 找唯一成员，拒绝缺失或歧义 ZIP。"""
+def _find_member(
+    archive: ZipFile,
+    basename: str,
+    *,
+    identity_directory: str,
+) -> ZipInfo:
+    """兼容两种官方成员布局，同时保持场景身份不可被目录省略绕过。
+
+    大多数 SIDD ZIP 把实例号写进 basename，例如
+    ``0031_NOISY_RAW_010.MAT``；部分官方 ZIP（已实测 0032）使用
+    ``0032_NOISY_RAW/.../NOISY_RAW_010.MAT``。后者只有在父目录精确包含
+    ``identity_directory`` 时才匹配，避免任意错场景归档都因通用 basename 通过。
+    两种布局同时出现或任一布局重复时仍视为歧义。
+    """
 
     expected = basename.casefold()
-    matches = [
-        info
-        for info in archive.infolist()
-        if not info.is_dir() and Path(info.filename).name.casefold() == expected
-    ]
+    _instance, separator, alternate_basename = basename.partition("_")
+    if not separator:
+        raise ValueError(f"预期成员名缺少实例前缀：{basename!r}")
+    alternate = alternate_basename.casefold()
+    expected_directory = identity_directory.casefold()
+    matches: list[ZipInfo] = []
+    for info in archive.infolist():
+        if info.is_dir():
+            continue
+        member_path = Path(info.filename)
+        member_basename = member_path.name.casefold()
+        exact_layout = member_basename == expected
+        alternate_layout = (
+            member_basename == alternate
+            and expected_directory
+            in {part.casefold() for part in member_path.parts[:-1]}
+        )
+        if exact_layout or alternate_layout:
+            matches.append(info)
     if len(matches) != 1:
         names = [info.filename for info in matches]
-        raise ValueError(f"远程 ZIP 中应唯一包含 {basename!r}，实际匹配 {names}")
+        raise ValueError(
+            f"远程 ZIP 中应唯一包含 {basename!r}，或在目录 "
+            f"{identity_directory!r} 下包含 {alternate_basename!r}，实际匹配 {names}"
+        )
     return matches[0]
 
 
@@ -191,7 +220,11 @@ def fetch_sidd_raw_frames(
             basename = f"{instance}_NOISY_RAW_{frame}.MAT"
             noisy_receipts[frame_index] = _extract_member(
                 archive,
-                _find_member(archive, basename),
+                _find_member(
+                    archive,
+                    basename,
+                    identity_directory=f"{instance}_NOISY_RAW",
+                ),
                 scene_dir / basename,
                 max_member_bytes=max_member_bytes,
             )
@@ -202,7 +235,11 @@ def fetch_sidd_raw_frames(
             basename = f"{instance}_GT_RAW_{frame}.MAT"
             target_receipts[frame_index] = _extract_member(
                 archive,
-                _find_member(archive, basename),
+                _find_member(
+                    archive,
+                    basename,
+                    identity_directory=f"{instance}_GT_RAW",
+                ),
                 scene_dir / basename,
                 max_member_bytes=max_member_bytes,
             )

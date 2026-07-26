@@ -112,6 +112,81 @@ def test_fetch_sidd_pair_extracts_members_and_reuses_verified_files(
     assert repeated["ground_truth"]["reused_existing"]
 
 
+def test_fetch_sidd_pair_accepts_official_directory_identity_layout(
+    tmp_path: Path,
+) -> None:
+    """无实例前缀 basename 仅在父目录携带精确场景角色令牌时允许。"""
+
+    scene = "0032_001_IP_00800_01000_3200_N"
+    noisy_zip = tmp_path / "noisy.zip"
+    target_zip = tmp_path / "target.zip"
+    with ZipFile(noisy_zip, "w") as archive:
+        archive.writestr(
+            "0032_NOISY_RAW/0032_NOISY_RAW/NOISY_RAW_010.MAT",
+            b"alternate-noisy",
+        )
+    with ZipFile(target_zip, "w") as archive:
+        archive.writestr(
+            "0032_GT_RAW/0032_GT_RAW/GT_RAW_010.MAT",
+            b"alternate-target",
+        )
+    held_out = tmp_path / "held_out.yaml"
+    held_out.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        "  - 0009_001_S6_00800_00350_3200_L\n",
+        encoding="utf-8",
+    )
+    archives = {
+        "https://example.test/noisy.zip": noisy_zip,
+        "https://example.test/target.zip": target_zip,
+    }
+
+    def factory(url: str) -> ZipFile:
+        """返回使用官方 0032 风格目录身份的测试归档。"""
+
+        return ZipFile(archives[url])
+
+    receipt_path = fetch_sidd_raw_pair(
+        scene_name=scene,
+        noisy_zip_url="https://example.test/noisy.zip",
+        ground_truth_zip_url="https://example.test/target.zip",
+        frame_index=10,
+        output_dir=tmp_path / "output",
+        held_out_scenes=held_out,
+        archive_factory=factory,
+    )
+    assert (receipt_path.parent / "0032_NOISY_RAW_010.MAT").read_bytes() == (
+        b"alternate-noisy"
+    )
+    assert (receipt_path.parent / "0032_GT_RAW_010.MAT").read_bytes() == (
+        b"alternate-target"
+    )
+
+    wrong_zip = tmp_path / "wrong.zip"
+    with ZipFile(wrong_zip, "w") as archive:
+        archive.writestr(
+            "0033_NOISY_RAW/0033_NOISY_RAW/NOISY_RAW_010.MAT",
+            b"wrong-scene",
+        )
+
+    def wrong_factory(url: str) -> ZipFile:
+        """让 noisy 指向错场景目录，验证通用 basename 不能绕过身份检查。"""
+
+        return ZipFile(wrong_zip if "noisy" in url else target_zip)
+
+    with pytest.raises(ValueError, match="0032_NOISY_RAW"):
+        fetch_sidd_raw_pair(
+            scene_name=scene,
+            noisy_zip_url="https://example.test/noisy.zip",
+            ground_truth_zip_url="https://example.test/target.zip",
+            frame_index=10,
+            output_dir=tmp_path / "wrong-output",
+            held_out_scenes=held_out,
+            archive_factory=wrong_factory,
+        )
+
+
 def test_fetch_sidd_pair_rejects_held_out_scene_before_network(tmp_path: Path) -> None:
     """命中 benchmark 场景时必须在打开远程 ZIP 之前拒绝。"""
 
