@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
 
+from isp_ai_enhancement import cli
 from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
@@ -137,6 +139,7 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
         "https://example.test/target.zip": target_zip,
     }
     opened: list[str] = []
+    progress: list[str] = []
 
     def factory(url: str) -> ZipFile:
         """记录被打开的 URL，并返回对应本地测试 ZIP。"""
@@ -149,6 +152,7 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
         output_dir=tmp_path / "output",
         held_out_scenes=held_out,
         archive_factory=factory,
+        progress_callback=progress.append,
     )
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     assert receipt["scene_count"] == 1
@@ -156,6 +160,10 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
     assert opened == [
         "https://example.test/noisy.zip",
         "https://example.test/target.zip",
+    ]
+    assert progress == [
+        f"[1/1] 开始获取 {scene}",
+        f"[1/1] 已校验 {scene}",
     ]
 
     duplicate = tmp_path / "duplicate.yaml"
@@ -179,3 +187,31 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
             archive_factory=factory,
         )
     assert opened == []
+
+
+def test_fetch_sidd_subset_cli_separates_progress_from_result(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """CLI 应把进度写入 stderr，stdout 只输出最终机器可解析的收据路径。"""
+
+    def fake_fetch(**arguments: object) -> Path:
+        """模拟批量获取并主动触发一个进度事件。"""
+
+        callback = arguments["progress_callback"]
+        assert callable(callback)
+        callback("[1/1] 已校验测试场景")
+        return Path("datasets/SIDD_Training_Subset/subset.receipt.json")
+
+    monkeypatch.setattr(cli, "fetch_sidd_raw_subset", fake_fetch)
+    arguments = argparse.Namespace(
+        config="resources/sidd_training_subset.yaml",
+        output="datasets/SIDD_Training_Subset",
+        held_out_scenes="resources/sidd_validation_scenes.yaml",
+        max_member_bytes=512 * 1024 * 1024,
+    )
+    assert cli._fetch_sidd_subset(arguments) == 0
+    captured = capsys.readouterr()
+    expected = Path("datasets/SIDD_Training_Subset/subset.receipt.json")
+    assert captured.out == f"{expected}\n"
+    assert captured.err == "[1/1] 已校验测试场景\n"

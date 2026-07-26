@@ -20,7 +20,9 @@ from isp_ai_enhancement.config import load_yaml
 
 from .sidd import SIDDScene, load_sidd_scene_order
 
+# 两个可注入接口分别隔离网络归档创建和人类可读进度，单测无需访问公网。
 ArchiveFactory = Callable[[str], ZipFile]
+ProgressCallback = Callable[[str], None]
 
 
 def _sha256_and_crc32(path: Path) -> tuple[str, int]:
@@ -245,6 +247,7 @@ def fetch_sidd_raw_subset(
     held_out_scenes: str | Path,
     max_member_bytes: int = 512 * 1024 * 1024,
     archive_factory: ArchiveFactory | None = None,
+    progress_callback: ProgressCallback | None = None,
 ) -> Path:
     """按版本化配置顺序获取多场景 RAW 配对，并生成集合级可审计收据。
 
@@ -266,7 +269,9 @@ def fetch_sidd_raw_subset(
         raise ValueError(f"子集配置包含官方 held-out benchmark 场景：{leaked}")
     output = Path(output_dir)
     receipts: list[dict[str, Any]] = []
-    for scene in scenes:
+    for index, scene in enumerate(scenes, start=1):
+        if progress_callback is not None:
+            progress_callback(f"[{index}/{len(scenes)}] 开始获取 {scene['scene']}")
         receipt_path = fetch_sidd_raw_pair(
             scene_name=scene["scene"],
             noisy_zip_url=scene["noisy_url"],
@@ -284,6 +289,8 @@ def fetch_sidd_raw_subset(
                 "receipt_sha256": _sha256_and_crc32(receipt_path)[0],
             }
         )
+        if progress_callback is not None:
+            progress_callback(f"[{index}/{len(scenes)}] 已校验 {scene['scene']}")
 
     collection_receipt = {
         "format_version": 1,

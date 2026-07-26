@@ -1,0 +1,37 @@
+# P0 公开 RAW 基线配置。当前选择性 6 对子集会被下述充分性门禁主动拒绝；
+# 只有扩充到足够 SIDD Full 训练帧并具备 CUDA 后才允许启动，不代表目标 Sensor 放行。
+seed: 20260726
+device: cuda
+model_config: configs/model_student.yaml
+context_config: configs/context.yaml
+manifest: data/sidd_training/manifest.jsonl
+output_dir: runs/student_public_p0
+data_policy:
+  purpose: commercial_grade
+  catalog: resources/datasets.yaml
+data_requirements:
+  min_train_records: 10000
+  # 默认物理场景哈希下 scene_id=010 约提供 450 帧，门槛不应高于可实现上限。
+  min_val_records: 300
+  min_train_scene_groups: 6
+  min_val_scene_groups: 1
+  required_train_sensors: [sidd_GP, sidd_IP, sidd_S6, sidd_N6, sidd_G4]
+  required_train_iso_buckets: [low, medium, high, extreme]
+  required_train_modes: [single]
+epochs: 100
+batch_size: 8
+num_workers: 8
+crop_size: 256
+learning_rate: 0.0002
+weight_decay: 0.0
+amp: true
+log_every: 20
+save_every_epochs: 1
+scheduler:
+  type: cosine
+  t_max: 100
+  eta_min: 0.000001
+loss:
+  charbonnier: 1.0
+  gradient: 0.10
+  color: 0.05

@@ -252,6 +252,7 @@ def train_from_config(path: str | Path) -> Path:
         purpose=purpose,
         approval_path=approval_path,
         context_config=context_config,
+        requirements=config.get("data_requirements"),
     )
     output_dir = Path(str(config.get("output_dir", "runs/train")))
     if not output_dir.is_absolute():

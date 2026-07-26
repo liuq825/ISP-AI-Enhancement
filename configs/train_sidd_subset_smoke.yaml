@@ -1,0 +1,33 @@
+# 真实 SIDD 子集单轮 CPU 烟雾训练：只验证 MAT→Manifest→16 通道→checkpoint 闭环。
+# 模型、样本量和训练轮数均不具有画质结论，禁止将产物标记为 P0 或商用品质权重。
+seed: 20260726
+device: cpu
+model_config: configs/model_smoke.yaml
+context_config: configs/context.yaml
+manifest: data/sidd_training_subset/manifest.jsonl
+output_dir: runs/sidd_training_subset_smoke
+data_policy:
+  purpose: commercial_grade
+  catalog: resources/datasets.yaml
+data_requirements:
+  # 烟雾配置只要求存在独立 train/val 物理场景；正式配置使用更高门槛。
+  min_train_records: 1
+  min_val_records: 1
+  min_train_scene_groups: 1
+  min_val_scene_groups: 1
+  required_train_sensors: []
+  required_train_iso_buckets: []
+  required_train_modes: [single]
+epochs: 1
+batch_size: 1
+num_workers: 0
+crop_size: 128
+learning_rate: 0.0002
+weight_decay: 0.0
+amp: false
+log_every: 1
+save_every_epochs: 1
+loss:
+  charbonnier: 1.0
+  gradient: 0.10
+  color: 0.05

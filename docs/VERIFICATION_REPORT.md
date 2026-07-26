@@ -30,7 +30,7 @@
 
 | 检查 | 结果 |
 |---|---|
-| Pytest | 53 passed |
+| Pytest | 56 passed |
 | 中文说明自动门禁 | 覆盖 `src/` 与 `tests/` 的模块、类和函数 |
 | Torch-Pruning 发行包 | 1.6.1 |
 | DepGraph 参考剪枝 | 40 个剪枝组、260 个组内联动操作，删除 1,536 个逻辑门控通道 |
@@ -41,6 +41,8 @@
 | SIDD noisy baseline | 37.1865 dB / 0.730949 packed RAW SSIM；逐 Sensor/ISO 已记录 |
 | SIDD 训练隔离 | 官方 held-out 场景命中即拒绝，且失败前不创建转换目录 |
 | SIDD 远程子集 | 精确成员、CRC/SHA256、断点复用、集合收据及联网前配置校验通过 |
+| SIDD 真实 RAW 导入 | 6 对、五相机、四个 ISO 桶；train/val/test=3/1/2，Manifest 通过 |
+| SIDD 真实训练 smoke | 极小 CPU 模型 1 epoch / 3 step、checkpoint 与验证闭环通过；无画质结论 |
 | 数据裁剪复现 | 训练随机裁剪；验证中心裁剪且不消耗全局 RNG |
 | 统一评测 | 逐样本 mask PSNR/packed RAW SSIM、Sensor/ISO 分桶与哈希报告通过 |
 | 训练恢复 | 从 epoch 1 恢复的 epoch 2 与连续训练权重逐元素完全一致 |
@@ -49,6 +51,7 @@
 | 剪枝 checkpoint | 双后端权重一致，目标 YAML 严格重建与来源 manifest 通过 |
 | 静态 ONNX CI | 极小模型实际导出、Checker、ORT 对照、算子审计与 v2 manifest 通过 |
 | 商用级 Release Gate | PASS/FAIL/BLOCKED、逐域失败与交付文件哈希测试通过 |
+| 训练数据充分性 | train/val 样本、物理场景、Sensor、ISO、模式下限测试通过 |
 
 相对误差最大值受接近零的输出影响，绝对误差满足 `atol=1e-4, rtol=1e-3`。
 

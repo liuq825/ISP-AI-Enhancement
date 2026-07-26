@@ -109,6 +109,77 @@ def validate_context_coverage(
     return errors
 
 
+def _required_strings(
+    requirements: Mapping[str, Any],
+    field_name: str,
+    errors: list[str],
+) -> set[str]:
+    """读取一个必需字符串列表；格式错误时记录门禁错误而不是猜测。"""
+
+    raw_values = requirements.get(field_name, [])
+    if not isinstance(raw_values, list) or not all(
+        isinstance(value, str) and value.strip() for value in raw_values
+    ):
+        errors.append(f"data_requirements.{field_name} must be a list of strings")
+        return set()
+    return {value.strip() for value in raw_values}
+
+
+def validate_data_requirements(
+    records: Iterable[ManifestRecord],
+    requirements: Mapping[str, Any] | None,
+) -> list[str]:
+    """验证训练配置声明的数据规模和覆盖下限。
+
+    许可允许、文件存在并不代表数据足以训练商用品质模型。本门禁按 split 统计
+    样本和 ``session_id + scene_id`` 物理组，并要求训练集覆盖指定 Sensor、ISO
+    桶和采集模式。配置省略时保持向后兼容，适合已有单元测试和通用库调用。
+    """
+
+    if requirements is None:
+        return []
+    if not isinstance(requirements, Mapping):
+        return ["data_requirements must be a mapping"]
+    items = list(records)
+    errors: list[str] = []
+    for field_name, value in (
+        ("min_train_records", len([item for item in items if item.split == "train"])),
+        ("min_val_records", len([item for item in items if item.split == "val"])),
+    ):
+        minimum = requirements.get(field_name, 0)
+        if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum < 0:
+            errors.append(f"data_requirements.{field_name} must be a non-negative integer")
+        elif value < minimum:
+            errors.append(f"{field_name}: required >= {minimum}, found {value}")
+
+    for field_name, split in (
+        ("min_train_scene_groups", "train"),
+        ("min_val_scene_groups", "val"),
+    ):
+        minimum = requirements.get(field_name, 0)
+        if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum < 0:
+            errors.append(f"data_requirements.{field_name} must be a non-negative integer")
+            continue
+        groups = {
+            (item.session_id, item.scene_id) for item in items if item.split == split
+        }
+        if len(groups) < minimum:
+            errors.append(f"{field_name}: required >= {minimum}, found {len(groups)}")
+
+    train_items = [item for item in items if item.split == "train"]
+    coverage_fields = (
+        ("required_train_sensors", {item.sensor_id for item in train_items}),
+        ("required_train_iso_buckets", {item.iso_bucket for item in train_items}),
+        ("required_train_modes", {item.mode for item in train_items}),
+    )
+    for field_name, observed in coverage_fields:
+        required = _required_strings(requirements, field_name, errors)
+        missing = sorted(required - observed)
+        if missing:
+            errors.append(f"{field_name}: missing {missing}")
+    return errors
+
+
 def validate_data_policy(
     records: Iterable[ManifestRecord],
     *,
@@ -179,8 +250,9 @@ def enforce_data_policy(
     purpose: str,
     context_config: ContextConfig,
     approval_path: str | Path | None = None,
+    requirements: Mapping[str, Any] | None = None,
 ) -> None:
-    """组合执行许可和上下文校验，任一失败即阻止训练启动。"""
+    """组合执行许可、上下文和数据充分性校验，任一失败即阻止训练启动。"""
 
     items = list(records)
     errors = validate_data_policy(
@@ -190,6 +262,7 @@ def enforce_data_policy(
         approval_path=approval_path,
     )
     errors.extend(validate_context_coverage(items, context_config))
+    errors.extend(validate_data_requirements(items, requirements))
     if errors:
         formatted = "\n".join(f"- {error}" for error in errors)
         raise ValueError(f"training data preflight failed:\n{formatted}")

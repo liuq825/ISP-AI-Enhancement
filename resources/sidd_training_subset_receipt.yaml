@@ -1,0 +1,62 @@
+# SIDD RAW 选择性训练子集的可审计收据；MAT/NPZ/checkpoint 本体由 .gitignore 隔离。
+receipt_version: 1
+checked_on: "2026-07-27"
+source_page: https://abdokamel.github.io/sidd/dataset.html
+acquisition:
+  method: remote ZIP central directory plus HTTP Range member extraction
+  config: resources/sidd_training_subset.yaml
+  config_sha256: 7719c095558da378dd7b98f79b84f4edbc3f96709fb087346f2f20a20ee22f5b
+  local_collection_receipt: datasets/SIDD_Training_Subset/subset.receipt.json
+  local_collection_receipt_sha256: 80ecaa486878671d98b146272a84e58c695cb7139a01c61158d007157f5ccdb4
+  scene_count: 6
+  raw_mat_count: 12
+  raw_mat_bytes: 398633116
+  frame_index: 10
+  held_out_scene_matches: 0
+files:
+  - scene: 0013_001_S6_03200_01250_3200_L
+    noisy: {bytes: 24478127, crc32: e263eef6, sha256: d59334671730455c57cc5a47b07ac1a65b99a67a3b10d4ddc9cf2e5a77888559}
+    ground_truth: {bytes: 56584149, crc32: 5a850f80, sha256: d855a4aeb97381d2cd01d82f2e0a2f774bd3b36284e15724eb6f319f09d1a031}
+  - scene: 0027_001_G4_00800_00350_5500_L
+    noisy: {bytes: 20555528, crc32: 4d87fa1d, sha256: 4471d628ec8c8fa7031df16089f852e8616633143d60ec1c0a0fed86224305e0}
+    ground_truth: {bytes: 56544749, crc32: e57dc527, sha256: 8459f7b952f929a91ce096b34ed15b6c6e4142e5a23159cf0f135fc3cb87a8b9}
+  - scene: 0050_002_N6_03200_03200_5500_L
+    noisy: {bytes: 12054229, crc32: cefaf25f, sha256: 8dd7f8f8960172be5df32b76e01beb7d6bbf65661ebcd0a66df4a7e2a5ef37d8}
+    ground_truth: {bytes: 46828981, crc32: 1911e3ce, sha256: 6cd298916297067613010d351f76462c57c44ae262e1b09a12f44e853c242239}
+  - scene: 0065_003_GP_10000_08460_4400_N
+    noisy: {bytes: 18546189, crc32: c768543a, sha256: 9faba07f68e572ea91954f085b104a972e51b0e3300493f6aeb726482ff12257}
+    ground_truth: {bytes: 44147455, crc32: e2b22e90, sha256: 48084551d89af220efed0c6abef05636e797d86a361bc48f2a29ca7d2c381449}
+  - scene: 0070_003_IP_02000_04000_3200_N
+    noisy: {bytes: 12772225, crc32: adbe558a, sha256: 4bb55be0bebf7e14e038d4d19c65761f26e0229f0632466d4f3810d197320282}
+    ground_truth: {bytes: 43750798, crc32: 37fb97ef, sha256: d3f4144f92f7acae9922cc50da4fdb5d4b10a26bf1550c9c2e858e4f06a45678}
+  - scene: 0198_010_GP_00100_00200_5500_N
+    noisy: {bytes: 18569435, crc32: dda646cd, sha256: d7c85d699dcdbd2c042c16e96e8727a7db93f40b42711228b56a8f60cb41ad1f}
+    ground_truth: {bytes: 43801251, crc32: b6ec812f, sha256: a95a2846965c5fb13ce56b871e1bbbc2747e8abf897f296eaf9e9bd9e9414a23}
+nlf:
+  path: datasets/SIDD_Blocks/noise_level_functions.csv
+  bytes: 19149
+  rows_including_header: 161
+  sha256: e48a235ae008bf6076402633df0dd1dc1fa3b6afce1ee0558a05ed358593d6b9
+import:
+  manifest: data/sidd_training_subset/manifest.jsonl
+  manifest_sha256: 9ee3eacb3af5728f99f3df9e6aee208e713bb73de76b74f519bafe171873d591
+  records: 6
+  splits: {train: 3, val: 1, test: 2}
+  sensors: {sidd_GP: 2, sidd_IP: 1, sidd_S6: 1, sidd_N6: 1, sidd_G4: 1}
+  iso_buckets: {low: 1, medium: 1, high: 3, extreme: 1}
+  packed_npz_count: 12
+  packed_npz_bytes: 381546431
+noisy_baseline:
+  test: {samples: 2, psnr_db: 31.628437042236328, packed_raw_ssim: 0.6196225136518478}
+  val: {samples: 1, psnr_db: 43.02956008911133, packed_raw_ssim: 0.966171145439148}
+training_smoke:
+  config: configs/train_sidd_subset_smoke.yaml
+  checkpoint: runs/sidd_training_subset_smoke/epoch_0001.pt
+  checkpoint_sha256: 11775e09fdad950424e7978159654cf82be44f1d6391e3dbd1996c7bba7f821e
+  epochs: 1
+  optimizer_steps: 3
+  validation_psnr_db: 13.668558120727539
+limitations:
+  - 该选择性子集只验证真实 RAW 工程闭环，不满足公开 P0 数据充分性门禁
+  - 一轮极小 CPU 模型没有画质意义，不得标记为商用品质 checkpoint
+  - 公开 SIDD 不能替代目标 Sensor、固件、融合模式和麒麟 9000 真机数据

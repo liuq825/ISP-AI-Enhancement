@@ -57,7 +57,8 @@ SIDD Full 的单个场景 noisy/GT ZIP 可分别超过 3 GB 和 8 GB，但当前
 选择性子集只够验证真实数据训练闭环，不等于覆盖 SIDD Full，更不能替代目标 Sensor
 数据。默认 `split_seed=20260726` 下，物理 `scene_id=010` 进入 val；配置中的
 `scene_id=001` 会进入 test，避免子集全部落入 train。扩充配置时应先检查物理场景分布，
-而不是只按相机或实例编号挑选。
+而不是只按相机或实例编号挑选。导入时复用官方验证包内的
+`noise_level_functions.csv`，避免 16 通道输入中的噪声强度上下文退化成未知值 0。
 
 ### SIDD RAW 验证块
 

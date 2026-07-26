@@ -8,6 +8,7 @@ from isp_ai_enhancement.data.context import ContextConfig
 from isp_ai_enhancement.data.governance import (
     enforce_data_policy,
     validate_data_policy,
+    validate_data_requirements,
 )
 from isp_ai_enhancement.data.manifest import ManifestRecord
 
@@ -155,3 +156,57 @@ def test_production_rejects_noncommercial_dataset(tmp_path: Path) -> None:
     )
     assert any("not allowed for production" in error for error in errors)
     assert any("prohibited for production" in error for error in errors)
+
+
+def test_data_requirements_reject_tiny_or_uncovered_training_set() -> None:
+    """样本规模、物理场景和域覆盖不足时必须同时列出全部缺口。"""
+
+    train = _record("target", sensor_id="sensor_a")
+    errors = validate_data_requirements(
+        [train],
+        {
+            "min_train_records": 2,
+            "min_val_records": 1,
+            "min_train_scene_groups": 2,
+            "min_val_scene_groups": 1,
+            "required_train_sensors": ["sensor_a", "sensor_b"],
+            "required_train_iso_buckets": ["low", "extreme"],
+            "required_train_modes": ["single", "mfnr"],
+        },
+    )
+    assert any("min_train_records" in error for error in errors)
+    assert any("min_val_records" in error for error in errors)
+    assert any("min_train_scene_groups" in error for error in errors)
+    assert any("min_val_scene_groups" in error for error in errors)
+    assert any("sensor_b" in error for error in errors)
+    assert any("extreme" in error for error in errors)
+    assert any("mfnr" in error for error in errors)
+
+
+def test_data_requirements_accept_declared_coverage() -> None:
+    """满足样本、场景、Sensor、ISO 与模式下限时不应产生错误。"""
+
+    train = _record("target", sensor_id="sensor_a")
+    validation = ManifestRecord(
+        **{
+            **train.as_dict(),
+            "sample_id": "validation_sample",
+            "split": "val",
+            "scene_id": "validation_scene",
+        }
+    )
+    assert (
+        validate_data_requirements(
+            [train, validation],
+            {
+                "min_train_records": 1,
+                "min_val_records": 1,
+                "min_train_scene_groups": 1,
+                "min_val_scene_groups": 1,
+                "required_train_sensors": ["sensor_a"],
+                "required_train_iso_buckets": ["low"],
+                "required_train_modes": ["single"],
+            },
+        )
+        == []
+    )

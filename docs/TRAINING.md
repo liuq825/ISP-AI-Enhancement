@@ -10,6 +10,11 @@
 4. 构建配对数据、模型、可选教师和特征蒸馏适配器；
 5. 恢复 checkpoint 或从固定随机种子开始训练。
 
+商用品质配置还必须声明 `data_requirements`。训练器在创建输出目录前检查 train/val
+最少样本、独立物理场景组，以及训练集 Sensor、ISO 桶和模式覆盖。许可合规和文件完整
+只说明“可以使用”，不能证明六对样本足以收敛；`configs/train_student_public_baseline.yaml`
+因此会主动拒绝当前选择性子集，直到公开训练集扩充到声明下限。
+
 ## 混合精度
 
 `amp: true` 只允许 CUDA float16 训练，使用 `torch.autocast` 与

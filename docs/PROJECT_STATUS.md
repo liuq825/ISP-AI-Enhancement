@@ -10,10 +10,10 @@
 
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
-| M0 工程烟雾测试 | 已完成 | 53 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
+| M0 工程烟雾测试 | 已完成 | 56 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
 | M1 公开验证域 | 已完成 | 官方 SIDD 两个 MAT 校验、1,280 块导入及真实 noisy baseline |
-| M1 训练数据 | 进行中 | Codalab Range 单成员路线已核验；选择性 RAW 子集获取中，仍缺完整训练覆盖与目标 Sensor RAW |
-| P0 Student FP32 | 训练器就绪 | AMP/恢复及逐 Sensor/ISO PSNR+SSIM 已实现；缺 RAW 完整落盘与 GPU |
+| M1 训练数据 | 进行中 | 6 对/五相机 RAW 子集已校验、导入并 smoke；仍缺 SIDD Full 规模与目标 Sensor RAW |
+| P0 Student FP32 | 训练器就绪 | 数据充分性门禁及真实 RAW smoke 通过；正式 P0 仍缺 ≥10k train 和 CUDA |
 | P1/P2/P3 物理剪枝 | 产物链路已实现 | 双后端逐元素对照、目标 YAML 重建与来源哈希通过；仍需 P0 权重/敏感度 |
 | QAT | 训练/导出链路已接入 | scale 严格恢复与标准 Q/DQ ONNX 已测；最终规则仍须目标 DDK 生成 |
 | ONNX | CI 实际导出通过 | 原子产物、ORT 对照、raw16-v1 清单和算子审计已测；仍需真实 P0 权重 |

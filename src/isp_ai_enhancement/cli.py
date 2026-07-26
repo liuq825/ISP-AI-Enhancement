@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
@@ -198,6 +199,8 @@ def _fetch_sidd_subset(args: argparse.Namespace) -> int:
             output_dir=args.output,
             held_out_scenes=args.held_out_scenes,
             max_member_bytes=args.max_member_bytes,
+            # 进度写 stderr，stdout 只保留最终收据路径，便于脚本稳定解析。
+            progress_callback=lambda message: print(message, file=sys.stderr, flush=True),
         )
     )
     return 0

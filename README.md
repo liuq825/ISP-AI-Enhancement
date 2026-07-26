@@ -38,8 +38,10 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
 .\.venv\Scripts\isp-ai.exe import-sidd `
   --source datasets/SIDD_Training_Subset `
   --output data/sidd `
-  --nlf-csv datasets/SIDD/noise_level_functions.csv
+  --nlf-csv datasets/SIDD_Blocks/noise_level_functions.csv
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/sidd/manifest.jsonl
+# 只验证真实数据训练链路；产物没有画质意义：
+.\.venv\Scripts\isp-ai.exe train --config configs/train_sidd_subset_smoke.yaml
 ```
 
 `fetch-sidd-pair` 也可只获取一对指定帧。两种入口都会在联网前对照
@@ -111,7 +113,8 @@ ONNX 伴生证据和 JSON Schema 见 `docs/MODEL_MANIFEST.md`。
 当前模型用于非商业研发和麒麟 9000 部署验证，可以使用许可允许研究用途的公开
 数据集。仓库保存数据源目录和转换入口，不提交数据本体，并继续遵守“不再分发”等
 原始条款。未来若把模型直接用于商业发布，需另行完成版权/IP 清关，必要时使用目标
-Sensor 自有数据重训。详见 `docs/DATASETS.md`。
+Sensor 自有数据重训。实际子集收据与 smoke 结果见
+`docs/SIDD_TRAINING_SUBSET.md`，通用策略见 `docs/DATASETS.md`。
 
 ## 仓库结构
 
