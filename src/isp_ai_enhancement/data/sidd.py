@@ -263,10 +263,27 @@ def _load_sidd_block_array(path: Path, variable: str) -> np.ndarray:
 
 
 def _save_raw_npz(path: Path, raw: np.ndarray) -> None:
-    """原子写入单个 packed RAW NPZ，避免中断后留下貌似完整的文件。"""
+    """原子写入 packed RAW NPZ；完整旧文件逐元素一致时直接复用。
 
+    Medium 规模 patch 导入会产生上万个文件。任务中断后重跑时，已完成 NPZ 必须
+    解压并与当前确定性结果逐元素核对；一致则保留原文件，不一致则硬失败，避免
+    静默覆盖可能来自不同 seed、CFA 或源文件的产物。
+    """
+
+    expected = np.asarray(raw, dtype=np.float32)
+    if path.is_file():
+        try:
+            with np.load(path, allow_pickle=False) as archive:
+                if set(archive.files) != {"raw"}:
+                    raise ValueError("NPZ 字段必须且只能包含 raw")
+                existing = np.asarray(archive["raw"])
+        except (OSError, ValueError) as error:
+            raise ValueError(f"{path}: 已有 NPZ 无法安全复用：{error}") from error
+        if existing.dtype != np.float32 or not np.array_equal(existing, expected):
+            raise ValueError(f"{path}: 已有 NPZ 与当前确定性转换结果不一致")
+        return
     temporary = path.with_name(f"{path.name}.tmp.npz")
-    np.savez_compressed(temporary, raw=np.asarray(raw, dtype=np.float32))
+    np.savez_compressed(temporary, raw=expected)
     temporary.replace(path)
 
 

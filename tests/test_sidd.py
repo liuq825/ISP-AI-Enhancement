@@ -140,6 +140,17 @@ def test_import_sidd_deterministically_extracts_patches_with_source_identity(
     ]
     with np.load(first_manifest.parent / first[0].input_path) as archive:
         assert archive["raw"].shape == (4, 16, 16)
+    first_npz = first_manifest.parent / first[0].input_path
+    original_mtime = first_npz.stat().st_mtime_ns
+    repeated_manifest = import_sidd_dataset(
+        source,
+        tmp_path / "first",
+        patch_size=16,
+        patches_per_pair=3,
+        patch_seed=123,
+    )
+    assert repeated_manifest == first_manifest
+    assert first_npz.stat().st_mtime_ns == original_mtime
 
 
 def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:
