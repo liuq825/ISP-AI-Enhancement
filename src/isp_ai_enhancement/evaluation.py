@@ -23,26 +23,36 @@ from isp_ai_enhancement.data.dataset import RawPairDataset
 from isp_ai_enhancement.data.governance import enforce_data_policy
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
 from isp_ai_enhancement.export import load_checkpoint_state, sha256_file
-from isp_ai_enhancement.metrics import psnr_per_sample
+from isp_ai_enhancement.metrics import psnr_per_sample, ssim_per_sample
 from isp_ai_enhancement.models.factory import build_model_from_file
 
 
 @dataclass
 class _MetricGroup:
-    """累加一个评测分组的样本数、noisy PSNR 和可选增强 PSNR。"""
+    """累加一个分组的 noisy/增强 PSNR 与 packed RAW SSIM。"""
 
     count: int = 0
     noisy_psnr_sum: float = 0.0
+    noisy_ssim_sum: float = 0.0
     enhanced_psnr_sum: float = 0.0
+    enhanced_ssim_sum: float = 0.0
     has_model: bool = False
 
-    def add(self, noisy_psnr: float, enhanced_psnr: float | None) -> None:
+    def add(
+        self,
+        noisy_psnr: float,
+        noisy_ssim: float,
+        enhanced_psnr: float | None,
+        enhanced_ssim: float | None,
+    ) -> None:
         """加入一个样本；只有模型评测时才累加增强指标。"""
 
         self.count += 1
         self.noisy_psnr_sum += noisy_psnr
-        if enhanced_psnr is not None:
+        self.noisy_ssim_sum += noisy_ssim
+        if enhanced_psnr is not None and enhanced_ssim is not None:
             self.enhanced_psnr_sum += enhanced_psnr
+            self.enhanced_ssim_sum += enhanced_ssim
             self.has_model = True
 
     def as_dict(self) -> dict[str, float | int]:
@@ -54,26 +64,44 @@ class _MetricGroup:
         result: dict[str, float | int] = {
             "samples": self.count,
             "noisy_psnr_db": noisy,
+            "noisy_packed_raw_ssim": self.noisy_ssim_sum / self.count,
         }
         if self.has_model:
             enhanced = self.enhanced_psnr_sum / self.count
+            enhanced_ssim = self.enhanced_ssim_sum / self.count
             result["enhanced_psnr_db"] = enhanced
             result["psnr_gain_db"] = enhanced - noisy
+            result["enhanced_packed_raw_ssim"] = enhanced_ssim
+            result["packed_raw_ssim_gain"] = (
+                enhanced_ssim - self.noisy_ssim_sum / self.count
+            )
         return result
 
 
 def _update_groups(
     groups: dict[str, _MetricGroup],
     keys: Iterable[str],
-    noisy_values: Iterable[float],
-    enhanced_values: Iterable[float | None],
+    noisy_psnr_values: Iterable[float],
+    noisy_ssim_values: Iterable[float],
+    enhanced_psnr_values: Iterable[float | None],
+    enhanced_ssim_values: Iterable[float | None],
 ) -> None:
     """把一批逐样本指标加入指定字符串分组。"""
 
-    for key, noisy, enhanced in zip(
-        keys, noisy_values, enhanced_values, strict=True
+    for key, noisy_psnr, noisy_ssim, enhanced_psnr, enhanced_ssim in zip(
+        keys,
+        noisy_psnr_values,
+        noisy_ssim_values,
+        enhanced_psnr_values,
+        enhanced_ssim_values,
+        strict=True,
     ):
-        groups.setdefault(str(key), _MetricGroup()).add(noisy, enhanced)
+        groups.setdefault(str(key), _MetricGroup()).add(
+            noisy_psnr,
+            noisy_ssim,
+            enhanced_psnr,
+            enhanced_ssim,
+        )
 
 
 def _load_evaluation_model(
@@ -156,8 +184,12 @@ def evaluate_manifest(
         valid_mask = inputs[:, 15:16]
         noisy = inputs[:, :4]
         noisy_values = psnr_per_sample(noisy, targets, valid_mask).cpu().tolist()
+        noisy_ssim_values = (
+            ssim_per_sample(noisy, targets, valid_mask).cpu().tolist()
+        )
         if model is None:
             enhanced_values: list[float | None] = [None] * len(noisy_values)
+            enhanced_ssim_values: list[float | None] = [None] * len(noisy_values)
         else:
             enhanced = torch.clamp(noisy + model(inputs), 0.0, 1.0)
             enhanced_values = [
@@ -166,21 +198,40 @@ def evaluate_manifest(
                     enhanced, targets, valid_mask
                 ).cpu().tolist()
             ]
-        for noisy_value, enhanced_value in zip(
-            noisy_values, enhanced_values, strict=True
+            enhanced_ssim_values = [
+                float(value)
+                for value in ssim_per_sample(
+                    enhanced, targets, valid_mask
+                ).cpu().tolist()
+            ]
+        for noisy_value, noisy_ssim, enhanced_value, enhanced_ssim in zip(
+            noisy_values,
+            noisy_ssim_values,
+            enhanced_values,
+            enhanced_ssim_values,
+            strict=True,
         ):
-            overall.add(float(noisy_value), enhanced_value)
+            overall.add(
+                float(noisy_value),
+                float(noisy_ssim),
+                enhanced_value,
+                enhanced_ssim,
+            )
         _update_groups(
             by_sensor,
             batch["sensor_id"],
             noisy_values,
+            noisy_ssim_values,
             enhanced_values,
+            enhanced_ssim_values,
         )
         _update_groups(
             by_iso,
             batch["iso_bucket"],
             noisy_values,
+            noisy_ssim_values,
             enhanced_values,
+            enhanced_ssim_values,
         )
 
     report: dict[str, Any] = {

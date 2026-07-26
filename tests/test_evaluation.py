@@ -27,6 +27,7 @@ def test_evaluate_manifest_reports_noisy_baseline_without_model(tmp_path: Path) 
     )
     assert report["overall"]["samples"] == 1
     assert report["overall"]["noisy_psnr_db"] > 0
+    assert 0 < report["overall"]["noisy_packed_raw_ssim"] <= 1
     assert "enhanced_psnr_db" not in report["overall"]
     assert set(report["by_sensor"]) == {"smoke_sensor"}
     assert report["model"] is None
