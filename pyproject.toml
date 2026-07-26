@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isp-ai-enhancement"
+version = "0.1.0"
+description = "RAW-domain NAFNet training and deployment pipeline targeting Kirin 9000-class mobile NPUs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "ISP-AI-Enhancement contributors"}]
+dependencies = [
+  "numpy>=1.26,<3",
+  "PyYAML>=6.0,<7",
+  "torch>=2.4,<3",
+]
+
+[project.optional-dependencies]
+export = [
+  "onnx>=1.17,<2",
+  "onnxruntime>=1.20,<2",
+]
+data = [
+  "h5py>=3.11,<4",
+  "rawpy>=0.21,<1",
+  "scipy>=1.13,<2",
+]
+quality = [
+  "pytest>=8.3,<10",
+  "ruff>=0.9,<1",
+]
+all = [
+  "isp-ai-enhancement[export,data,quality]",
+]
+
+[project.scripts]
+isp-ai = "isp_ai_enhancement.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

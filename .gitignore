@@ -1,0 +1,36 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local datasets, weights, exports, and experiments are intentionally not versioned.
+data/
+datasets/
+checkpoints/
+artifacts/
+outputs/
+runs/
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.om
+*.ms
+
+# Local document-review intermediates.
+.codex-doc-review/
+
+# Editors and operating systems.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+pip-install.stdout.log
+pip-install.stderr.log

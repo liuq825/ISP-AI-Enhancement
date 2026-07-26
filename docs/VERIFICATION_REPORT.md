@@ -1,0 +1,39 @@
+# M0 验证报告
+
+日期：2026-07-26
+
+## 环境
+
+- Python 3.12.13
+- PyTorch 2.13.0 CPU
+- NumPy 2.5.1
+- ONNX 1.22.0
+- ONNX Runtime 1.28.0
+
+## 结果
+
+| 检查 | 结果 |
+|---|---|
+| Ruff lint/format | 通过 |
+| Pytest | 16 passed |
+| Student P0 参数 | 14,348,516 |
+| 参考 P3 参数 | 12,176,868 |
+| 参考物理剪枝率 | 15.135% |
+| 程序化 RAW manifest | 通过文件、ID、split 和泄漏检查 |
+| 小模型单 epoch 训练 | 通过；仅为代码烟雾测试 |
+| 512×512 静态 ONNX | ONNX Checker 通过 |
+| PyTorch/ONNX Runtime 最大绝对误差 | `4.18e-7` |
+| ONNX 输入/输出 | 固定 `1×16×512×512 -> 1×4×512×512` |
+| 动态 shape 子图 | 无 `Shape/Gather/Mod/Pad/Slice` |
+
+相对误差最大值受接近零的输出影响，绝对误差满足 `atol=1e-4, rtol=1e-3`。
+
+## 未验证
+
+- 以上模型是随机初始化后在 8 个程序化样本上训练一轮的小模型，不具有画质价值。
+- 未生成 Teacher、P0/P3 商用 checkpoint。
+- 未安装目标 HiAI CANN DDK，未生成 OM。
+- 未在麒麟 9000 测算子落点、INT8 比例、热态时延、内存、功耗或回退。
+- 未获得目标 Sensor 商用授权数据和 ISP 集成接口。
+
+因此当前证据只放行 M0 工程闭环，不能放行任何商用或设备性能结论。

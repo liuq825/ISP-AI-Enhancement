@@ -1,0 +1,62 @@
+catalog_version: 1
+checked_on: "2026-07-26"
+policy:
+  production_rule: >
+    A production checkpoint may use a dataset only after a named reviewer has
+    approved the exact license version and provenance snapshot. Downloadable
+    does not mean commercially usable.
+datasets:
+  - id: sidd
+    name: Smartphone Image Denoising Dataset
+    task: paired smartphone RAW denoising
+    official_url: https://abdokamel.github.io/sidd/
+    license_url: https://abdokamel.github.io/sidd/
+    license_status: MIT stated for dataset and associated code
+    production_default: review_required
+    automated_download: false
+    reason: Large files and upstream host availability require an operator-controlled import.
+    expected_use: research baseline and data-pipeline validation
+
+  - id: sid
+    name: See-in-the-Dark
+    task: extreme low-light RAW restoration
+    official_url: https://github.com/cchen156/Learning-to-See-in-the-Dark
+    license_url: https://github.com/cchen156/Learning-to-See-in-the-Dark/blob/master/LICENSE
+    license_status: MIT repository license; dataset scope must be confirmed
+    production_default: prohibited_until_legal_approval
+    automated_download: false
+    reason: Upstream requests manual download and the repository license may not settle all image rights.
+    expected_use: research-only sensitivity study
+
+  - id: dnd
+    name: Darmstadt Noise Dataset
+    task: real-noise benchmark
+    official_url: https://noise.visinf.tu-darmstadt.de/
+    license_url: https://noise.visinf.tu-darmstadt.de/license/
+    license_status: non-commercial; redistribution prohibited
+    production_default: prohibited
+    automated_download: false
+    reason: Registration is required and commercial use is expressly excluded.
+    expected_use: isolated research benchmark only; never production training
+
+  - id: eld
+    name: Extreme Low-light Denoising Dataset
+    task: cross-camera extreme low-light RAW evaluation
+    official_url: https://github.com/Vandermode/ELD
+    license_url: null
+    license_status: dataset license not clearly stated in the reviewed primary material
+    production_default: prohibited_until_written_permission
+    automated_download: false
+    reason: Unknown dataset license.
+    expected_use: research evaluation after internal approval
+
+  - id: target_sensor_capture
+    name: Product-owned target Sensor RAW corpus
+    task: production training, calibration, golden and visual review
+    official_url: null
+    license_url: internal
+    license_status: must be owned or contractually licensed for commercial model training
+    production_default: required
+    automated_download: false
+    reason: Public benchmarks do not represent the target CFA, analog chain, ISP fusion, or device variation.
+    expected_use: all production checkpoints

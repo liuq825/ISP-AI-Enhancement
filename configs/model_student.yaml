@@ -1,0 +1,9 @@
+model:
+  name: nafnet_raw
+  input_channels: 16
+  output_channels: 4
+  width: 32
+  encoder_blocks: [2, 2, 4, 8]
+  middle_blocks: 4
+  decoder_blocks: [2, 2, 2, 2]
+  expansion_spec: baseline

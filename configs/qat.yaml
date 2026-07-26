@@ -1,0 +1,14 @@
+qat:
+  weight_bits: 8
+  activation_bits: 8
+  observer_momentum: 0.95
+  exclude_modules:
+    - intro
+    - ending
+  observer_warmup_steps: 10000
+  total_steps: 100000
+  target_int8_compute_ratio: 0.95
+  note: >
+    This configuration performs backend-neutral fake quantization. Final scales,
+    mixed-precision boundaries, and OM operator placement must be regenerated
+    and audited with the exact HiAI CANN DDK used by the target firmware.

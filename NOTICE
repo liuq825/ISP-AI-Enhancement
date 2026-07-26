@@ -1,0 +1,11 @@
+ISP-AI-Enhancement contains an independently organized adaptation of the
+NAFNet architecture described by:
+
+  Liangyu Chen, Xiaojie Chu, Xiangyu Zhang, and Jian Sun,
+  "Simple Baselines for Image Restoration", ECCV 2022.
+
+The upstream NAFNet implementation is Copyright (c) 2022 megvii-model and is
+available under the MIT License:
+https://github.com/megvii-research/NAFNet
+
+No upstream pretrained weights are redistributed by this repository.

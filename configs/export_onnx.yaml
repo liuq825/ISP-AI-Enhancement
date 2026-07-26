@@ -1,0 +1,10 @@
+export:
+  opset: 17
+  batch: 1
+  height: 512
+  width: 512
+  input_name: context_raw
+  output_name: raw_residual
+  dynamic_axes: false
+  verify_atol: 0.0001
+  verify_rtol: 0.001

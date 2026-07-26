@@ -1,0 +1,6 @@
+# One argument per line. Copy this file into a versioned product-specific file.
+# Do not assume flags are portable across HiAI CANN DDK releases.
+--model
+artifacts/student_512.onnx
+--output
+artifacts/student_512

@@ -1,0 +1,10 @@
+context:
+  max_abs_ev: 8.0
+  wb_ratio_min: 0.25
+  wb_ratio_max: 4.0
+  camera_embeddings:
+    smoke_sensor: [0.0, 0.0, 0.0, 0.0]
+  mode_codes:
+    single: 0.0
+    hdr: 0.5
+    mfnr: 1.0

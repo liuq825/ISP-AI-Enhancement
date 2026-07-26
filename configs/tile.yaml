@@ -1,0 +1,6 @@
+tile:
+  size: 512
+  halo: 48
+  multiple: 16
+  blend: hann
+  min_weight: 0.001
