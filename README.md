@@ -47,6 +47,20 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
 `fetch-sidd-pair` 也可只获取一对指定帧。两种入口都会在联网前对照
 `resources/sidd_validation_scenes.yaml`，禁止把官方 held-out 场景用作训练。
 
+生成并获取 160 个训练场景各两帧的 SIDD Medium 规模公开基线：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe build-sidd-range-config `
+  --output resources/sidd_medium_range.yaml --frames 10 20
+.\.venv\Scripts\isp-ai.exe fetch-sidd-subset `
+  --config resources/sidd_medium_range.yaml `
+  --output datasets/SIDD_Medium_Range `
+  --progress-file outputs/sidd_medium_download.log
+```
+
+生成器会核对 160 个训练场景、40 个 held-out 场景和 `160×5` 个官方 Mirror 2 URL；
+获取器对同一场景只打开一次 noisy ZIP 和一次 GT ZIP，并可安全断点重跑。
+
 导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
 
 ```powershell

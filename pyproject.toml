@@ -30,6 +30,7 @@ data = [
 # 超大官方场景 ZIP 只按 HTTP Range 提取指定帧，避免下载数 GB 无关成员。
 acquisition = [
   "remotezip==0.12.3",
+  "requests>=2.32,<3",
 ]
 # 固定已验证版本，避免 DepGraph API 漂移悄然改变剪枝结果。
 pruning = [

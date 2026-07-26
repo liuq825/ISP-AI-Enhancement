@@ -14,18 +14,25 @@ from .governance import (
 )
 from .manifest import ManifestRecord, read_manifest, validate_manifest
 from .sidd import import_sidd_dataset, import_sidd_validation_blocks
-from .sidd_remote import fetch_sidd_raw_pair, fetch_sidd_raw_subset
+from .sidd_catalog import build_sidd_range_config
+from .sidd_remote import (
+    fetch_sidd_raw_frames,
+    fetch_sidd_raw_pair,
+    fetch_sidd_raw_subset,
+)
 
 __all__ = [
     "ContextBuilder",
     "ContextConfig",
     "ManifestRecord",
     "RawMetadata",
+    "build_sidd_range_config",
     "canonical_pack_bayer",
     "enforce_data_policy",
     "import_sidd_dataset",
     "import_sidd_validation_blocks",
     "fetch_sidd_raw_pair",
+    "fetch_sidd_raw_frames",
     "fetch_sidd_raw_subset",
     "load_context_config",
     "read_manifest",

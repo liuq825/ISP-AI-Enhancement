@@ -156,14 +156,14 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
     )
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     assert receipt["scene_count"] == 1
-    assert receipt["scenes"][0]["receipt_sha256"]
+    assert receipt["pairs"][0]["receipt_sha256"]
     assert opened == [
         "https://example.test/noisy.zip",
         "https://example.test/target.zip",
     ]
     assert progress == [
-        f"[1/1] 开始获取 {scene}",
-        f"[1/1] 已校验 {scene}",
+        f"[1/1] 开始获取 {scene} frames [010]",
+        f"[1/1] 已校验 {scene} frames [010]",
     ]
 
     duplicate = tmp_path / "duplicate.yaml"
@@ -192,6 +192,7 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
 def test_fetch_sidd_subset_cli_separates_progress_from_result(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
 ) -> None:
     """CLI 应把进度写入 stderr，stdout 只输出最终机器可解析的收据路径。"""
 
@@ -209,9 +210,70 @@ def test_fetch_sidd_subset_cli_separates_progress_from_result(
         output="datasets/SIDD_Training_Subset",
         held_out_scenes="resources/sidd_validation_scenes.yaml",
         max_member_bytes=512 * 1024 * 1024,
+        progress_file=str(tmp_path / "progress.log"),
     )
     assert cli._fetch_sidd_subset(arguments) == 0
     captured = capsys.readouterr()
     expected = Path("datasets/SIDD_Training_Subset/subset.receipt.json")
     assert captured.out == f"{expected}\n"
     assert captured.err == "[1/1] 已校验测试场景\n"
+    assert (tmp_path / "progress.log").read_text(encoding="utf-8") == captured.err
+
+
+def test_fetch_sidd_subset_supports_multiple_frames_per_scene(tmp_path: Path) -> None:
+    """双帧配置应生成两对文件，并在集合收据区分场景数与配对数。"""
+
+    scene = "0001_001_S6_00100_00060_3200_L"
+    noisy_zip = tmp_path / "noisy.zip"
+    target_zip = tmp_path / "target.zip"
+    with ZipFile(noisy_zip, "w") as archive:
+        archive.writestr("raw/0001_NOISY_RAW_010.MAT", b"noisy-10")
+        archive.writestr("raw/0001_NOISY_RAW_020.MAT", b"noisy-20")
+    with ZipFile(target_zip, "w") as archive:
+        archive.writestr("raw/0001_GT_RAW_010.MAT", b"target-10")
+        archive.writestr("raw/0001_GT_RAW_020.MAT", b"target-20")
+    held_out = tmp_path / "held_out.yaml"
+    held_out.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        "  - 0009_001_S6_00800_00350_3200_L\n",
+        encoding="utf-8",
+    )
+    config = tmp_path / "subset.yaml"
+    config.write_text(
+        "frame_indices: [10, 20]\n"
+        "scenes:\n"
+        f"  - scene: {scene}\n"
+        "    noisy_url: https://example.test/noisy.zip\n"
+        "    ground_truth_url: https://example.test/target.zip\n",
+        encoding="utf-8",
+    )
+    archives = {
+        "https://example.test/noisy.zip": noisy_zip,
+        "https://example.test/target.zip": target_zip,
+    }
+    opened: list[str] = []
+
+    def factory(url: str) -> ZipFile:
+        """把同一远程归档映射给两个帧请求。"""
+
+        opened.append(url)
+        return ZipFile(archives[url])
+
+    receipt_path = fetch_sidd_raw_subset(
+        config=config,
+        output_dir=tmp_path / "output",
+        held_out_scenes=held_out,
+        archive_factory=factory,
+    )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["format_version"] == 2
+    assert receipt["scene_count"] == 1
+    assert receipt["pair_count"] == 2
+    assert receipt["frame_indices"] == [10, 20]
+    assert [item["frame_index"] for item in receipt["pairs"]] == [10, 20]
+    # 两帧共享 noisy/GT 两次归档打开，而不是每对各打开两次。
+    assert opened == [
+        "https://example.test/noisy.zip",
+        "https://example.test/target.zip",
+    ]

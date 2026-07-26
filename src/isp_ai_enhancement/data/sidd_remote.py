@@ -132,26 +132,37 @@ def _scene_name(scene: SIDDScene) -> str:
     )
 
 
-def fetch_sidd_raw_pair(
+def fetch_sidd_raw_frames(
     *,
     scene_name: str,
     noisy_zip_url: str,
     ground_truth_zip_url: str,
-    frame_index: int,
+    frame_indices: list[int] | tuple[int, ...],
     output_dir: str | Path,
     held_out_scenes: str | Path,
     max_member_bytes: int = 512 * 1024 * 1024,
     archive_factory: ArchiveFactory | None = None,
-) -> Path:
-    """从两个远程场景 ZIP 提取同编号 RAW 配对并写审计收据。
+) -> list[Path]:
+    """一次打开两个远程 ZIP，提取同场景的多组 RAW 配对并写审计收据。
 
     ``archive_factory`` 只用于测试或受控镜像适配；生产默认使用 RemoteZip。
-    每个角色先按 ZIP CRC 与本地 SHA256 验证，再原子替换最终 MAT。若上次仅完成
-    noisy，重试会复核并复用它，只继续获取 GT。
+    每个角色先按 ZIP CRC 与本地 SHA256 验证，再原子替换最终 MAT。多帧共享一次
+    中央目录读取，避免 320 对配置重复打开同一场景归档。若上次只完成部分文件，
+    重试会逐一复核并复用，只继续缺失成员。
     """
 
-    if frame_index <= 0 or frame_index > 999:
-        raise ValueError("frame_index 必须在 [1,999]")
+    frames = list(frame_indices)
+    if (
+        not frames
+        or any(
+            not isinstance(frame, int)
+            or isinstance(frame, bool)
+            or not 1 <= frame <= 999
+            for frame in frames
+        )
+        or len(frames) != len(set(frames))
+    ):
+        raise ValueError("frame_indices 必须是 [1,999] 内的不重复整数序列")
     scene = SIDDScene.from_directory(Path(scene_name))
     canonical_name = _scene_name(scene)
     held_out_names = {_scene_name(value) for value in load_sidd_scene_order(held_out_scenes)}
@@ -166,54 +177,106 @@ def fetch_sidd_raw_pair(
     output = Path(output_dir)
     scene_dir = output / canonical_name
     instance = scene.instance_id
-    frame = f"{frame_index:03d}"
-    noisy_basename = f"{instance}_NOISY_RAW_{frame}.MAT"
-    target_basename = f"{instance}_GT_RAW_{frame}.MAT"
 
+    noisy_receipts: dict[int, dict[str, Any]] = {}
     with factory(noisy_zip_url) as archive:
-        noisy_info = _find_member(archive, noisy_basename)
-        noisy_receipt = _extract_member(
-            archive,
-            noisy_info,
-            scene_dir / noisy_basename,
-            max_member_bytes=max_member_bytes,
-        )
+        for frame_index in frames:
+            frame = f"{frame_index:03d}"
+            basename = f"{instance}_NOISY_RAW_{frame}.MAT"
+            noisy_receipts[frame_index] = _extract_member(
+                archive,
+                _find_member(archive, basename),
+                scene_dir / basename,
+                max_member_bytes=max_member_bytes,
+            )
+    target_receipts: dict[int, dict[str, Any]] = {}
     with factory(ground_truth_zip_url) as archive:
-        target_info = _find_member(archive, target_basename)
-        target_receipt = _extract_member(
-            archive,
-            target_info,
-            scene_dir / target_basename,
-            max_member_bytes=max_member_bytes,
+        for frame_index in frames:
+            frame = f"{frame_index:03d}"
+            basename = f"{instance}_GT_RAW_{frame}.MAT"
+            target_receipts[frame_index] = _extract_member(
+                archive,
+                _find_member(archive, basename),
+                scene_dir / basename,
+                max_member_bytes=max_member_bytes,
+            )
+
+    receipt_paths: list[Path] = []
+    for frame_index in frames:
+        frame = f"{frame_index:03d}"
+        receipt = {
+            "format_version": 1,
+            "scene_name": canonical_name,
+            "frame_index": frame_index,
+            "noisy_zip_url": noisy_zip_url,
+            "ground_truth_zip_url": ground_truth_zip_url,
+            "noisy": noisy_receipts[frame_index],
+            "ground_truth": target_receipts[frame_index],
+        }
+        receipt_path = scene_dir / f"{instance}_RAW_{frame}.receipt.json"
+        temporary_receipt = receipt_path.with_name(f"{receipt_path.name}.tmp")
+        temporary_receipt.write_text(
+            json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
         )
-
-    receipt = {
-        "format_version": 1,
-        "scene_name": canonical_name,
-        "frame_index": frame_index,
-        "noisy_zip_url": noisy_zip_url,
-        "ground_truth_zip_url": ground_truth_zip_url,
-        "noisy": noisy_receipt,
-        "ground_truth": target_receipt,
-    }
-    receipt_path = scene_dir / f"{instance}_RAW_{frame}.receipt.json"
-    temporary_receipt = receipt_path.with_name(f"{receipt_path.name}.tmp")
-    temporary_receipt.write_text(
-        json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    temporary_receipt.replace(receipt_path)
-    return receipt_path
+        temporary_receipt.replace(receipt_path)
+        receipt_paths.append(receipt_path)
+    return receipt_paths
 
 
-def _validate_subset_spec(config_path: Path) -> tuple[int, list[dict[str, str]]]:
+def fetch_sidd_raw_pair(
+    *,
+    scene_name: str,
+    noisy_zip_url: str,
+    ground_truth_zip_url: str,
+    frame_index: int,
+    output_dir: str | Path,
+    held_out_scenes: str | Path,
+    max_member_bytes: int = 512 * 1024 * 1024,
+    archive_factory: ArchiveFactory | None = None,
+) -> Path:
+    """提取单个 RAW 帧配对；实现复用多帧入口的全部安全校验。"""
+
+    return fetch_sidd_raw_frames(
+        scene_name=scene_name,
+        noisy_zip_url=noisy_zip_url,
+        ground_truth_zip_url=ground_truth_zip_url,
+        frame_indices=(frame_index,),
+        output_dir=output_dir,
+        held_out_scenes=held_out_scenes,
+        max_member_bytes=max_member_bytes,
+        archive_factory=archive_factory,
+    )[0]
+
+
+def _validate_subset_spec(config_path: Path) -> tuple[list[int], list[dict[str, str]]]:
     """一次性校验子集配置，确保发起首个网络请求前已发现全部格式问题。"""
 
     values = load_yaml(config_path)
-    frame_index = values.get("frame_index")
+    has_single_frame = "frame_index" in values
+    has_multiple_frames = "frame_indices" in values
+    if has_single_frame == has_multiple_frames:
+        raise ValueError(f"{config_path}: 必须且只能定义 frame_index 或 frame_indices")
+    raw_frames = (
+        [values["frame_index"]]
+        if has_single_frame
+        else values["frame_indices"]
+    )
+    if (
+        not isinstance(raw_frames, list)
+        or not raw_frames
+        or any(
+            not isinstance(frame, int)
+            or isinstance(frame, bool)
+            or not 1 <= frame <= 999
+            for frame in raw_frames
+        )
+    ):
+        raise ValueError(f"{config_path}: 帧编号必须是 [1,999] 内的非空整数列表")
+    frame_indices = [int(frame) for frame in raw_frames]
+    if len(frame_indices) != len(set(frame_indices)):
+        raise ValueError(f"{config_path}: frame_indices 含重复帧")
     raw_scenes = values.get("scenes")
-    if not isinstance(frame_index, int) or not 1 <= frame_index <= 999:
-        raise ValueError(f"{config_path}: frame_index 必须是 [1,999] 内的整数")
     if not isinstance(raw_scenes, list) or not raw_scenes:
         raise ValueError(f"{config_path}: scenes 必须是非空列表")
 
@@ -237,7 +300,7 @@ def _validate_subset_spec(config_path: Path) -> tuple[int, list[dict[str, str]]]
             raise ValueError(f"{config_path}: {scene['scene']} ground_truth_url 不是 HTTP(S)")
         seen_names.add(canonical_name)
         scenes.append(scene)
-    return frame_index, scenes
+    return frame_indices, scenes
 
 
 def fetch_sidd_raw_subset(
@@ -257,7 +320,7 @@ def fetch_sidd_raw_subset(
     """
 
     config_path = Path(config)
-    frame_index, scenes = _validate_subset_spec(config_path)
+    frame_indices, scenes = _validate_subset_spec(config_path)
     config_sha256, _config_crc32 = _sha256_and_crc32(config_path)
     held_out_names = {
         _scene_name(scene) for scene in load_sidd_scene_order(held_out_scenes)
@@ -269,36 +332,45 @@ def fetch_sidd_raw_subset(
         raise ValueError(f"子集配置包含官方 held-out benchmark 场景：{leaked}")
     output = Path(output_dir)
     receipts: list[dict[str, Any]] = []
-    for index, scene in enumerate(scenes, start=1):
+    frame_label = ",".join(f"{frame:03d}" for frame in frame_indices)
+    for scene_index, scene in enumerate(scenes, start=1):
+        label = f"{scene['scene']} frames [{frame_label}]"
         if progress_callback is not None:
-            progress_callback(f"[{index}/{len(scenes)}] 开始获取 {scene['scene']}")
-        receipt_path = fetch_sidd_raw_pair(
+            progress_callback(f"[{scene_index}/{len(scenes)}] 开始获取 {label}")
+        receipt_paths = fetch_sidd_raw_frames(
             scene_name=scene["scene"],
             noisy_zip_url=scene["noisy_url"],
             ground_truth_zip_url=scene["ground_truth_url"],
-            frame_index=frame_index,
+            frame_indices=frame_indices,
             output_dir=output,
             held_out_scenes=held_out_scenes,
             max_member_bytes=max_member_bytes,
             archive_factory=archive_factory,
         )
-        receipts.append(
-            {
-                "scene_name": scene["scene"],
-                "receipt": receipt_path.relative_to(output).as_posix(),
-                "receipt_sha256": _sha256_and_crc32(receipt_path)[0],
-            }
-        )
+        for frame_index, receipt_path in zip(
+            frame_indices,
+            receipt_paths,
+            strict=True,
+        ):
+            receipts.append(
+                {
+                    "scene_name": scene["scene"],
+                    "frame_index": frame_index,
+                    "receipt": receipt_path.relative_to(output).as_posix(),
+                    "receipt_sha256": _sha256_and_crc32(receipt_path)[0],
+                }
+            )
         if progress_callback is not None:
-            progress_callback(f"[{index}/{len(scenes)}] 已校验 {scene['scene']}")
+            progress_callback(f"[{scene_index}/{len(scenes)}] 已校验 {label}")
 
     collection_receipt = {
-        "format_version": 1,
+        "format_version": 2,
         "config": str(config_path),
         "config_sha256": config_sha256,
-        "frame_index": frame_index,
-        "scene_count": len(receipts),
-        "scenes": receipts,
+        "frame_indices": frame_indices,
+        "pair_count": len(receipts),
+        "scene_count": len(scenes),
+        "pairs": receipts,
     }
     receipt_path = output / "subset.receipt.json"
     output.mkdir(parents=True, exist_ok=True)

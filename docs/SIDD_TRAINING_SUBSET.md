@@ -40,7 +40,8 @@ low-ISO val 为 43.0296 dB / 0.966171。样本极少，这些值仅用于发现�
 checkpoint 的真实数据闭环可以执行。
 
 它不是 P0，更不是达到商用品质的权重。正式
-`configs/train_student_public_baseline.yaml` 声明至少 10,000 条 train、300 条 val、
+`configs/train_student_public_baseline.yaml` 以官方 320 对 Medium 规模为基准，声明
+至少 250 条 train、4 条 val、
 6 个训练物理场景、五款相机和四个 ISO 桶；当前子集会被训练前门禁拒绝。最终商用级
 放行还必须加入目标 Sensor 数据，并在目标麒麟 9000 设备完成画质、算子、性能、内存、
 稳定性和回退证据。

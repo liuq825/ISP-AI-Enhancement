@@ -30,7 +30,7 @@
 
 | 检查 | 结果 |
 |---|---|
-| Pytest | 56 passed |
+| Pytest | 59 passed |
 | 中文说明自动门禁 | 覆盖 `src/` 与 `tests/` 的模块、类和函数 |
 | Torch-Pruning 发行包 | 1.6.1 |
 | DepGraph 参考剪枝 | 40 个剪枝组、260 个组内联动操作，删除 1,536 个逻辑门控通道 |
@@ -43,6 +43,8 @@
 | SIDD 远程子集 | 精确成员、CRC/SHA256、断点复用、集合收据及联网前配置校验通过 |
 | SIDD 真实 RAW 导入 | 6 对、五相机、四个 ISO 桶；train/val/test=3/1/2，Manifest 通过 |
 | SIDD 真实训练 smoke | 极小 CPU 模型 1 epoch / 3 step、checkpoint 与验证闭环通过；无画质结论 |
+| SIDD Medium 规模配置 | 160 train/40 held-out、800 Mirror 2 URL、10 场景/5 相机、320 对通过 |
+| SIDD 双帧 Range | 首尾 frame 020 成员实际核验；每场景只打开 noisy/GT 各一次 |
 | 数据裁剪复现 | 训练随机裁剪；验证中心裁剪且不消耗全局 RNG |
 | 统一评测 | 逐样本 mask PSNR/packed RAW SSIM、Sensor/ISO 分桶与哈希报告通过 |
 | 训练恢复 | 从 epoch 1 恢复的 epoch 2 与连续训练权重逐元素完全一致 |

@@ -16,6 +16,11 @@ from isp_ai_enhancement.data.sidd import (
     import_sidd_dataset,
     import_sidd_validation_blocks,
 )
+from isp_ai_enhancement.data.sidd_catalog import (
+    SIDD_MIRROR2_LIST,
+    SIDD_SCENE_PAGE,
+    build_sidd_range_config,
+)
 from isp_ai_enhancement.data.sidd_remote import (
     fetch_sidd_raw_pair,
     fetch_sidd_raw_subset,
@@ -193,6 +198,19 @@ def _fetch_sidd_pair(args: argparse.Namespace) -> int:
 def _fetch_sidd_subset(args: argparse.Namespace) -> int:
     """按版本化场景清单顺序获取 RAW 训练子集，并打印集合收据。"""
 
+    progress_path = Path(args.progress_file) if args.progress_file else None
+    if progress_path is not None:
+        progress_path.parent.mkdir(parents=True, exist_ok=True)
+        progress_path.write_text("", encoding="utf-8")
+
+    def report_progress(message: str) -> None:
+        """把进度发往交互 stderr，并可追加到适合后台监控的 UTF-8 日志。"""
+
+        print(message, file=sys.stderr, flush=True)
+        if progress_path is not None:
+            with progress_path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(message + "\n")
+
     print(
         fetch_sidd_raw_subset(
             config=args.config,
@@ -200,7 +218,21 @@ def _fetch_sidd_subset(args: argparse.Namespace) -> int:
             held_out_scenes=args.held_out_scenes,
             max_member_bytes=args.max_member_bytes,
             # 进度写 stderr，stdout 只保留最终收据路径，便于脚本稳定解析。
-            progress_callback=lambda message: print(message, file=sys.stderr, flush=True),
+            progress_callback=report_progress,
+        )
+    )
+    return 0
+
+
+def _build_sidd_range_config(args: argparse.Namespace) -> int:
+    """从官方场景表和 Mirror 2 清单生成双帧训练获取配置。"""
+
+    print(
+        build_sidd_range_config(
+            output=args.output,
+            frame_indices=args.frames,
+            source_page=args.source_page,
+            mirror_list=args.mirror_list,
         )
     )
     return 0
@@ -371,7 +403,18 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=512 * 1024 * 1024,
     )
+    sidd_subset.add_argument(
+        "--progress-file",
+        help="可选 UTF-8 进度日志；每次启动先清空，适合监控长时间后台获取",
+    )
     sidd_subset.set_defaults(function=_fetch_sidd_subset)
+
+    sidd_catalog = commands.add_parser("build-sidd-range-config")
+    sidd_catalog.add_argument("--output", required=True)
+    sidd_catalog.add_argument("--frames", type=int, nargs="+", default=[10, 20])
+    sidd_catalog.add_argument("--source-page", default=SIDD_SCENE_PAGE)
+    sidd_catalog.add_argument("--mirror-list", default=SIDD_MIRROR2_LIST)
+    sidd_catalog.set_defaults(function=_build_sidd_range_config)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)

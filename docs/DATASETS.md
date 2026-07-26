@@ -60,6 +60,18 @@ SIDD Full 的单个场景 noisy/GT ZIP 可分别超过 3 GB 和 8 GB，但当前
 而不是只按相机或实例编号挑选。导入时复用官方验证包内的
 `noise_level_functions.csv`，避免 16 通道输入中的噪声强度上下文退化成未知值 0。
 
+`build-sidd-range-config` 进一步读取官网场景表与独立的
+`SIDD_URLs_Mirror_2.txt`，逐 `<tr>` 提取 200 个场景，排除其中 40 个 held-out，
+再要求剩余 160 个场景严格对应 `160×5=800` 个角色 URL。仓库已生成
+`resources/sidd_medium_range.yaml`，选择 frame 010/020，共 320 对，规模与官方
+SIDD Medium 相同但帧选择由本项目显式固定。配置保存两份来源 SHA256，任一上游数量
+或顺序变化都会失败，不能靠“URL 可下载”猜测身份。
+
+双帧获取时，同一场景的 noisy/GT 归档各只打开一次，再在归档内依次校验两个成员；
+相比逐配对打开可少 320 次中央目录请求。长时间后台任务可用
+`--progress-file outputs/sidd_medium_download.log` 记录已完成场景。预计 RAW 本体
+约 20 GB，仍由 `.gitignore` 隔离。
+
 ### SIDD RAW 验证块
 
 官方 `ValidationNoisyBlocksRaw.mat` 与 `ValidationGtBlocksRaw.mat` 的变量形状均为
