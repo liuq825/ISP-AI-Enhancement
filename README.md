@@ -78,6 +78,7 @@ py -m venv .venv
 
 结构化剪枝默认使用 `torch-pruning==1.6.1` 的 DepGraph 物理删除通道，并保留手工重建
 后端作为交叉验证。SimpleGate 成对索引、已知兼容性问题和参考结果见 `docs/PRUNING.md`。
+AMP、余弦学习率、原子 checkpoint 和确定性恢复约束见 `docs/TRAINING.md`。
 
 ## 数据使用边界
 

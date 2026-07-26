@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 import torch
 from torch import nn
+from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import DataLoader
 
 from isp_ai_enhancement.config import load_yaml
@@ -39,28 +40,95 @@ def _seed_everything(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
+def _seed_worker(_worker_id: int) -> None:
+    """用 PyTorch 分配的 worker 种子同步初始化 NumPy 与 Python 随机源。"""
+
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+
+
 def _save_checkpoint(
     path: Path,
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
+    scheduler: LRScheduler | None,
+    scaler: torch.amp.GradScaler,
     epoch: int,
+    global_step: int,
+    best_validation_psnr: float,
     config: dict[str, Any],
+    loader_generator: torch.Generator,
     distiller: nn.Module | None = None,
 ) -> None:
-    """保存可恢复训练的版本化检查点，并在启用蒸馏时包含适配器状态。"""
+    """原子保存可精确恢复的版本化检查点与全部随机状态。"""
 
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "format_version": 1,
+        "format_version": 2,
         "epoch": epoch,
+        "global_step": global_step,
+        "best_validation_psnr": best_validation_psnr,
         "model_state": model.state_dict(),
         "optimizer_state": optimizer.state_dict(),
+        "scheduler_state": scheduler.state_dict() if scheduler is not None else None,
+        "scaler_state": scaler.state_dict(),
+        "python_rng_state": random.getstate(),
+        "numpy_rng_state": np.random.get_state(),
+        "torch_rng_state": torch.get_rng_state(),
+        "cuda_rng_state": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+        "loader_generator_state": loader_generator.get_state(),
         "config": config,
         "created_unix": int(time()),
     }
     if distiller is not None:
         payload["distiller_state"] = distiller.state_dict()
-    torch.save(payload, path)
+    # 先写同目录临时文件再替换，进程中断不会留下一个貌似有效的半截 checkpoint。
+    temporary = path.with_name(f"{path.name}.tmp")
+    torch.save(payload, temporary)
+    temporary.replace(path)
+
+
+def _restore_training_state(
+    path: Path,
+    *,
+    model: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    scheduler: LRScheduler | None,
+    scaler: torch.amp.GradScaler,
+    loader_generator: torch.Generator,
+    distiller: nn.Module | None,
+) -> tuple[int, int, float]:
+    """恢复模型、优化器、调度器、AMP 与随机状态，返回下一轮训练位置。"""
+
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if not isinstance(payload, dict) or int(payload.get("format_version", 0)) < 2:
+        raise ValueError("resume checkpoint must use training format_version >= 2")
+    model.load_state_dict(payload["model_state"], strict=True)
+    optimizer.load_state_dict(payload["optimizer_state"])
+    saved_scheduler = payload.get("scheduler_state")
+    if (scheduler is None) != (saved_scheduler is None):
+        raise ValueError("resume checkpoint scheduler configuration does not match")
+    if scheduler is not None:
+        scheduler.load_state_dict(saved_scheduler)
+    scaler.load_state_dict(payload.get("scaler_state", {}))
+    saved_distiller = payload.get("distiller_state")
+    if (distiller is None) != (saved_distiller is None):
+        raise ValueError("resume checkpoint distillation configuration does not match")
+    if distiller is not None:
+        distiller.load_state_dict(saved_distiller, strict=True)
+
+    random.setstate(payload["python_rng_state"])
+    np.random.set_state(payload["numpy_rng_state"])
+    torch.set_rng_state(payload["torch_rng_state"])
+    if torch.cuda.is_available() and payload.get("cuda_rng_state") is not None:
+        torch.cuda.set_rng_state_all(payload["cuda_rng_state"])
+    loader_generator.set_state(payload["loader_generator_state"])
+    return (
+        int(payload["epoch"]) + 1,
+        int(payload["global_step"]),
+        float(payload["best_validation_psnr"]),
+    )
 
 
 @torch.inference_mode()
@@ -68,15 +136,21 @@ def _evaluate(
     model: nn.Module,
     loader: DataLoader,
     device: torch.device,
+    amp_enabled: bool,
 ) -> float:
-    """在验证集上计算平均 packed RAW PSNR，不创建梯度图。"""
+    """在验证集上计算逐样本平均 packed RAW PSNR，不创建梯度图。"""
 
     model.eval()
     values: list[float] = []
     for batch in loader:
         inputs = batch["input"].to(device)
         target = batch["target"].to(device)
-        enhanced = torch.clamp(inputs[:, :4] + model(inputs), 0.0, 1.0)
+        with torch.autocast(
+            device_type=device.type,
+            dtype=torch.float16,
+            enabled=amp_enabled,
+        ):
+            enhanced = torch.clamp(inputs[:, :4] + model(inputs), 0.0, 1.0)
         values.extend(
             float(value)
             for value in psnr_per_sample(
@@ -84,6 +158,28 @@ def _evaluate(
             ).cpu().tolist()
         )
     return sum(values) / max(1, len(values))
+
+
+def _build_scheduler(
+    optimizer: torch.optim.Optimizer,
+    config: dict[str, Any],
+    epochs: int,
+) -> LRScheduler | None:
+    """按配置创建 epoch 级学习率调度器；省略配置时保持常数学习率。"""
+
+    settings = config.get("scheduler")
+    if settings is None:
+        return None
+    if not isinstance(settings, dict):
+        raise ValueError("scheduler must be a mapping")
+    scheduler_type = str(settings.get("type", "cosine")).lower()
+    if scheduler_type != "cosine":
+        raise ValueError("only cosine scheduler is currently supported")
+    return torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer,
+        T_max=int(settings.get("t_max", epochs)),
+        eta_min=float(settings.get("eta_min", 1e-6)),
+    )
 
 
 def train_from_config(path: str | Path) -> Path:
@@ -101,6 +197,9 @@ def train_from_config(path: str | Path) -> Path:
     if device_name.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is unavailable")
     device = torch.device(device_name)
+    amp_enabled = bool(config.get("amp", False))
+    if amp_enabled and device.type != "cuda":
+        raise ValueError("float16 AMP is supported only when training on CUDA")
     model_config_value = config.get("model_config", config.get("student_config"))
     if model_config_value is None:
         raise ValueError("training config must define model_config or student_config")
@@ -166,12 +265,28 @@ def train_from_config(path: str | Path) -> Path:
         crop_size=crop_size,
         augment=False,
     )
+    num_workers = int(config.get("num_workers", 0))
+    train_generator = torch.Generator().manual_seed(seed)
+    validation_generator = torch.Generator().manual_seed(seed + 1)
     loader_options = {
         "batch_size": int(config.get("batch_size", 1)),
-        "num_workers": int(config.get("num_workers", 0)),
+        "num_workers": num_workers,
+        "worker_init_fn": _seed_worker,
+        "pin_memory": device.type == "cuda",
+        "persistent_workers": num_workers > 0,
     }
-    train_loader = DataLoader(train_data, shuffle=True, **loader_options)
-    val_loader = DataLoader(val_data, shuffle=False, **loader_options)
+    train_loader = DataLoader(
+        train_data,
+        shuffle=True,
+        generator=train_generator,
+        **loader_options,
+    )
+    val_loader = DataLoader(
+        val_data,
+        shuffle=False,
+        generator=validation_generator,
+        **loader_options,
+    )
     model = build_model_from_file(model_config).to(device)
     teacher: nn.Module | None = None
     distiller: FeatureDistiller | None = None
@@ -217,10 +332,38 @@ def train_from_config(path: str | Path) -> Path:
     )
     epochs = int(config.get("epochs", 1))
     log_every = int(config.get("log_every", 20))
+    save_every_epochs = int(config.get("save_every_epochs", 1))
+    if epochs <= 0 or log_every <= 0 or save_every_epochs <= 0:
+        raise ValueError("epochs, log_every, and save_every_epochs must be positive")
+    scheduler = _build_scheduler(optimizer, config, epochs)
+    scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
     history_path = output_dir / "history.jsonl"
     global_step = 0
-    with history_path.open("w", encoding="utf-8", newline="\n") as history:
-        for epoch in range(1, epochs + 1):
+    start_epoch = 1
+    best_validation_psnr = float("-inf")
+    resume_value = config.get("resume_checkpoint")
+    if resume_value is not None:
+        resume_path = Path(str(resume_value))
+        if not resume_path.is_absolute():
+            resume_path = config_path.parent.parent / resume_path
+        start_epoch, global_step, best_validation_psnr = _restore_training_state(
+            resume_path,
+            model=model,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            scaler=scaler,
+            loader_generator=train_generator,
+            distiller=distiller,
+        )
+    if start_epoch > epochs:
+        raise ValueError(
+            f"resume checkpoint already completed epoch {start_epoch - 1}, "
+            f"but configured epochs is {epochs}"
+        )
+
+    history_mode = "a" if resume_value is not None else "w"
+    with history_path.open(history_mode, encoding="utf-8", newline="\n") as history:
+        for epoch in range(start_epoch, epochs + 1):
             model.train()
             for batch in train_loader:
                 inputs = batch["input"].to(device)
@@ -228,34 +371,46 @@ def train_from_config(path: str | Path) -> Path:
                 # 第 16 通道是输入契约定义的有效像素掩码，只参与损失加权。
                 valid_mask = inputs[:, 15:16]
                 optimizer.zero_grad(set_to_none=True)
-                residual, student_features = model.forward_features(inputs)
-                enhanced = torch.clamp(inputs[:, :4] + residual, 0.0, 1.0)
-                teacher_enhanced = None
-                teacher_features = None
-                if teacher is not None:
-                    # 教师固定为推理态；只让学生和特征适配器接收梯度。
-                    with torch.no_grad():
-                        teacher_residual, teacher_features = teacher.forward_features(inputs)
-                        teacher_enhanced = torch.clamp(inputs[:, :4] + teacher_residual, 0.0, 1.0)
-                loss, terms = criterion(
-                    enhanced,
-                    target,
-                    mask=valid_mask,
-                    teacher_enhanced=teacher_enhanced,
-                )
-                if distiller is not None and teacher_features is not None:
-                    feature_loss = distiller(student_features, teacher_features)
-                    terms["teacher_feature"] = feature_loss
-                    loss = loss + teacher_feature_weight * feature_loss
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-                optimizer.step()
+                with torch.autocast(
+                    device_type=device.type,
+                    dtype=torch.float16,
+                    enabled=amp_enabled,
+                ):
+                    residual, student_features = model.forward_features(inputs)
+                    enhanced = torch.clamp(inputs[:, :4] + residual, 0.0, 1.0)
+                    teacher_enhanced = None
+                    teacher_features = None
+                    if teacher is not None:
+                        # 教师固定为推理态；只让学生和特征适配器接收梯度。
+                        with torch.no_grad():
+                            teacher_residual, teacher_features = teacher.forward_features(inputs)
+                            teacher_enhanced = torch.clamp(
+                                inputs[:, :4] + teacher_residual, 0.0, 1.0
+                            )
+                    loss, terms = criterion(
+                        enhanced,
+                        target,
+                        mask=valid_mask,
+                        teacher_enhanced=teacher_enhanced,
+                    )
+                    if distiller is not None and teacher_features is not None:
+                        feature_loss = distiller(student_features, teacher_features)
+                        terms["teacher_feature"] = feature_loss
+                        loss = loss + teacher_feature_weight * feature_loss
+                scaler.scale(loss).backward()
+                # 裁剪前必须把 AMP 梯度还原到真实尺度，否则阈值 1.0 没有物理意义。
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(optimized_parameters, max_norm=1.0)
+                scaler.step(optimizer)
+                scaler.update()
                 global_step += 1
                 if global_step % log_every == 0:
                     record = {
                         "epoch": epoch,
                         "step": global_step,
                         "loss": float(loss.detach().item()),
+                        "learning_rate": float(optimizer.param_groups[0]["lr"]),
+                        "grad_scale": float(scaler.get_scale()),
                         **{
                             f"loss_{name}": float(value.detach().item())
                             for name, value in terms.items()
@@ -263,24 +418,53 @@ def train_from_config(path: str | Path) -> Path:
                     }
                     history.write(json.dumps(record, sort_keys=True) + "\n")
                     history.flush()
-            validation_psnr = _evaluate(model, val_loader, device)
+            validation_psnr = _evaluate(model, val_loader, device, amp_enabled)
+            if scheduler is not None:
+                # 按官方建议在本轮 optimizer.step() 全部完成后推进 epoch 级调度器。
+                scheduler.step()
+            is_best = validation_psnr > best_validation_psnr
+            best_validation_psnr = max(best_validation_psnr, validation_psnr)
             history.write(
                 json.dumps(
                     {
                         "epoch": epoch,
                         "step": global_step,
                         "validation_psnr": validation_psnr,
+                        "best_validation_psnr": best_validation_psnr,
+                        "learning_rate": float(optimizer.param_groups[0]["lr"]),
+                        "is_best": is_best,
                     },
                     sort_keys=True,
                 )
                 + "\n"
             )
-            _save_checkpoint(
-                output_dir / f"epoch_{epoch:04d}.pt",
-                model,
-                optimizer,
-                epoch,
-                config,
-                distiller,
-            )
+            history.flush()
+            if epoch % save_every_epochs == 0 or epoch == epochs:
+                _save_checkpoint(
+                    output_dir / f"epoch_{epoch:04d}.pt",
+                    model,
+                    optimizer,
+                    scheduler,
+                    scaler,
+                    epoch,
+                    global_step,
+                    best_validation_psnr,
+                    config,
+                    train_generator,
+                    distiller,
+                )
+            if is_best:
+                _save_checkpoint(
+                    output_dir / "best.pt",
+                    model,
+                    optimizer,
+                    scheduler,
+                    scaler,
+                    epoch,
+                    global_step,
+                    best_validation_psnr,
+                    config,
+                    train_generator,
+                    distiller,
+                )
     return output_dir / f"epoch_{epochs:04d}.pt"

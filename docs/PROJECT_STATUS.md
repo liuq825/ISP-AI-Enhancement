@@ -10,9 +10,9 @@
 
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
-| M0 工程烟雾测试 | 已完成 | 36 项 CPU 测试、合成 RAW、小模型训练、静态 ONNX 一致性 |
+| M0 工程烟雾测试 | 已完成 | 37 项 CPU 测试、可恢复小模型训练、静态 ONNX 一致性 |
 | M1 数据接入 | 进行中 | 完成 SIDD 场景/验证块导入器；官方验证 MAT 正在后台续传 |
-| P0 Student FP32 | 未开始 | 已实现逐样本/分 Sensor/ISO 评测；仍缺公开 RAW 完整落盘与 GPU 训练资源 |
+| P0 Student FP32 | 训练器就绪 | AMP、余弦调度、最佳/原子 checkpoint、确定性恢复已实现；缺 RAW 完整落盘与 GPU |
 | P1/P2/P3 物理剪枝 | 双后端已实现 | Torch-Pruning 1.6.1 默认、手工重建交叉验证；仍需 P0 权重和分域敏感度 |
 | QAT | 模拟链路已实现 | 最终量化规则必须由目标 HiAI CANN DDK 重新生成 |
 | ONNX | 导出链路已实现 | 需要实际 checkpoint 与 ONNX Runtime 对照 |

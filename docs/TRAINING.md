@@ -1,0 +1,58 @@
+# 训练与恢复规范
+
+## 启动顺序
+
+训练器在创建输出权重前依次执行：
+
+1. 校验 Manifest 文件、重复 ID 和场景级划分泄漏；
+2. 按声明的 `data_policy.purpose` 检查数据目录与许可；
+3. 确认每个 `sensor_id` 都存在版本化相机嵌入；
+4. 构建配对数据、模型、可选教师和特征蒸馏适配器；
+5. 恢复 checkpoint 或从固定随机种子开始训练。
+
+## 混合精度
+
+`amp: true` 只允许 CUDA float16 训练，使用 `torch.autocast` 与
+`torch.amp.GradScaler`。梯度裁剪前先执行 `scaler.unscale_`，否则阈值 1.0 会作用于
+放大后的梯度。CPU 冒烟配置保持 `amp: false`；不能把 CPU bfloat16 的结果直接当作目标
+GPU/端侧 FP16 结论。
+
+## 学习率
+
+省略 `scheduler` 时保持常数学习率。商用品质训练配置使用 epoch 级余弦退火：
+
+```yaml
+scheduler:
+  type: cosine
+  t_max: 100
+  eta_min: 0.000001
+```
+
+调度器在一轮内全部 `optimizer.step()` 完成后调用一次。训练日志同时记录当前学习率。
+
+## Checkpoint 与恢复
+
+格式版本 2 保存：
+
+- 模型、优化器、调度器、AMP scaler 和可选蒸馏适配器状态；
+- 已完成 epoch、global step 与最佳验证 PSNR；
+- Python、NumPy、PyTorch CPU/CUDA 和 DataLoader Generator 随机状态；
+- 完整训练配置与创建时间。
+
+文件先写同目录临时文件，再原子替换目标。`best.pt` 保存最佳验证模型，
+`epoch_NNNN.pt` 按 `save_every_epochs` 保存，并始终保留最终轮。
+
+恢复示例：
+
+```yaml
+epochs: 100
+resume_checkpoint: runs/student_distill/epoch_0040.pt
+```
+
+`epochs` 表示最终总轮数而不是再训练轮数。调度器或蒸馏结构与 checkpoint 不一致时，
+训练器拒绝恢复。单元测试从第一轮 checkpoint 恢复第二轮，并要求权重与连续训练逐元素
+完全一致。
+
+PyTorch 官方参考：[AMP](https://docs.pytorch.org/docs/stable/amp)、
+[可复现性](https://docs.pytorch.org/docs/stable/notes/randomness.html)、
+[CosineAnnealingLR](https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html)。

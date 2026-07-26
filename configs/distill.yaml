@@ -18,6 +18,11 @@ crop_size: 256
 learning_rate: 0.0001
 weight_decay: 0.0
 amp: true
+scheduler:
+  # 每个 epoch 完成 optimizer 更新后推进，无周期重启。
+  type: cosine
+  t_max: 100
+  eta_min: 0.000001
 loss:
   # 前三项为真值监督，后两项分别约束教师输出和中间特征。
   charbonnier: 1.0
