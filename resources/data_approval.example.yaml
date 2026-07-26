@@ -1,0 +1,8 @@
+approval_version: 1
+approved_datasets:
+  target_sensor_capture:
+    approved_uses: [production]
+    reviewer: "replace-with-named-reviewer"
+    approved_on: "YYYY-MM-DD"
+    license_snapshot_sha256: "replace-with-64-digit-sha256"
+    provenance_snapshot_sha256: "replace-with-64-digit-sha256"

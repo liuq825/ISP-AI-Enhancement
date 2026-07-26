@@ -13,6 +13,7 @@ def test_smoke_dataset_and_manifest(tmp_path: Path) -> None:
 
 def test_manifest_detects_split_leakage() -> None:
     base = dict(
+        dataset_id="dataset",
         input_path="input.npz",
         target_path="target.npz",
         sensor_id="sensor",

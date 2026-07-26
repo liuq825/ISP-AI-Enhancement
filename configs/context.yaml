@@ -4,6 +4,11 @@ context:
   wb_ratio_max: 4.0
   camera_embeddings:
     smoke_sensor: [0.0, 0.0, 0.0, 0.0]
+    sidd_GP: [-1.0, -1.0, -1.0, -1.0]
+    sidd_IP: [-1.0, -1.0, 1.0, 1.0]
+    sidd_S6: [-1.0, 1.0, -1.0, 1.0]
+    sidd_N6: [1.0, -1.0, 1.0, -1.0]
+    sidd_G4: [1.0, 1.0, 1.0, 1.0]
   mode_codes:
     single: 0.0
     hdr: 0.5

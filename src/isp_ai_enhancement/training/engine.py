@@ -12,8 +12,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from isp_ai_enhancement.config import load_yaml
-from isp_ai_enhancement.data.context import ContextBuilder, ContextConfig
+from isp_ai_enhancement.data.context import ContextBuilder, load_context_config
 from isp_ai_enhancement.data.dataset import RawPairDataset
+from isp_ai_enhancement.data.governance import enforce_data_policy
+from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
 from isp_ai_enhancement.distillation import FeatureDistiller
 from isp_ai_enhancement.export import load_checkpoint_state
 from isp_ai_enhancement.losses import LossWeights, RawRestorationLoss
@@ -85,14 +87,46 @@ def train_from_config(path: str | Path) -> Path:
     manifest = Path(str(config["manifest"]))
     if not manifest.is_absolute():
         manifest = config_path.parent.parent / manifest
+    context_config_value = config.get("context_config")
+    if context_config_value is None:
+        raise ValueError("training config must define context_config")
+    context_config_path = Path(str(context_config_value))
+    if not context_config_path.is_absolute():
+        context_config_path = config_path.parent.parent / context_config_path
+    context_config = load_context_config(context_config_path)
+    records = read_manifest(manifest)
+    manifest_errors = validate_manifest(records, root=manifest.parent)
+    if manifest_errors:
+        formatted = "\n".join(f"- {error}" for error in manifest_errors)
+        raise ValueError(f"manifest validation failed:\n{formatted}")
+
+    data_policy = config.get("data_policy")
+    if not isinstance(data_policy, dict):
+        raise ValueError("training config must define a data_policy mapping")
+    purpose = str(data_policy.get("purpose", ""))
+    catalog_value = data_policy.get("catalog")
+    if not purpose or catalog_value is None:
+        raise ValueError("data_policy must define purpose and catalog")
+    catalog_path = Path(str(catalog_value))
+    if not catalog_path.is_absolute():
+        catalog_path = config_path.parent.parent / catalog_path
+    approval_value = data_policy.get("approval")
+    approval_path = Path(str(approval_value)) if approval_value is not None else None
+    if approval_path is not None and not approval_path.is_absolute():
+        approval_path = config_path.parent.parent / approval_path
+    enforce_data_policy(
+        records,
+        catalog_path=catalog_path,
+        purpose=purpose,
+        approval_path=approval_path,
+        context_config=context_config,
+    )
     output_dir = Path(str(config.get("output_dir", "runs/train")))
     if not output_dir.is_absolute():
         output_dir = config_path.parent.parent / output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    builder = ContextBuilder(
-        ContextConfig(camera_embeddings={"smoke_sensor": (0.0, 0.0, 0.0, 0.0)})
-    )
+    builder = ContextBuilder(context_config)
     crop_size = int(config["crop_size"]) if config.get("crop_size") else None
     train_data = RawPairDataset(
         manifest,

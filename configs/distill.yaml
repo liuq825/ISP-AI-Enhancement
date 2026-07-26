@@ -3,8 +3,12 @@ device: cuda
 student_config: configs/model_student.yaml
 teacher_config: configs/model_teacher.yaml
 teacher_checkpoint: checkpoints/teacher.pt
+context_config: configs/context.yaml
 manifest: data/production/manifest.jsonl
 output_dir: runs/student_distill
+data_policy:
+  purpose: commercial_grade
+  catalog: resources/datasets.yaml
 epochs: 100
 batch_size: 8
 num_workers: 8

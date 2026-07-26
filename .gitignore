@@ -11,12 +11,12 @@ dist/
 *.egg-info/
 
 # Local datasets, weights, exports, and experiments are intentionally not versioned.
-data/
-datasets/
-checkpoints/
-artifacts/
-outputs/
-runs/
+/data/
+/datasets/
+/checkpoints/
+/artifacts/
+/outputs/
+/runs/
 *.ckpt
 *.pth
 *.pt

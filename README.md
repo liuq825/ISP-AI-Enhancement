@@ -4,9 +4,10 @@
 覆盖单帧 RAW 与 HDR/MFNR 融合后 RAW，提供数据契约、Teacher/Student、蒸馏、
 结构化物理剪枝、QAT 准备、ONNX 导出、重叠 Tile 推理和端侧放行工具。
 
-当前状态是“可复现实验与端侧适配基线”，不是已经通过量产认证的模型。真正的商用
-发布仍必须使用具备商业授权的目标 Sensor 数据，在目标麒麟 9000 设备、固件和
-HiAI CANN DDK 上完成算子、画质、热态时延、内存、稳定性与回退六项验证。
+当前目标是研发并部署一份达到商用级技术指标的工程验证模型，不是把本仓库及权重
+直接作为商业产品交付。项目仍会在目标麒麟 9000 设备、固件和 HiAI CANN DDK 上
+完成算子、画质、热态时延、内存、稳定性与回退六项验证；商业发布所需的版权/IP
+清关不属于本阶段完成条件。
 
 ## 快速开始
 
@@ -17,6 +18,16 @@ py -m venv .venv
 .\.venv\Scripts\isp-ai.exe make-smoke-data --output data/smoke --samples 16
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/smoke/manifest.jsonl
 .\.venv\Scripts\python.exe -m pytest
+```
+
+导入已解压的 SIDD RAW 数据（数据本体不进入 Git）：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe import-sidd `
+  --source datasets/SIDD `
+  --output data/sidd `
+  --nlf-csv datasets/SIDD/noise_level_functions.csv
+.\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/sidd/manifest.jsonl
 ```
 
 训练与导出入口：
@@ -41,11 +52,12 @@ py -m venv .venv
 精确定义见 `docs/INPUT_CONTRACT.md`；量产边界与端侧路线见
 `docs/DEPLOYMENT_KIRIN9000.md`。
 
-## 重要合规边界
+## 数据使用边界
 
-公开数据集的“可下载”不等于“可用于商业模型”。仓库只保存数据源目录、许可快照和
-下载/转换入口，不提交数据本体。任何生产权重都必须由法务确认训练数据、基础权重和
-工具链许可。详见 `docs/DATASETS.md` 与 `docs/LICENSE_COMPLIANCE.md`。
+当前模型用于非商业研发和麒麟 9000 部署验证，可以使用许可允许研究用途的公开
+数据集。仓库保存数据源目录和转换入口，不提交数据本体，并继续遵守“不再分发”等
+原始条款。未来若把模型直接用于商业发布，需另行完成版权/IP 清关，必要时使用目标
+Sensor 自有数据重训。详见 `docs/DATASETS.md`。
 
 ## 仓库结构
 

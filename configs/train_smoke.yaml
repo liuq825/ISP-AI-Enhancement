@@ -1,8 +1,12 @@
 seed: 20260726
 device: cpu
 model_config: configs/model_smoke.yaml
+context_config: configs/context.yaml
 manifest: data/smoke/manifest.jsonl
 output_dir: runs/smoke
+data_policy:
+  purpose: smoke
+  catalog: resources/datasets.yaml
 epochs: 1
 batch_size: 1
 num_workers: 0

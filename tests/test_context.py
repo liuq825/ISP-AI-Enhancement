@@ -6,6 +6,7 @@ from isp_ai_enhancement.data.context import (
     ContextConfig,
     RawMetadata,
     canonical_pack_bayer,
+    load_context_config,
 )
 
 
@@ -57,3 +58,21 @@ def test_context_contract() -> None:
 def test_context_rejects_unknown_sensor() -> None:
     with pytest.raises(ValueError, match="missing camera embedding"):
         ContextBuilder().build(torch.zeros(1, 4, 16, 16), RawMetadata(sensor_id="unknown"))
+
+
+def test_load_context_config(tmp_path) -> None:
+    path = tmp_path / "context.yaml"
+    path.write_text(
+        "context:\n"
+        "  camera_embeddings:\n"
+        "    target_sensor: [0.1, -0.1, 0.2, -0.2]\n"
+        "  mode_codes: {single: 0.0, hdr: 0.5, mfnr: 1.0}\n",
+        encoding="utf-8",
+    )
+    config = load_context_config(path)
+    assert config.camera_embeddings["target_sensor"] == (0.1, -0.1, 0.2, -0.2)
+
+
+def test_context_config_rejects_unknown_keys() -> None:
+    with pytest.raises(ValueError, match="unknown context"):
+        ContextConfig.from_mapping({"camera_embeddings": {}, "typo": 1})

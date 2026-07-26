@@ -66,5 +66,41 @@
 ### 公开数据集商业许可风险
 
 - 现象：公开 RAW 集许可差异大，DND 明确禁止商业使用。
-- 处理：建立机器可读目录，默认 deny；生产权重必须使用自有/已授权目标 Sensor
-  数据，研究 checkpoint 与生产 checkpoint 隔离。
+- 处理：建立机器可读目录并记录 `dataset_id`。当前模型定位为非商业研发与部署
+  验证，可在原许可允许的研究范围使用；若未来直接商业发布再执行 IP 清关或重训。
+
+## 2026-07-26：M1 数据接入加固
+
+### 训练器把真实 Sensor 错当成 smoke_sensor
+
+- 现象：训练入口内部硬编码 `smoke_sensor` embedding，配置中的 Sensor 注册表
+  没有真正参与训练。
+- 风险：真实数据可能在启动后才因未知 Sensor 失败，或被迫把不同 Sensor 伪装成
+  同一域。
+- 处理：训练配置必须声明 `context_config`；Manifest 中每颗 Sensor 都必须在
+  版本化注册表存在，样本内联 embedding 与注册表不一致时失败即停。
+
+### 可下载数据没有用途追溯
+
+- 现象：旧 Manifest 不记录 `dataset_id`，训练器无法区分 SIDD、DND 或自有数据。
+- 风险：无法复现实验数据构成，也可能违反数据自身的禁止再分发或用途限制。
+- 处理：Manifest 强制记录 `dataset_id`。`commercial_grade` 表示非商业、商用级
+  技术验证；严格 `production` 审批门禁仅保留给未来直接商业发布。
+
+### SIDD 的 Raw-RGB 容易被误解成四通道
+
+- 现象：SIDD 页面称其为 Raw-RGB，但文件内容是二维 Bayer mosaic。
+- 风险：直接当作 RGB/四通道会导致 CFA 错位；训练仍可能收敛，但颜色和行列噪声
+  关系已经被破坏。
+- 处理：转换器使用官方五款相机 CFA 表统一打包成 `[R, Gr, Gb, B]`，并按场景号
+  进行组级切分，防止内容泄漏。
+
+### `.gitignore` 的 `data/` 误伤 Python 包
+
+- 现象：本地 27 项测试通过，但 Git 索引中没有 `src/isp_ai_enhancement/data/`；
+  远端首次提交因此缺失 Context、Manifest 和数据集实现。
+- 根因：未锚定的 `data/` 会匹配仓库任意层级同名目录，不只匹配根目录训练数据。
+- 处理：改为 `/data/`、`/datasets/` 等根目录锚定规则，并通过 `git ls-files` 验证
+  数据源码确实进入索引。
+- 防复发：提交前同时执行测试、`git status`、`git check-ignore -v` 和干净检出验证；
+  本地通过不能替代对版本控制内容的核验。

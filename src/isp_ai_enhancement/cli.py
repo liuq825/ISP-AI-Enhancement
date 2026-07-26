@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
+from isp_ai_enhancement.data.sidd import import_sidd_dataset
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
 from isp_ai_enhancement.export import export_onnx
 from isp_ai_enhancement.models.factory import build_model_from_file
@@ -73,6 +74,20 @@ def _validate_manifest(args: argparse.Namespace) -> int:
     return 0
 
 
+def _import_sidd(args: argparse.Namespace) -> int:
+    print(
+        import_sidd_dataset(
+            args.source,
+            args.output,
+            nlf_csv=args.nlf_csv,
+            split_seed=args.split_seed,
+            train_ratio=args.train_ratio,
+            val_ratio=args.val_ratio,
+        )
+    )
+    return 0
+
+
 def _train(args: argparse.Namespace) -> int:
     print(train_from_config(args.config))
     return 0
@@ -119,6 +134,15 @@ def build_parser() -> argparse.ArgumentParser:
     manifest = commands.add_parser("validate-manifest")
     manifest.add_argument("--manifest", required=True)
     manifest.set_defaults(function=_validate_manifest)
+
+    sidd = commands.add_parser("import-sidd")
+    sidd.add_argument("--source", required=True)
+    sidd.add_argument("--output", required=True)
+    sidd.add_argument("--nlf-csv")
+    sidd.add_argument("--split-seed", type=int, default=20260726)
+    sidd.add_argument("--train-ratio", type=float, default=0.8)
+    sidd.add_argument("--val-ratio", type=float, default=0.1)
+    sidd.set_defaults(function=_import_sidd)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)
