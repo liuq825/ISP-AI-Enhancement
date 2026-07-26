@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import time
 import zlib
 from collections.abc import Callable
 from pathlib import Path
@@ -311,6 +312,8 @@ def fetch_sidd_raw_subset(
     max_member_bytes: int = 512 * 1024 * 1024,
     archive_factory: ArchiveFactory | None = None,
     progress_callback: ProgressCallback | None = None,
+    max_attempts: int = 4,
+    retry_backoff_seconds: float = 5.0,
 ) -> Path:
     """按版本化配置顺序获取多场景 RAW 配对，并生成集合级可审计收据。
 
@@ -320,6 +323,14 @@ def fetch_sidd_raw_subset(
     """
 
     config_path = Path(config)
+    if (
+        not isinstance(max_attempts, int)
+        or isinstance(max_attempts, bool)
+        or max_attempts <= 0
+    ):
+        raise ValueError("max_attempts 必须为正整数")
+    if retry_backoff_seconds < 0:
+        raise ValueError("retry_backoff_seconds 不能为负数")
     frame_indices, scenes = _validate_subset_spec(config_path)
     config_sha256, _config_crc32 = _sha256_and_crc32(config_path)
     held_out_names = {
@@ -337,16 +348,38 @@ def fetch_sidd_raw_subset(
         label = f"{scene['scene']} frames [{frame_label}]"
         if progress_callback is not None:
             progress_callback(f"[{scene_index}/{len(scenes)}] 开始获取 {label}")
-        receipt_paths = fetch_sidd_raw_frames(
-            scene_name=scene["scene"],
-            noisy_zip_url=scene["noisy_url"],
-            ground_truth_zip_url=scene["ground_truth_url"],
-            frame_indices=frame_indices,
-            output_dir=output,
-            held_out_scenes=held_out_scenes,
-            max_member_bytes=max_member_bytes,
-            archive_factory=archive_factory,
-        )
+        receipt_paths: list[Path] | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                receipt_paths = fetch_sidd_raw_frames(
+                    scene_name=scene["scene"],
+                    noisy_zip_url=scene["noisy_url"],
+                    ground_truth_zip_url=scene["ground_truth_url"],
+                    frame_indices=frame_indices,
+                    output_dir=output,
+                    held_out_scenes=held_out_scenes,
+                    max_member_bytes=max_member_bytes,
+                    archive_factory=archive_factory,
+                )
+                break
+            except ValueError:
+                # 身份、held-out、大小或 CRC 错误是确定性数据问题，重试不会修复，
+                # 必须立即失败以防把错配内容当作暂时网络异常。
+                raise
+            except Exception as error:
+                if attempt >= max_attempts:
+                    raise
+                delay = retry_backoff_seconds * attempt
+                if progress_callback is not None:
+                    progress_callback(
+                        f"[{scene_index}/{len(scenes)}] {type(error).__name__}: "
+                        f"{error}；{delay:g} 秒后进行第 {attempt + 1}/{max_attempts} 次尝试"
+                    )
+                # 退避只作用于可恢复的场景级异常，默认最长 15 秒，避免快速压测公共镜像。
+                if delay > 0:
+                    time.sleep(delay)
+        if receipt_paths is None:  # pragma: no cover - 循环穷尽时异常已在上方重新抛出
+            raise RuntimeError("SIDD 场景获取未返回收据")
         for frame_index, receipt_path in zip(
             frame_indices,
             receipt_paths,
@@ -369,6 +402,7 @@ def fetch_sidd_raw_subset(
         "config_sha256": config_sha256,
         "frame_indices": frame_indices,
         "pair_count": len(receipts),
+        "max_attempts": max_attempts,
         "scene_count": len(scenes),
         "pairs": receipts,
     }

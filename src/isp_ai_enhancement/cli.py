@@ -217,6 +217,8 @@ def _fetch_sidd_subset(args: argparse.Namespace) -> int:
             output_dir=args.output,
             held_out_scenes=args.held_out_scenes,
             max_member_bytes=args.max_member_bytes,
+            max_attempts=args.max_attempts,
+            retry_backoff_seconds=args.retry_backoff_seconds,
             # 进度写 stderr，stdout 只保留最终收据路径，便于脚本稳定解析。
             progress_callback=report_progress,
         )
@@ -407,6 +409,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--progress-file",
         help="可选 UTF-8 进度日志；每次启动先清空，适合监控长时间后台获取",
     )
+    sidd_subset.add_argument("--max-attempts", type=int, default=4)
+    sidd_subset.add_argument("--retry-backoff-seconds", type=float, default=5.0)
     sidd_subset.set_defaults(function=_fetch_sidd_subset)
 
     sidd_catalog = commands.add_parser("build-sidd-range-config")
