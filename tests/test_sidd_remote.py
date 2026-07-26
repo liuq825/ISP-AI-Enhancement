@@ -167,6 +167,20 @@ def test_fetch_sidd_subset_validates_all_rows_and_writes_collection_receipt(
     assert status["completed_scenes"] == 1
     assert status["completed_pairs"] == 1
     assert status["completion_percent"] == 100.0
+    opened.clear()
+
+    def offline_only_factory(_url: str) -> ZipFile:
+        """完整收据存在时不得再次打开远程归档。"""
+
+        raise AssertionError("已完成场景应只做本地 SHA256/CRC 复核")
+
+    fetch_sidd_raw_subset(
+        config=config,
+        output_dir=tmp_path / "output",
+        held_out_scenes=held_out,
+        archive_factory=offline_only_factory,
+    )
+    assert opened == []
     assert progress == [
         f"[1/1] 开始获取 {scene} frames [010]",
         f"[1/1] 已校验 {scene} frames [010]",

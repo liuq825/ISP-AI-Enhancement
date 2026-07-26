@@ -304,6 +304,55 @@ def _validate_subset_spec(config_path: Path) -> tuple[list[int], list[dict[str, 
     return frame_indices, scenes
 
 
+def _verified_local_scene_receipts(
+    *,
+    scene: dict[str, str],
+    frame_indices: list[int],
+    output: Path,
+) -> list[Path] | None:
+    """用已有收据离线复核完整场景；收据不齐时返回 ``None`` 继续远程恢复。"""
+
+    instance = scene["scene"].split("_", 1)[0]
+    scene_dir = output / scene["scene"]
+    receipt_paths = [
+        scene_dir / f"{instance}_RAW_{frame_index:03d}.receipt.json"
+        for frame_index in frame_indices
+    ]
+    if not all(path.is_file() for path in receipt_paths):
+        return None
+    for frame_index, receipt_path in zip(
+        frame_indices,
+        receipt_paths,
+        strict=True,
+    ):
+        try:
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if (
+                receipt.get("scene_name") != scene["scene"]
+                or receipt.get("frame_index") != frame_index
+                or receipt.get("noisy_zip_url") != scene["noisy_url"]
+                or receipt.get("ground_truth_zip_url") != scene["ground_truth_url"]
+            ):
+                raise ValueError("收据身份或来源 URL 与当前配置不一致")
+            frame = f"{frame_index:03d}"
+            for role, marker in (("noisy", "NOISY"), ("ground_truth", "GT")):
+                details = receipt[role]
+                mat_path = scene_dir / f"{instance}_{marker}_RAW_{frame}.MAT"
+                if (
+                    not mat_path.is_file()
+                    or mat_path.stat().st_size != int(details["member_bytes"])
+                ):
+                    raise ValueError(f"{role} MAT 缺失或大小不匹配")
+                sha256, crc32 = _sha256_and_crc32(mat_path)
+                if sha256 != str(details["sha256"]).casefold():
+                    raise ValueError(f"{role} MAT SHA256 不匹配")
+                if f"{crc32:08x}" != str(details["crc32"]).casefold():
+                    raise ValueError(f"{role} MAT CRC32 不匹配")
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+            raise ValueError(f"{receipt_path}: 已完成场景离线复核失败：{error}") from error
+    return receipt_paths
+
+
 def fetch_sidd_raw_subset(
     *,
     config: str | Path,
@@ -348,36 +397,47 @@ def fetch_sidd_raw_subset(
         label = f"{scene['scene']} frames [{frame_label}]"
         if progress_callback is not None:
             progress_callback(f"[{scene_index}/{len(scenes)}] 开始获取 {label}")
-        receipt_paths: list[Path] | None = None
-        for attempt in range(1, max_attempts + 1):
-            try:
-                receipt_paths = fetch_sidd_raw_frames(
-                    scene_name=scene["scene"],
-                    noisy_zip_url=scene["noisy_url"],
-                    ground_truth_zip_url=scene["ground_truth_url"],
-                    frame_indices=frame_indices,
-                    output_dir=output,
-                    held_out_scenes=held_out_scenes,
-                    max_member_bytes=max_member_bytes,
-                    archive_factory=archive_factory,
+        receipt_paths = _verified_local_scene_receipts(
+            scene=scene,
+            frame_indices=frame_indices,
+            output=output,
+        )
+        if receipt_paths is not None:
+            if progress_callback is not None:
+                progress_callback(
+                    f"[{scene_index}/{len(scenes)}] 本地 SHA256/CRC 复核通过 {label}"
                 )
-                break
-            except ValueError:
-                # 身份、held-out、大小或 CRC 错误是确定性数据问题，重试不会修复，
-                # 必须立即失败以防把错配内容当作暂时网络异常。
-                raise
-            except Exception as error:
-                if attempt >= max_attempts:
-                    raise
-                delay = retry_backoff_seconds * attempt
-                if progress_callback is not None:
-                    progress_callback(
-                        f"[{scene_index}/{len(scenes)}] {type(error).__name__}: "
-                        f"{error}；{delay:g} 秒后进行第 {attempt + 1}/{max_attempts} 次尝试"
+        else:
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    receipt_paths = fetch_sidd_raw_frames(
+                        scene_name=scene["scene"],
+                        noisy_zip_url=scene["noisy_url"],
+                        ground_truth_zip_url=scene["ground_truth_url"],
+                        frame_indices=frame_indices,
+                        output_dir=output,
+                        held_out_scenes=held_out_scenes,
+                        max_member_bytes=max_member_bytes,
+                        archive_factory=archive_factory,
                     )
-                # 退避只作用于可恢复的场景级异常，默认最长 15 秒，避免快速压测公共镜像。
-                if delay > 0:
-                    time.sleep(delay)
+                    break
+                except ValueError:
+                    # 身份、held-out、大小或 CRC 错误是确定性数据问题，重试不会修复，
+                    # 必须立即失败以防把错配内容当作暂时网络异常。
+                    raise
+                except Exception as error:
+                    if attempt >= max_attempts:
+                        raise
+                    delay = retry_backoff_seconds * attempt
+                    if progress_callback is not None:
+                        progress_callback(
+                            f"[{scene_index}/{len(scenes)}] {type(error).__name__}: "
+                            f"{error}；{delay:g} 秒后进行第 "
+                            f"{attempt + 1}/{max_attempts} 次尝试"
+                        )
+                    # 退避只作用于可恢复的场景级异常，默认最长 15 秒，避免快速压测公共镜像。
+                    if delay > 0:
+                        time.sleep(delay)
         if receipt_paths is None:  # pragma: no cover - 循环穷尽时异常已在上方重新抛出
             raise RuntimeError("SIDD 场景获取未返回收据")
         for frame_index, receipt_path in zip(
