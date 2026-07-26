@@ -15,6 +15,11 @@ from torch import Tensor, nn
 from isp_ai_enhancement.config import load_yaml
 from isp_ai_enhancement.models.factory import build_model_from_file
 from isp_ai_enhancement.onnx_audit import audit_onnx
+from isp_ai_enhancement.quantization.fake_quant import (
+    SymmetricFakeQuant,
+    prepare_qat,
+    set_observer_enabled,
+)
 
 _INPUT_CHANNEL_SEMANTICS = [
     "raw_r",
@@ -78,6 +83,7 @@ def export_onnx(
     checkpoint: str | Path,
     output: str | Path,
     export_config: str | Path | None = None,
+    qat_config: str | Path | None = None,
 ) -> Path:
     """导出静态 ONNX、验证 PyTorch/ORT 一致性并生成部署清单。
 
@@ -86,8 +92,45 @@ def export_onnx(
     """
 
     model = build_model_from_file(model_config)
+    qat_report = None
+    qat_config_path = Path(qat_config) if qat_config is not None else None
+    if qat_config_path is not None:
+        qat_settings = load_yaml(qat_config_path).get("qat")
+        if not isinstance(qat_settings, dict):
+            raise ValueError("qat_config must contain a 'qat' mapping")
+        activation_bits = int(qat_settings.get("activation_bits", 8))
+        weight_bits = int(qat_settings.get("weight_bits", 8))
+        if activation_bits != 8 or weight_bits != 8:
+            raise ValueError("ONNX Q/DQ export currently requires 8-bit activations and weights")
+        exclude_modules = qat_settings.get("exclude_modules", ("intro", "ending"))
+        if not isinstance(exclude_modules, (list, tuple)) or not all(
+            isinstance(value, str) for value in exclude_modules
+        ):
+            raise ValueError("QAT exclude_modules must be a list of module names")
+        # 必须先按训练时的相同规则重建 QAT 模块树，再 strict 加载观察器 buffer；
+        # 直接把 QAT checkpoint 加到普通 Conv2d 图会丢失量化尺度或键不匹配。
+        qat_report = prepare_qat(
+            model,
+            activation_bits=activation_bits,
+            weight_bits=weight_bits,
+            observer_momentum=float(qat_settings.get("observer_momentum", 0.95)),
+            exclude_modules=tuple(exclude_modules),
+        )
     model.load_state_dict(load_checkpoint_state(checkpoint), strict=True)
     model.eval()
+    if qat_report is not None:
+        uninitialized = [
+            name
+            for name, module in model.named_modules()
+            if isinstance(module, SymmetricFakeQuant)
+            and not bool(module.observer_initialized.item())
+        ]
+        if uninitialized:
+            raise ValueError(
+                "QAT checkpoint contains uninitialized observers: "
+                + ", ".join(uninitialized[:10])
+            )
+        set_observer_enabled(model, False)
     settings = load_yaml(export_config).get("export", {}) if export_config is not None else {}
     batch = int(settings.get("batch", 1))
     height = int(settings.get("height", 512))
@@ -171,6 +214,8 @@ def export_onnx(
             "export_config_sha256": (
                 sha256_file(export_config_path) if export_config_path else None
             ),
+            "qat_config": str(qat_config_path) if qat_config_path else None,
+            "qat_config_sha256": sha256_file(qat_config_path) if qat_config_path else None,
         },
         "input_shape": [batch, model.input_channels, height, width],
         "input_dtype": "float32-export; fp16-device-candidate",
@@ -194,6 +239,23 @@ def export_onnx(
             "max_relative_error": max_relative_error,
             "onnx_audit": onnx_audit,
         },
+        "quantization": (
+            {
+                "mode": "qat_qdq_int8",
+                "converted_convolutions": qat_report.converted_convolutions,
+                "excluded_convolutions": qat_report.excluded_convolutions,
+                "simulated_int8_weight_ratio": qat_report.simulated_int8_weight_ratio,
+                "quantize_linear_nodes": onnx_audit["operator_counts"].get(
+                    "QuantizeLinear", 0
+                ),
+                "dequantize_linear_nodes": onnx_audit["operator_counts"].get(
+                    "DequantizeLinear", 0
+                ),
+                "target_status": "requires exact HiAI CANN DDK QDQ conversion and profiler",
+            }
+            if qat_report is not None
+            else {"mode": "float"}
+        ),
         "deployment_status": "UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING",
     }
     manifest_path = output_path.with_suffix(".manifest.json")

@@ -14,6 +14,12 @@
 - 完整算子计数、高风险算子和动态 shape 子图审计；
 - `UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING` 部署状态。
 
+QAT 导出还记录 `source.qat_config(_sha256)` 与 `quantization`：训练图转换/排除卷积数、
+按权重元素模拟覆盖率，以及 ONNX 中 `QuantizeLinear/DequantizeLinear` 节点数。
+Q/DQ scale 来自已冻结观察器，导出前任何未初始化观察器都会失败。Q/DQ 节点存在只证明
+量化意图进入 ONNX，不证明目标 DDK 已生成 INT8 NPU 算子；最终仍以 OM 转换日志和
+按 MAC profiler 为准。
+
 导出先写临时 ONNX，只有 Checker、ORT 数值对照和结构审计全部通过才原子替换正式文件；
 manifest 同样采用临时文件替换。失败任务不得留下一个看似可交付的半截产物。
 

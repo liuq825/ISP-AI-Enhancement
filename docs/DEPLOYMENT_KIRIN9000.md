@@ -25,6 +25,10 @@ ONNX 支持和参数会变化；`deploy/hiai/invoke_converter.ps1` 要求产品�
 通道顺序、源文件哈希、ORT 对照和算子审计。其状态仍保持
 `UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING`，直到真机 Gate 完成。
 
+QAT checkpoint 通过 `--qat-config` 重建冻结观察器，并导出标准 ONNX
+`QuantizeLinear/DequantizeLinear`。禁止把自定义 `Round/Clip` 伪量化子图直接当作
+目标 INT8 模型；目标 DDK 必须读取/转换 Q/DQ，并在转换日志中给出每个节点的最终落点。
+
 ### B. MindSpore Lite（备用验证）
 
 用于验证宿主 API、Tile、回退和 Android/HarmonyOS 集成。它不是 OM 性能结论的

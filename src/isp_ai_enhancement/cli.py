@@ -204,6 +204,7 @@ def _export_onnx(args: argparse.Namespace) -> int:
             checkpoint=args.checkpoint,
             output=args.output,
             export_config=args.export_config,
+            qat_config=args.qat_config,
         )
     )
     return 0
@@ -323,6 +324,10 @@ def build_parser() -> argparse.ArgumentParser:
     onnx.add_argument("--checkpoint", required=True)
     onnx.add_argument("--output", required=True)
     onnx.add_argument("--export-config", default="configs/export_onnx.yaml")
+    onnx.add_argument(
+        "--qat-config",
+        help="QAT checkpoint 对应配置；提供后导出标准 INT8 Q/DQ 节点",
+    )
     onnx.set_defaults(function=_export_onnx)
 
     audit = commands.add_parser("audit-onnx")

@@ -77,6 +77,12 @@ qat_config: configs/qat.yaml
 这些覆盖率仍不是目标 NPU 的 INT8 计算占比。最终 95% 目标只能由准确 HiAI CANN DDK
 转换后的节点落点与 profiler 按计算量核验，不能用 Python 卷积层数代替。
 
+QAT checkpoint 的 per-output-channel 权重观察器在建图时即按卷积输出通道定形，
+因此断点恢复和导出可以使用 `strict=True`；不能等首批 forward 后才把 scale 从长度 1
+扩成输出通道数。导出时必须同时提供 `--qat-config configs/qat.yaml`，以训练时相同
+排除规则重建 QAT 图。当前 ONNX Q/DQ 路径只接受激活/权重均为 8 bit；其他训练模拟
+位宽会明确拒绝导出。
+
 PyTorch 官方参考：[AMP](https://docs.pytorch.org/docs/stable/amp)、
 [可复现性](https://docs.pytorch.org/docs/stable/notes/randomness.html)、
 [CosineAnnealingLR](https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html)。

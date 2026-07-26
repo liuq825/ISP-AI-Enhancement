@@ -77,10 +77,37 @@ class SymmetricFakeQuant(nn.Module):
                 )
         if not self.fake_quant_enabled:
             return value
-        if not bool(self.observer_initialized.item()):
+        # ONNX 导出入口已在 trace 前逐模块校验初始化状态；trace 内再次 ``item()``
+        # 只会产生“张量转 Python 常量”的误导警告，因此仅在普通 eager 路径检查。
+        if not torch.jit.is_tracing() and not bool(self.observer_initialized.item()):
             raise RuntimeError("fake quantization requires an initialized observer")
         quant_max = float((1 << (self.bits - 1)) - 1)
-        scale = self._reshape_scale(self.max_abs.clamp_min(1e-8) / quant_max, value)
+        scale_vector = self.max_abs.clamp_min(1e-8) / quant_max
+        if self.bits == 8:
+            # 使用 PyTorch 标准 fake-quant 算子，旧 ONNX 导出器会把它稳定映射为
+            # QuantizeLinear/DequantizeLinear；零点固定为 0，scale 仍沿用对称 127 档。
+            # quant_min 取标准 int8 的 -128 是 ONNX Q/DQ 的格式要求，训练样本的
+            # max_abs/127 scale 通常不会实际使用额外的 -128 档。
+            if self.per_channel:
+                zero_points = torch.zeros_like(scale_vector, dtype=torch.int32)
+                return torch.fake_quantize_per_channel_affine(
+                    value,
+                    scale_vector,
+                    zero_points,
+                    self.channel_axis,
+                    -128,
+                    127,
+                )
+            zero_point = torch.zeros((), dtype=torch.int32, device=scale_vector.device)
+            return torch.ops.aten.fake_quantize_per_tensor_affine.tensor_qparams(
+                value,
+                scale_vector.reshape(()),
+                zero_point,
+                -128,
+                127,
+            )
+        # 非 8 bit 仅保留后端无关训练模拟；当前部署 Q/DQ 导出会显式拒绝该位宽。
+        scale = self._reshape_scale(scale_vector, value)
         quantized = torch.round(value / scale).clamp(-quant_max, quant_max) * scale
         return value + (quantized - value).detach()
 
@@ -109,6 +136,11 @@ class QATConv2d(nn.Conv2d):
             channel_axis=0,
             momentum=observer_momentum,
         )
+        # per-output-channel scale 的结构长度由卷积 out_channels 唯一决定，必须在
+        # 建图时定形。若等首批 forward 才从 1 扩容，QAT checkpoint 重建时会因
+        # buffer shape 不同而无法 strict 加载，断点恢复和 ONNX 导出都会失败。
+        self.weight_fake_quant.max_abs.resize_(self.out_channels)
+        self.weight_fake_quant.max_abs.fill_(1.0)
 
     @classmethod
     def from_float(

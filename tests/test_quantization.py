@@ -53,3 +53,30 @@ def test_fake_quant_observer_does_not_update_during_evaluation() -> None:
     quantizer.eval()
     quantizer(torch.ones(1, 1, 2, 2))
     torch.testing.assert_close(quantizer.max_abs, torch.tensor([0.25]))
+
+
+def test_qat_weight_observer_shape_is_checkpoint_stable() -> None:
+    """权重观察器应在首批前按输出通道定形，保证 strict checkpoint 恢复。"""
+
+    source = NAFNetRaw(
+        width=4,
+        encoder_blocks=(1, 1, 1, 1),
+        middle_blocks=1,
+        decoder_blocks=(1, 1, 1, 1),
+    )
+    target = NAFNetRaw(
+        width=4,
+        encoder_blocks=(1, 1, 1, 1),
+        middle_blocks=1,
+        decoder_blocks=(1, 1, 1, 1),
+    )
+    prepare_qat(source)
+    prepare_qat(target)
+    source.train()
+    source(torch.randn(1, 16, 16, 16))
+
+    target.load_state_dict(source.state_dict(), strict=True)
+    source_scale = source.encoders[0][0].conv1.weight_fake_quant.max_abs
+    target_scale = target.encoders[0][0].conv1.weight_fake_quant.max_abs
+    assert source_scale.shape == (8,)
+    torch.testing.assert_close(target_scale, source_scale)

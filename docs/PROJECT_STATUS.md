@@ -10,11 +10,11 @@
 
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
-| M0 工程烟雾测试 | 已完成 | 48 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
+| M0 工程烟雾测试 | 已完成 | 50 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
 | M1 数据接入 | 进行中 | 完成 SIDD 场景/验证块导入器；官方验证 MAT 正在后台续传 |
 | P0 Student FP32 | 训练器就绪 | AMP/恢复及逐 Sensor/ISO PSNR+SSIM 已实现；缺 RAW 完整落盘与 GPU |
 | P1/P2/P3 物理剪枝 | 产物链路已实现 | 双后端逐元素对照、目标 YAML 重建与来源哈希通过；仍需 P0 权重/敏感度 |
-| QAT | 训练链路已接入 | 观察器热身/冻结与 checkpoint 已验证；最终规则仍须目标 DDK 生成 |
+| QAT | 训练/导出链路已接入 | scale 严格恢复与标准 Q/DQ ONNX 已测；最终规则仍须目标 DDK 生成 |
 | ONNX | CI 实际导出通过 | 原子产物、ORT 对照、raw16-v1 清单和算子审计已测；仍需真实 P0 权重 |
 | OM | 阻塞于外部环境 | 缺目标 DDK、转换器版本、固件和可访问测试设备 |
 | ISP 集成与六项放行 | 阻塞于产品环境 | 缺厂商 ISP 接口、RAW、融合 mask、热态 Profiler |

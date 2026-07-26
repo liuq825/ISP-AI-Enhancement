@@ -248,6 +248,23 @@
   图，按 global step 冻结观察器，并把量化 buffer 保存进 v2 checkpoint。
 - 边界：层数/权重元素覆盖率只用于代码审计，不能替代目标 OM 的按计算量 INT8 落点。
 
+### QAT per-channel scale 无法 strict 恢复
+
+- 现象：权重观察器建图时 `max_abs` 长度为 1，首批 forward 后才变成
+  `out_channels`；重建图加载 checkpoint 时出现数十个 shape mismatch。
+- 影响：不只 QAT ONNX 导出失败，同一问题也会破坏 QAT 训练断点恢复。
+- 处理：`QATConv2d` 创建时即按输出通道定形权重 scale；测试在首批后把状态严格加载
+  到一个从未 forward 的新 QAT 模型。
+
+### 自定义 Round/Clip 不等于可部署 INT8 图
+
+- 现象：原伪量化公式若直接 trace，只会产生 `Round/Clip/Mul` 浮点子图，转换器无法
+  稳定识别量化意图。
+- 处理：8 bit 路径改用 PyTorch 标准 fake-quant 算子；ONNX 实际审计必须出现
+  `QuantizeLinear/DequantizeLinear`，且 ORT 与 PyTorch 数值对照通过。
+- 边界：Q/DQ 仍只是交付给目标 DDK 的量化意图；INT8 NPU 落点只能由 OM profiler
+  证明。
+
 ## 2026-07-26：剪枝产物工作流
 
 ### 上层 checkpoint 工作流的 inference_mode 会让 DepGraph 失败

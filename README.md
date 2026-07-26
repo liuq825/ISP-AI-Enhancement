@@ -64,6 +64,12 @@ py -m venv .venv
   --config configs/model_student.yaml `
   --checkpoint checkpoints/student.pt `
   --output artifacts/student_512.onnx
+# QAT checkpoint 必须同时提供训练时的 QAT 配置，导出标准 INT8 Q/DQ 节点：
+.\.venv\Scripts\isp-ai.exe export-onnx `
+  --config configs/model_student_pruned15.yaml `
+  --checkpoint runs/student_pruned15_qat/best.pt `
+  --qat-config configs/qat.yaml `
+  --output artifacts/student_pruned15_qat_512.onnx
 # 真机证据齐全后执行三态商用级放行 Gate：
 .\.venv\Scripts\isp-ai.exe check-release `
   --evidence evidence/kirin9000_release.yaml `
