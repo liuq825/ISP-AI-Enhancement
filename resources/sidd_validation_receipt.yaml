@@ -1,0 +1,65 @@
+# SIDD RAW 验证块的可审计获取/转换收据；数据本体受 .gitignore 管理，不进入代码仓。
+receipt_version: 1
+dataset_id: sidd
+purpose: public_raw_denoising_baseline
+retrieved_at: "2026-07-27T00:53:00+08:00"
+source_page: https://abdokamel.github.io/sidd/
+scene_source_page: https://abdokamel.github.io/sidd/dataset.html
+license_statement: The dataset and associated code repositories are under the MIT License.
+retrieval_method: official linked files with HTTP range resume
+
+source_files:
+  noisy:
+    filename: ValidationNoisyBlocksRaw.mat
+    bytes: 257564539
+    sha256: 25347a0d01e28efd730fd66162c2b96536cd4549f79e917fde60b695838fa448
+    matlab_variable: ValidationNoisyBlocksRaw
+    shape: [40, 32, 256, 256]
+    dtype: single
+  ground_truth:
+    filename: ValidationGtBlocksRaw.mat
+    bytes: 308401493
+    sha256: 3ea11bc05ae89883f0a2cd49948961f042fa9e4861f29b3a81e0eb9bf1176d49
+    matlab_variable: ValidationGtBlocksRaw
+    shape: [40, 32, 256, 256]
+    dtype: single
+
+companion_evidence:
+  scene_order_sha256: 341f577be01162f04328ff6a938855d3bc9afe1305f1fa9ce74986d41fdc17ef
+  nlf_csv_sha256: e48a235ae008bf6076402633df0dd1dc1fa3b6afce1ee0558a05ed358593d6b9
+  bayer_csv_sha256: baad7b182bcc6865b68c37bd83b217a977a979307b2397bbb2fe003aaeab90ee
+
+conversion:
+  command: isp-ai import-sidd-blocks
+  channel_order: [R, Gr, Gb, B]
+  split: test
+  scene_instances: 40
+  blocks_per_instance: 32
+  records: 1280
+  npz_files: 2560
+  npz_total_bytes: 382676098
+  manifest_sha256: fff0aa40d1947bc20d93b81e40bc008085dc255682b9c80b5c0b39aa40c776e2
+  sensor_counts:
+    sidd_G4: 256
+    sidd_GP: 256
+    sidd_IP: 256
+    sidd_N6: 256
+    sidd_S6: 256
+  iso_bucket_counts:
+    medium: 512
+    high: 608
+    extreme: 160
+
+noisy_baseline:
+  # 该报告仅衡量未增强 noisy 输入与 GT 的距离，不是任何模型的成绩。
+  report_filename: sidd_validation_noisy_baseline.json
+  report_sha256: 77db13dc4111faa5fdb336349060f003aeaf3b2461b79c0a99ea04f1e89df11e
+  samples: 1280
+  psnr_db: 37.18650369346142
+  packed_raw_ssim: 0.7309489089122507
+  elapsed_seconds_cpu: 53.73337310005445
+
+limitations:
+  - packed RAW SSIM 是内部逐通道回归指标，不宣称与官方 Bayer mosaic SSIM 逐位相同
+  - 公开 SIDD 域不能替代目标 Sensor、融合模式、固件和温度覆盖
+  - 数据与基线报告仅保存在本地，仓库只提交哈希和统计收据

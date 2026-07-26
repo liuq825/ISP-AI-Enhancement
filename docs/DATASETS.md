@@ -47,6 +47,10 @@ CLI 默认读取 `resources/sidd_validation_scenes.yaml` 并执行 held-out 硬�
 packed RAW，并记录两个源 MAT 及场景顺序文件的 SHA256。转换时 noisy 与 GT 分开
 加载，避免同时常驻约 670 MB 未压缩数组。
 
+本次实际下载、SHA256、转换计数和 noisy baseline 已固化在
+`resources/sidd_validation_receipt.yaml` 与 `docs/SIDD_VALIDATION_BASELINE.md`。
+数据本体和转换 NPZ 仅本地保存，不提交 Git。
+
 ## 为什么公开集不能替代产品数据
 
 公开集无法覆盖目标设备的 CFA、黑电平、模拟/数字增益链、行列噪声、温度漂移、

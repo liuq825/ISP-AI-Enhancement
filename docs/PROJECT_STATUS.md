@@ -11,7 +11,8 @@
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
 | M0 工程烟雾测试 | 已完成 | 50 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
-| M1 数据接入 | 进行中 | 完成 SIDD 场景/验证块导入器；官方验证 MAT 正在后台续传 |
+| M1 公开验证域 | 已完成 | 官方 SIDD 两个 MAT 校验、1,280 块导入及真实 noisy baseline |
+| M1 训练数据 | 进行中 | SIDD Full 第一镜像不可达；仍缺公开训练集完整落盘与目标 Sensor RAW |
 | P0 Student FP32 | 训练器就绪 | AMP/恢复及逐 Sensor/ISO PSNR+SSIM 已实现；缺 RAW 完整落盘与 GPU |
 | P1/P2/P3 物理剪枝 | 产物链路已实现 | 双后端逐元素对照、目标 YAML 重建与来源哈希通过；仍需 P0 权重/敏感度 |
 | QAT | 训练/导出链路已接入 | scale 严格恢复与标准 Q/DQ ONNX 已测；最终规则仍须目标 DDK 生成 |
@@ -24,6 +25,6 @@
 
 1. 获得产品 Sensor 清单、RAW dump 权限、黑白电平/CFA/LSC 元数据和融合 mask。
 2. 锁定麒麟 9000 目标机型、系统版本、HiAI CANN DDK 与 NPU 算子清单。
-3. 导入公开 RAW 研究集；有条件时补充目标 Sensor 数据并冻结 Golden Set。
+3. 导入公开 RAW 训练集；有条件时补充目标 Sensor 数据并冻结 Golden Set。
 4. 训练 Teacher/P0，并在每个 Sensor×模式×ISO 桶建立独立基线。
 5. 用真实权重执行 P1/P2/P3、QAT、OM 和热态实机 Gate。

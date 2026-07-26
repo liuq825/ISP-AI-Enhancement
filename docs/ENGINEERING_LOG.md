@@ -152,6 +152,22 @@
 - 防复发：后台启动后立即读取实际进程命令行，并同时检查目标文件与 stdout 大小；
   不能只依赖 curl 进度日志判断落盘位置。
 
+### PowerShell 同时存在 Path/PATH 时 Start-Process 拒绝启动
+
+- 现象：SIDD 转换后台任务两次在启动前失败，报环境字典已存在 `Path`/`PATH` 重复键；
+  `-UseNewEnvironment` 在当前宿主仍无法规避。
+- 处理：使用 `System.Diagnostics.ProcessStartInfo`、`UseShellExecute=true` 和隐藏窗口
+  启动同一个虚拟环境解释器；所有参数改为不含空格的工作目录相对路径。
+- 防复发：启动后同时监控 venv launcher 与实际 Python 子进程，并以输出文件精确计数
+  判断完成，不能只看父 PID。
+
+### 下载完成不等于 MAT 可用
+
+- 处理：分别核验 HTTP 预期长度、SHA256、唯一 MATLAB 变量、`40×32×256×256`
+  shape 和 `single` dtype；转换后再验证 1,280 条 Manifest 与 2,560 个 NPZ。
+- 结果：noisy 输入基线为 37.1865 dB / 0.730949 packed RAW SSIM；五个 Sensor 分桶
+  跨度很大，后续模型放行禁止只看总体均值。
+
 ### 验证块 MAT 没有保存相机 CFA
 
 - 现象：两个官方 RAW 验证文件只包含 `40×32×256×256` 浮点数组，没有相机代号。
