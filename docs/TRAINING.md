@@ -15,6 +15,10 @@
 只说明“可以使用”，不能证明六对样本足以收敛；`configs/train_student_public_baseline.yaml`
 因此会主动拒绝当前选择性子集，直到公开训练集扩充到声明下限。
 
+对于离线 patch 数据，`min_*_records` 约束实际优化样本数，`min_*_source_pairs`
+另行统计 Manifest 元数据中的唯一 `source_pair_id`。两者必须同时满足：从一张图生成
+数万个重复 patch 可以提高 step 数，却不会增加相机、场景或噪声实现的独立性。
+
 ## 混合精度
 
 `amp: true` 只允许 CUDA float16 训练，使用 `torch.autocast` 与

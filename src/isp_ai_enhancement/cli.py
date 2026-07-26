@@ -157,6 +157,9 @@ def _import_sidd(args: argparse.Namespace) -> int:
             split_seed=args.split_seed,
             train_ratio=args.train_ratio,
             val_ratio=args.val_ratio,
+            patch_size=args.patch_size,
+            patches_per_pair=args.patches_per_pair,
+            patch_seed=args.patch_seed,
         )
     )
     return 0
@@ -355,6 +358,13 @@ def build_parser() -> argparse.ArgumentParser:
     sidd.add_argument("--split-seed", type=int, default=20260726)
     sidd.add_argument("--train-ratio", type=float, default=0.8)
     sidd.add_argument("--val-ratio", type=float, default=0.1)
+    sidd.add_argument(
+        "--patch-size",
+        type=int,
+        help="可选 packed RAW patch 边长；必须为 16 的倍数",
+    )
+    sidd.add_argument("--patches-per-pair", type=int, default=1)
+    sidd.add_argument("--patch-seed", type=int, default=20260727)
     sidd.set_defaults(function=_import_sidd)
 
     sidd_blocks = commands.add_parser("import-sidd-blocks")

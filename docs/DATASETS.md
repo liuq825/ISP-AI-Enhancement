@@ -72,6 +72,12 @@ SIDD Medium 相同但帧选择由本项目显式固定。配置保存两份来�
 `--progress-file outputs/sidd_medium_download.log` 记录已完成场景。预计 RAW 本体
 约 20 GB，仍由 `.gitignore` 隔离。
 
+训练导入使用 `--patch-size 256 --patches-per-pair 16`。每个 noisy/GT 源配对只加载
+和 CFA 打包一次，再按 `patch_seed` 生成 16 个不重复 packed RAW 坐标，避免训练时
+每取一个小 crop 都重新解压约 50 MB 的全分辨率 NPZ。Manifest 同时记录
+`source_pair_id`、坐标、patch 大小/seed 和两份源 SHA256。数据门禁分别统计 patch
+记录与唯一源配对；重复派生更多 patch 不能伪装成更多独立拍摄。
+
 ### SIDD RAW 验证块
 
 官方 `ValidationNoisyBlocksRaw.mat` 与 `ValidationGtBlocksRaw.mat` 的变量形状均为

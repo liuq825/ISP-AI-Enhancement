@@ -56,10 +56,16 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
   --config resources/sidd_medium_range.yaml `
   --output datasets/SIDD_Medium_Range `
   --progress-file outputs/sidd_medium_download.log
+.\.venv\Scripts\isp-ai.exe import-sidd `
+  --source datasets/SIDD_Medium_Range `
+  --output data/sidd_training `
+  --nlf-csv datasets/SIDD_Blocks/noise_level_functions.csv `
+  --patch-size 256 --patches-per-pair 16 --patch-seed 20260727
 ```
 
 生成器会核对 160 个训练场景、40 个 held-out 场景和 `160×5` 个官方 Mirror 2 URL；
 获取器对同一场景只打开一次 noisy ZIP 和一次 GT ZIP，并可安全断点重跑。
+patch 导入保留独立 `source_pair_id`，正式训练门禁同时检查源配对数和派生 patch 数。
 
 导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
 

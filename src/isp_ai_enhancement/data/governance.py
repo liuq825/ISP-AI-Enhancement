@@ -166,6 +166,32 @@ def validate_data_requirements(
         if len(groups) < minimum:
             errors.append(f"{field_name}: required >= {minimum}, found {len(groups)}")
 
+    for field_name, split in (
+        ("min_train_source_pairs", "train"),
+        ("min_val_source_pairs", "val"),
+    ):
+        minimum = requirements.get(field_name, 0)
+        if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum < 0:
+            errors.append(f"data_requirements.{field_name} must be a non-negative integer")
+            continue
+        split_items = [item for item in items if item.split == split]
+        source_pairs = {
+            str(item.metadata.get("source_pair_id", "")).strip()
+            for item in split_items
+            if str(item.metadata.get("source_pair_id", "")).strip()
+        }
+        missing_ids = sum(
+            1
+            for item in split_items
+            if not str(item.metadata.get("source_pair_id", "")).strip()
+        )
+        if minimum > 0 and missing_ids:
+            errors.append(
+                f"{field_name}: {missing_ids} {split} records lack metadata.source_pair_id"
+            )
+        if len(source_pairs) < minimum:
+            errors.append(f"{field_name}: required >= {minimum}, found {len(source_pairs)}")
+
     train_items = [item for item in items if item.split == "train"]
     coverage_fields = (
         ("required_train_sensors", {item.sensor_id for item in train_items}),

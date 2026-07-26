@@ -10,11 +10,13 @@ data_policy:
   purpose: commercial_grade
   catalog: resources/datasets.yaml
 data_requirements:
-  # 官方 SIDD Medium 为 160 个训练实例各两对；完整全分辨率图会在每轮随机采样 crop，
-  # 因而不能把 crop 数误写成源配对数门槛。
-  min_train_records: 250
-  # 默认物理场景哈希下 scene_id=010 只有约 6 对，门槛不应高于可实现上限。
-  min_val_records: 4
+  # 每个源配对固定抽取 16 个训练 patch；记录数和独立源配对数必须分别达标。
+  # 当前稳定物理场景切分得到 206 train 源对，即 3,296 个固定 patch。
+  min_train_records: 3200
+  min_val_records: 64
+  min_train_source_pairs: 200
+  # 默认物理场景哈希下 scene_id=010 约有 6 个源配对。
+  min_val_source_pairs: 4
   min_train_scene_groups: 6
   min_val_scene_groups: 1
   required_train_sensors: [sidd_GP, sidd_IP, sidd_S6, sidd_N6, sidd_G4]

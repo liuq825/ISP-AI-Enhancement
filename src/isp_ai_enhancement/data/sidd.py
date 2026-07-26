@@ -335,6 +335,42 @@ def _iso_bucket(iso: int) -> str:
     return "extreme"
 
 
+def _patch_coordinates(
+    *,
+    height: int,
+    width: int,
+    patch_size: int,
+    patch_count: int,
+    seed_token: str,
+) -> list[tuple[int, int]]:
+    """从 packed RAW 平面确定性抽取不重复 patch 左上角坐标。"""
+
+    if patch_size <= 0 or patch_size % 16:
+        raise ValueError("patch_size 必须为 16 的正整数倍")
+    if patch_count <= 0:
+        raise ValueError("patches_per_pair 必须为正整数")
+    if height < patch_size or width < patch_size:
+        raise ValueError(
+            f"packed RAW {height}×{width} 小于 patch_size={patch_size}"
+        )
+    possible = (height - patch_size + 1) * (width - patch_size + 1)
+    if patch_count > possible:
+        raise ValueError(f"patches_per_pair={patch_count} 超过可用位置 {possible}")
+    seed = int.from_bytes(hashlib.sha256(seed_token.encode()).digest()[:8], "big")
+    generator = np.random.default_rng(seed)
+    coordinates: list[tuple[int, int]] = []
+    seen: set[tuple[int, int]] = set()
+    while len(coordinates) < patch_count:
+        coordinate = (
+            int(generator.integers(0, height - patch_size + 1)),
+            int(generator.integers(0, width - patch_size + 1)),
+        )
+        if coordinate not in seen:
+            seen.add(coordinate)
+            coordinates.append(coordinate)
+    return coordinates
+
+
 def import_sidd_dataset(
     source_dir: str | Path,
     output_dir: str | Path,
@@ -344,15 +380,22 @@ def import_sidd_dataset(
     split_seed: int = 20260726,
     train_ratio: float = 0.8,
     val_ratio: float = 0.1,
+    patch_size: int | None = None,
+    patches_per_pair: int = 1,
+    patch_seed: int = 20260727,
 ) -> Path:
     """把解压后的官方 SIDD RAW 树转换为项目统一的 packed RAW 数据集。
 
     每一对源文件都会记录 SHA256；分组键使用场景 ID，确保同一场景的多个
     噪声帧不会被拆到训练和测试集合。若提供 ``held_out_scenes``，任何官方
     benchmark 场景一旦出现在训练源目录中都会被硬拒绝。输出 NPZ 的通道顺序
-    恒为 ``[R, Gr, Gb, B]``，与手机原始 CFA 类型无关。
+    恒为 ``[R, Gr, Gb, B]``，与手机原始 CFA 类型无关。提供 ``patch_size`` 时，
+    每个源配对按固定 seed 生成不重复 packed RAW patch，并保留 ``source_pair_id``，
+    供数据充分性门禁区分独立拍摄与派生裁剪。
     """
 
+    if patch_size is None and patches_per_pair != 1:
+        raise ValueError("未设置 patch_size 时 patches_per_pair 必须为 1")
     source = Path(source_dir)
     output = Path(output_dir)
     nlf_values = load_sidd_nlf(nlf_csv) if nlf_csv is not None else {}
@@ -405,39 +448,79 @@ def import_sidd_dataset(
                 )
             noisy = canonical_pack_bayer(torch.from_numpy(noisy_mosaic), cfa).numpy()
             target = canonical_pack_bayer(torch.from_numpy(target_mosaic), cfa).numpy()
-            sample_id = f"sidd_{scene.instance_id}_{pair_index:03d}"
-            converted_input = sample_dir / f"{sample_id}_input.npz"
-            converted_target = sample_dir / f"{sample_id}_target.npz"
-            _save_raw_npz(converted_input, noisy)
-            _save_raw_npz(converted_target, target)
-            records.append(
-                ManifestRecord(
-                    sample_id=sample_id,
-                    dataset_id="sidd",
-                    input_path=converted_input.relative_to(output).as_posix(),
-                    target_path=converted_target.relative_to(output).as_posix(),
-                    split=split,
-                    sensor_id=f"sidd_{scene.camera_id}",
-                    mode="single",
-                    session_id="sidd",
-                    scene_id=scene.scene_id,
-                    iso_bucket=_iso_bucket(scene.iso),
-                    metadata={
-                        "noise_sigma": _noise_sigma(nlf),
-                        "exposure_ratio": 1.0,
-                        "wb_rg": 1.0,
-                        "wb_bg": 1.0,
-                        "cfa_pattern": cfa,
-                        "iso": scene.iso,
-                        "shutter_denominator": scene.shutter_denominator,
-                        "cct": scene.cct,
-                        "illuminant_brightness": scene.brightness,
-                        "nlf": list(nlf) if nlf is not None else None,
-                        "source_input_sha256": _sha256(noisy_path),
-                        "source_target_sha256": _sha256(target_path),
-                    },
+            source_pair_id = f"sidd_{scene.instance_id}_{pair_index:03d}"
+            if patch_size is None:
+                patch_specs: list[tuple[int | None, int, int]] = [(None, 0, 0)]
+            else:
+                coordinates = _patch_coordinates(
+                    height=int(noisy.shape[-2]),
+                    width=int(noisy.shape[-1]),
+                    patch_size=patch_size,
+                    patch_count=patches_per_pair,
+                    seed_token=(
+                        f"{patch_seed}:{scene_dir.name}:{noisy_path.name}:"
+                        f"{target_path.name}"
+                    ),
                 )
-            )
+                patch_specs = [
+                    (patch_index, top, left)
+                    for patch_index, (top, left) in enumerate(coordinates, start=1)
+                ]
+            source_input_sha256 = _sha256(noisy_path)
+            source_target_sha256 = _sha256(target_path)
+            for patch_index, top, left in patch_specs:
+                if patch_index is None:
+                    sample_id = source_pair_id
+                    sample_input = noisy
+                    sample_target = target
+                else:
+                    sample_id = f"{source_pair_id}_p{patch_index:03d}"
+                    sample_input = noisy[:, top : top + patch_size, left : left + patch_size]
+                    sample_target = target[:, top : top + patch_size, left : left + patch_size]
+                converted_input = sample_dir / f"{sample_id}_input.npz"
+                converted_target = sample_dir / f"{sample_id}_target.npz"
+                _save_raw_npz(converted_input, sample_input)
+                _save_raw_npz(converted_target, sample_target)
+                metadata: dict[str, object] = {
+                    "noise_sigma": _noise_sigma(nlf),
+                    "exposure_ratio": 1.0,
+                    "wb_rg": 1.0,
+                    "wb_bg": 1.0,
+                    "cfa_pattern": cfa,
+                    "iso": scene.iso,
+                    "shutter_denominator": scene.shutter_denominator,
+                    "cct": scene.cct,
+                    "illuminant_brightness": scene.brightness,
+                    "nlf": list(nlf) if nlf is not None else None,
+                    "source_pair_id": source_pair_id,
+                    "source_input_sha256": source_input_sha256,
+                    "source_target_sha256": source_target_sha256,
+                }
+                if patch_index is not None:
+                    metadata.update(
+                        {
+                            "patch_index": patch_index,
+                            "patch_top": top,
+                            "patch_left": left,
+                            "patch_size": patch_size,
+                            "patch_seed": patch_seed,
+                        }
+                    )
+                records.append(
+                    ManifestRecord(
+                        sample_id=sample_id,
+                        dataset_id="sidd",
+                        input_path=converted_input.relative_to(output).as_posix(),
+                        target_path=converted_target.relative_to(output).as_posix(),
+                        split=split,
+                        sensor_id=f"sidd_{scene.camera_id}",
+                        mode="single",
+                        session_id="sidd",
+                        scene_id=scene.scene_id,
+                        iso_bucket=_iso_bucket(scene.iso),
+                        metadata=metadata,
+                    )
+                )
     manifest_path = output / "manifest.jsonl"
     write_manifest(records, manifest_path)
     return manifest_path

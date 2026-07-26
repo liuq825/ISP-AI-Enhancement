@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from isp_ai_enhancement.config import load_yaml
+from isp_ai_enhancement.data.sidd import _split_for_scene
 from isp_ai_enhancement.data.sidd_catalog import build_sidd_range_config
 
 
@@ -83,3 +85,42 @@ def test_build_sidd_range_config_rejects_shifted_or_incomplete_url_list(
             expected_training_scenes=2,
             fetcher=fetcher,
         )
+
+
+def test_versioned_medium_config_and_training_thresholds_are_achievable() -> None:
+    """仓库 320 对配置应完整覆盖域，且正式门槛不得高于稳定切分产量。"""
+
+    acquisition = load_yaml("resources/sidd_medium_range.yaml")
+    scenes = acquisition["scenes"]
+    assert len(scenes) == 160
+    assert acquisition["held_out_scene_count"] == 40
+    assert acquisition["frame_indices"] == [10, 20]
+    assert {row["scene"].split("_")[1] for row in scenes} == {
+        f"{value:03d}" for value in range(1, 11)
+    }
+    assert {row["scene"].split("_")[2] for row in scenes} == {
+        "G4",
+        "GP",
+        "IP",
+        "N6",
+        "S6",
+    }
+    source_pairs = {"train": 0, "val": 0, "test": 0}
+    for row in scenes:
+        scene_id = row["scene"].split("_")[1]
+        split = _split_for_scene(
+            scene_id,
+            seed=20260726,
+            train_ratio=0.8,
+            val_ratio=0.1,
+        )
+        source_pairs[split] += len(acquisition["frame_indices"])
+    assert source_pairs == {"train": 206, "val": 6, "test": 108}
+
+    requirements = load_yaml("configs/train_student_public_baseline.yaml")[
+        "data_requirements"
+    ]
+    assert source_pairs["train"] >= requirements["min_train_source_pairs"]
+    assert source_pairs["val"] >= requirements["min_val_source_pairs"]
+    assert source_pairs["train"] * 16 >= requirements["min_train_records"]
+    assert source_pairs["val"] * 16 >= requirements["min_val_records"]

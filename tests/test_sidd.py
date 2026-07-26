@@ -18,12 +18,15 @@ from isp_ai_enhancement.data.sidd import (
 )
 
 
-def _create_scene(root: Path, name: str) -> Path:
+def _create_scene(root: Path, name: str, *, mosaic_size: int = 8) -> Path:
     """生成符合 SIDD 命名规则的最小 NumPy 测试场景。"""
 
     scene = root / name
     scene.mkdir(parents=True)
-    mosaic = np.arange(64, dtype=np.float32).reshape(8, 8) / 64.0
+    mosaic = np.arange(mosaic_size**2, dtype=np.float32).reshape(
+        mosaic_size, mosaic_size
+    )
+    mosaic /= float(mosaic_size**2)
     np.save(scene / f"{name[:4]}_NOISY_RAW_001.npy", mosaic)
     np.save(scene / f"{name[:4]}_GT_RAW_001.npy", np.clip(mosaic + 0.01, 0, 1))
     return scene
@@ -95,6 +98,48 @@ def test_import_sidd_rejects_official_held_out_scene(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="held-out benchmark"):
         import_sidd_dataset(source, output, held_out_scenes=scene_order)
     assert not output.exists()
+
+
+def test_import_sidd_deterministically_extracts_patches_with_source_identity(
+    tmp_path: Path,
+) -> None:
+    """patch 导入应可复现坐标，并保留独立源配对身份供充分性门禁使用。"""
+
+    source = tmp_path / "source"
+    name = "0052_002_S6_01600_01000_5500_N"
+    _create_scene(source, name, mosaic_size=64)
+    first_manifest = import_sidd_dataset(
+        source,
+        tmp_path / "first",
+        patch_size=16,
+        patches_per_pair=3,
+        patch_seed=123,
+    )
+    second_manifest = import_sidd_dataset(
+        source,
+        tmp_path / "second",
+        patch_size=16,
+        patches_per_pair=3,
+        patch_seed=123,
+    )
+    first = read_manifest(first_manifest)
+    second = read_manifest(second_manifest)
+    assert len(first) == len(second) == 3
+    assert [item.sample_id for item in first] == [
+        "sidd_0052_001_p001",
+        "sidd_0052_001_p002",
+        "sidd_0052_001_p003",
+    ]
+    assert {item.metadata["source_pair_id"] for item in first} == {"sidd_0052_001"}
+    coordinates = [
+        (item.metadata["patch_top"], item.metadata["patch_left"]) for item in first
+    ]
+    assert len(set(coordinates)) == 3
+    assert coordinates == [
+        (item.metadata["patch_top"], item.metadata["patch_left"]) for item in second
+    ]
+    with np.load(first_manifest.parent / first[0].input_path) as archive:
+        assert archive["raw"].shape == (4, 16, 16)
 
 
 def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:

@@ -13,7 +13,11 @@ from isp_ai_enhancement.data.governance import (
 from isp_ai_enhancement.data.manifest import ManifestRecord
 
 
-def _record(dataset_id: str, sensor_id: str = "sensor") -> ManifestRecord:
+def _record(
+    dataset_id: str,
+    sensor_id: str = "sensor",
+    source_pair_id: str | None = None,
+) -> ManifestRecord:
     """构造只包含治理测试所需字段的最小清单记录。"""
 
     return ManifestRecord(
@@ -27,7 +31,11 @@ def _record(dataset_id: str, sensor_id: str = "sensor") -> ManifestRecord:
         session_id="session",
         scene_id="scene",
         iso_bucket="low",
-        metadata={},
+        metadata=(
+            {"source_pair_id": source_pair_id}
+            if source_pair_id is not None
+            else {}
+        ),
     )
 
 
@@ -169,6 +177,8 @@ def test_data_requirements_reject_tiny_or_uncovered_training_set() -> None:
             "min_val_records": 1,
             "min_train_scene_groups": 2,
             "min_val_scene_groups": 1,
+            "min_train_source_pairs": 2,
+            "min_val_source_pairs": 1,
             "required_train_sensors": ["sensor_a", "sensor_b"],
             "required_train_iso_buckets": ["low", "extreme"],
             "required_train_modes": ["single", "mfnr"],
@@ -178,6 +188,8 @@ def test_data_requirements_reject_tiny_or_uncovered_training_set() -> None:
     assert any("min_val_records" in error for error in errors)
     assert any("min_train_scene_groups" in error for error in errors)
     assert any("min_val_scene_groups" in error for error in errors)
+    assert any("min_train_source_pairs" in error for error in errors)
+    assert any("min_val_source_pairs" in error for error in errors)
     assert any("sensor_b" in error for error in errors)
     assert any("extreme" in error for error in errors)
     assert any("mfnr" in error for error in errors)
@@ -186,13 +198,14 @@ def test_data_requirements_reject_tiny_or_uncovered_training_set() -> None:
 def test_data_requirements_accept_declared_coverage() -> None:
     """满足样本、场景、Sensor、ISO 与模式下限时不应产生错误。"""
 
-    train = _record("target", sensor_id="sensor_a")
+    train = _record("target", sensor_id="sensor_a", source_pair_id="pair_a")
     validation = ManifestRecord(
         **{
             **train.as_dict(),
             "sample_id": "validation_sample",
             "split": "val",
             "scene_id": "validation_scene",
+            "metadata": {"source_pair_id": "pair_b"},
         }
     )
     assert (
@@ -203,6 +216,8 @@ def test_data_requirements_accept_declared_coverage() -> None:
                 "min_val_records": 1,
                 "min_train_scene_groups": 1,
                 "min_val_scene_groups": 1,
+                "min_train_source_pairs": 1,
+                "min_val_source_pairs": 1,
                 "required_train_sensors": ["sensor_a"],
                 "required_train_iso_buckets": ["low"],
                 "required_train_modes": ["single"],
