@@ -25,6 +25,10 @@ from isp_ai_enhancement.pruning.torch_pruning_adapter import (
     torch_pruning_physical_prune,
 )
 from isp_ai_enhancement.pruning.workflow import prune_checkpoint
+from isp_ai_enhancement.release_gate import (
+    evaluate_release_evidence,
+    write_release_report,
+)
 from isp_ai_enhancement.training.engine import train_from_config
 
 
@@ -212,6 +216,16 @@ def _audit_onnx(args: argparse.Namespace) -> int:
     return 0
 
 
+def _check_release(args: argparse.Namespace) -> int:
+    """执行商用级三态放行 Gate；未通过或证据不足时返回非零退出码。"""
+
+    report = evaluate_release_evidence(args.evidence)
+    if args.output:
+        write_release_report(report, args.output)
+    print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+    return 0 if report["overall_status"] == "PASS" else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     """构建所有子命令和参数定义；调用本函数不会解析或修改进程状态。"""
 
@@ -314,6 +328,11 @@ def build_parser() -> argparse.ArgumentParser:
     audit = commands.add_parser("audit-onnx")
     audit.add_argument("--model", required=True)
     audit.set_defaults(function=_audit_onnx)
+
+    release = commands.add_parser("check-release")
+    release.add_argument("--evidence", required=True)
+    release.add_argument("--output")
+    release.set_defaults(function=_check_release)
     return parser
 
 

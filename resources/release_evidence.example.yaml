@@ -1,0 +1,81 @@
+# 商用级放行证据模板。所有 false、空字符串和全零 SHA256 都是有意的未验证占位，
+# 执行 check-release 将返回 BLOCKED/FAIL，禁止把模板本身误当作放行记录。
+format_version: 1
+release_id: kirin9000-ai-enhancement-unverified
+
+target:
+  chip: Kirin 9000
+  device_model: ""
+  os_build: ""
+  ddk_version: ""
+  firmware_version: ""
+
+data:
+  # 当前目标是非商业的商用品质验证；usage_reviewed 表示用途已经按原许可核验，
+  # 不要求提前完成未来直接商业发布的版权/IP 清关。
+  usage_reviewed: false
+  split_validated: false
+  ground_truth_validated: false
+  metadata_validated: false
+  golden_set_frozen: false
+  manifest_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  golden_set_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+
+quality:
+  # “显著 SSIM 下降”必须在项目锁版时给出数值，不能临时凭主观判断。
+  max_ssim_drop: 0.002
+  domains:
+    - sensor_id: target_sensor
+      mode: single
+      p0_pass: false
+      p0_psnr_db: 0.0
+      p0_ssim: 0.0
+      pruned_fp32_psnr_db: 0.0
+      final_om_psnr_db: 0.0
+      final_om_ssim: 0.0
+      tail_pass: false
+      blind_review_pass: false
+
+operator:
+  int8_mac_ratio: 0.0
+  unexplained_fallback_nodes: 0
+  unexplained_cast_nodes: 0
+  profiler_report_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+
+performance:
+  hot_sample_count: 0
+  hot_p90_ms: 0.0
+  hot_p99_ms: 0.0
+  p99_limit_ms: 0.0
+
+memory:
+  fusion_cache_released: false
+  ai_peak_mb: 0.0
+  budget_mb: 0.0
+
+stability:
+  long_run_pass: false
+  burst20_pass: false
+  camera_switch_pass: false
+  lifecycle_pass: false
+  invalid_input_pass: false
+  crash_count: 0
+  timeout_count: 0
+
+fallback:
+  fault_injection_trials: 0
+  successful_outputs: 0
+  reason_codes_complete: false
+
+release:
+  model_card_path: ""
+  model_card_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  model_manifest_path: ""
+  model_manifest_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  om_model_path: ""
+  om_model_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  calibration_path: ""
+  calibration_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  compatibility_path: ""
+  compatibility_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  signoff: []

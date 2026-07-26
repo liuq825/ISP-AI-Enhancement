@@ -64,6 +64,10 @@ py -m venv .venv
   --config configs/model_student.yaml `
   --checkpoint checkpoints/student.pt `
   --output artifacts/student_512.onnx
+# 真机证据齐全后执行三态商用级放行 Gate：
+.\.venv\Scripts\isp-ai.exe check-release `
+  --evidence evidence/kirin9000_release.yaml `
+  --output evidence/kirin9000_release.report.json
 ```
 
 ## 输入输出契约

@@ -20,3 +20,24 @@
 
 Python QAT 报告中的“按层覆盖率”或“按权重元素覆盖率”不等于本表的按计算量占比。
 算子 Gate 必须使用目标 DDK 转换结果和 profiler 统计。
+
+## 机器执行入口
+
+`resources/release_evidence.example.yaml` 是未验证模板，必须替换为目标机真实证据；
+模板中的 `false`、空路径和零值不能用于放行。执行：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe check-release `
+  --evidence evidence/kirin9000_release.yaml `
+  --output evidence/kirin9000_release.report.json
+```
+
+结果使用三态语义：
+
+- `PASS`：全部 Gate 有证据且逐项通过；
+- `FAIL`：已经测量，但至少一个硬阈值或哈希检查失败；
+- `BLOCKED`：目标设备、DDK、文件、签字或其他必填证据缺失。
+
+命令只有在总体 `PASS` 时返回退出码 0。报告绑定输入 YAML 的 SHA256，并核验 Model
+Card、模型 manifest、OM、校准包和兼容矩阵的真实文件哈希。画质检查逐
+`Sensor×模式` 运行，任一域失败都会进入报告，不能由高分域平均抵消。
