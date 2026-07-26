@@ -53,6 +53,24 @@ resume_checkpoint: runs/student_distill/epoch_0040.pt
 训练器拒绝恢复。单元测试从第一轮 checkpoint 恢复第二轮，并要求权重与连续训练逐元素
 完全一致。
 
+## QAT 微调
+
+QAT 必须从已经完成物理剪枝和 FP32 微调的权重开始：
+
+```yaml
+model_config: configs/model_student_pruned15.yaml
+initial_checkpoint: checkpoints/student_pruned15.pt
+qat_config: configs/qat.yaml
+```
+
+`initial_checkpoint` 只载入模型权重并开始一个新优化过程；`resume_checkpoint` 恢复同一
+训练过程的全部状态，两者互斥。观察器在 `observer_warmup_steps` 后冻结；模型进入
+`eval()` 时也不会使用验证数据更新尺度。训练日志记录转换/排除卷积、按层覆盖率和按权重
+元素覆盖率。
+
+这些覆盖率仍不是目标 NPU 的 INT8 计算占比。最终 95% 目标只能由准确 HiAI CANN DDK
+转换后的节点落点与 profiler 按计算量核验，不能用 Python 卷积层数代替。
+
 PyTorch 官方参考：[AMP](https://docs.pytorch.org/docs/stable/amp)、
 [可复现性](https://docs.pytorch.org/docs/stable/notes/randomness.html)、
 [CosineAnnealingLR](https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html)。

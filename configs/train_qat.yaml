@@ -1,0 +1,29 @@
+# 从已微调的物理剪枝 FP32 权重开始 QAT；不能直接用随机初始化模型。
+seed: 20260726
+device: cuda
+model_config: configs/model_student_pruned15.yaml
+initial_checkpoint: checkpoints/student_pruned15.pt
+qat_config: configs/qat.yaml
+context_config: configs/context.yaml
+manifest: data/production/manifest.jsonl
+output_dir: runs/student_pruned15_qat
+data_policy:
+  purpose: commercial_grade
+  catalog: resources/datasets.yaml
+epochs: 30
+batch_size: 8
+num_workers: 8
+crop_size: 256
+learning_rate: 0.00002
+weight_decay: 0.0
+amp: true
+log_every: 20
+save_every_epochs: 1
+scheduler:
+  type: cosine
+  t_max: 30
+  eta_min: 0.0000001
+loss:
+  charbonnier: 1.0
+  gradient: 0.10
+  color: 0.05

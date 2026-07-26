@@ -47,8 +47,8 @@ def _write_training_config(
     return path
 
 
-def test_resume_reproduces_uninterrupted_second_epoch(tmp_path: Path) -> None:
-    """从第一轮 checkpoint 恢复后的第二轮权重应与连续训练逐元素一致。"""
+def test_resume_and_qat_initialization_are_checkpoint_safe(tmp_path: Path) -> None:
+    """恢复权重须逐元素一致，FP32 初始权重也必须能安全进入 QAT。"""
 
     manifest = generate_smoke_dataset(
         tmp_path / "data",
@@ -97,3 +97,30 @@ def test_resume_reproduces_uninterrupted_second_epoch(tmp_path: Path) -> None:
     assert resumed["scheduler_state"] == continuous["scheduler_state"]
     for name, value in continuous["model_state"].items():
         torch.testing.assert_close(value, resumed["model_state"][name], rtol=0, atol=0)
+
+    qat_settings = tmp_path / "qat.yaml"
+    qat_settings.write_text(
+        "qat:\n"
+        "  weight_bits: 8\n"
+        "  activation_bits: 8\n"
+        "  observer_momentum: 0.95\n"
+        "  exclude_modules: [intro, ending]\n"
+        "  observer_warmup_steps: 1\n",
+        encoding="utf-8",
+    )
+    qat_value = yaml.safe_load(continuous_config.read_text(encoding="utf-8"))
+    qat_value["epochs"] = 1
+    qat_value["scheduler"]["t_max"] = 1
+    qat_value["output_dir"] = str(tmp_path / "qat")
+    qat_value["initial_checkpoint"] = str(continuous_final)
+    qat_value["qat_config"] = str(qat_settings)
+    qat_config = tmp_path / "train_qat.yaml"
+    qat_config.write_text(yaml.safe_dump(qat_value, sort_keys=False), encoding="utf-8")
+    qat_checkpoint = torch.load(
+        train_from_config(qat_config),
+        map_location="cpu",
+        weights_only=False,
+    )
+    qat_keys = set(qat_checkpoint["model_state"])
+    assert any("activation_fake_quant.max_abs" in key for key in qat_keys)
+    assert any("observer_initialized" in key for key in qat_keys)

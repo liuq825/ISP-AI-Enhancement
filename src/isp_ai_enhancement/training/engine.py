@@ -28,6 +28,11 @@ from isp_ai_enhancement.export import load_checkpoint_state
 from isp_ai_enhancement.losses import LossWeights, RawRestorationLoss
 from isp_ai_enhancement.metrics import psnr_per_sample
 from isp_ai_enhancement.models.factory import build_model_from_file
+from isp_ai_enhancement.quantization.fake_quant import (
+    QATReport,
+    prepare_qat,
+    set_observer_enabled,
+)
 
 
 def _seed_everything(seed: int) -> None:
@@ -200,6 +205,10 @@ def train_from_config(path: str | Path) -> Path:
     amp_enabled = bool(config.get("amp", False))
     if amp_enabled and device.type != "cuda":
         raise ValueError("float16 AMP is supported only when training on CUDA")
+    initial_value = config.get("initial_checkpoint")
+    resume_value = config.get("resume_checkpoint")
+    if initial_value is not None and resume_value is not None:
+        raise ValueError("initial_checkpoint and resume_checkpoint are mutually exclusive")
     model_config_value = config.get("model_config", config.get("student_config"))
     if model_config_value is None:
         raise ValueError("training config must define model_config or student_config")
@@ -288,6 +297,39 @@ def train_from_config(path: str | Path) -> Path:
         **loader_options,
     )
     model = build_model_from_file(model_config).to(device)
+    if initial_value is not None:
+        initial_path = Path(str(initial_value))
+        if not initial_path.is_absolute():
+            initial_path = config_path.parent.parent / initial_path
+        model.load_state_dict(load_checkpoint_state(initial_path), strict=True)
+
+    qat_report: QATReport | None = None
+    qat_observer_warmup_steps: int | None = None
+    qat_config_value = config.get("qat_config")
+    if qat_config_value is not None:
+        qat_config_path = Path(str(qat_config_value))
+        if not qat_config_path.is_absolute():
+            qat_config_path = config_path.parent.parent / qat_config_path
+        qat_settings = load_yaml(qat_config_path).get("qat")
+        if not isinstance(qat_settings, dict):
+            raise ValueError("qat_config must contain a 'qat' mapping")
+        qat_observer_warmup_steps = int(
+            qat_settings.get("observer_warmup_steps", 10_000)
+        )
+        if qat_observer_warmup_steps <= 0:
+            raise ValueError("QAT observer_warmup_steps must be positive")
+        exclude_modules = qat_settings.get("exclude_modules", ("intro", "ending"))
+        if not isinstance(exclude_modules, (list, tuple)) or not all(
+            isinstance(value, str) for value in exclude_modules
+        ):
+            raise ValueError("QAT exclude_modules must be a list of module names")
+        qat_report = prepare_qat(
+            model,
+            activation_bits=int(qat_settings.get("activation_bits", 8)),
+            weight_bits=int(qat_settings.get("weight_bits", 8)),
+            observer_momentum=float(qat_settings.get("observer_momentum", 0.95)),
+            exclude_modules=tuple(exclude_modules),
+        )
     teacher: nn.Module | None = None
     distiller: FeatureDistiller | None = None
     teacher_feature_weight = 0.0
@@ -341,7 +383,6 @@ def train_from_config(path: str | Path) -> Path:
     global_step = 0
     start_epoch = 1
     best_validation_psnr = float("-inf")
-    resume_value = config.get("resume_checkpoint")
     if resume_value is not None:
         resume_path = Path(str(resume_value))
         if not resume_path.is_absolute():
@@ -363,9 +404,32 @@ def train_from_config(path: str | Path) -> Path:
 
     history_mode = "a" if resume_value is not None else "w"
     with history_path.open(history_mode, encoding="utf-8", newline="\n") as history:
+        if qat_report is not None and history_mode == "w":
+            history.write(
+                json.dumps(
+                    {
+                        "event": "qat_prepared",
+                        "converted_convolutions": qat_report.converted_convolutions,
+                        "excluded_convolutions": qat_report.excluded_convolutions,
+                        "simulated_int8_layer_ratio": qat_report.simulated_int8_ratio,
+                        "simulated_int8_weight_ratio": (
+                            qat_report.simulated_int8_weight_ratio
+                        ),
+                        "observer_warmup_steps": qat_observer_warmup_steps,
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
         for epoch in range(start_epoch, epochs + 1):
             model.train()
             for batch in train_loader:
+                if (
+                    qat_observer_warmup_steps is not None
+                    and global_step >= qat_observer_warmup_steps
+                ):
+                    # 热身结束后冻结统计尺度，后续只优化权重并注入固定量化误差。
+                    set_observer_enabled(model, False)
                 inputs = batch["input"].to(device)
                 target = batch["target"].to(device)
                 # 第 16 通道是输入契约定义的有效像素掩码，只参与损失加权。

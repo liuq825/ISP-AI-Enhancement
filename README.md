@@ -52,6 +52,8 @@ py -m venv .venv
 
 ```powershell
 .\.venv\Scripts\isp-ai.exe train --config configs/train_smoke.yaml
+# 有真实剪枝权重和 CUDA 环境后启动 QAT：
+.\.venv\Scripts\isp-ai.exe train --config configs/train_qat.yaml
 .\.venv\Scripts\isp-ai.exe export-onnx `
   --config configs/model_student.yaml `
   --checkpoint checkpoints/student.pt `

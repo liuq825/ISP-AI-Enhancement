@@ -35,6 +35,10 @@ class SymmetricFakeQuant(nn.Module):
         self.channel_axis = channel_axis
         self.momentum = momentum
         self.register_buffer("max_abs", torch.ones(1))
+        self.register_buffer(
+            "observer_initialized",
+            torch.tensor(False, dtype=torch.bool),
+        )
         self.observer_enabled = True
         self.fake_quant_enabled = True
 
@@ -58,15 +62,23 @@ class SymmetricFakeQuant(nn.Module):
     def forward(self, value: Tensor) -> Tensor:
         """更新观察器并执行量化-反量化，反向传播使用恒等直通梯度。"""
 
-        observed = self._observed_max(value)
-        if self.max_abs.numel() != observed.numel():
-            self.max_abs.resize_(observed.shape).copy_(observed.clamp_min(1e-8))
-        elif self.observer_enabled:
-            self.max_abs.mul_(self.momentum).add_(
-                observed.clamp_min(1e-8), alpha=1.0 - self.momentum
-            )
+        observed = self._observed_max(value).clamp_min(1e-8)
+        if self.observer_enabled and self.training:
+            if self.max_abs.numel() != observed.numel():
+                self.max_abs.resize_(observed.shape)
+                self.observer_initialized.fill_(False)
+            if not bool(self.observer_initialized.item()):
+                # 首批必须直接采用真实范围；从固定 1.0 做 EMA 会严重浪费低幅 RAW 精度。
+                self.max_abs.copy_(observed)
+                self.observer_initialized.fill_(True)
+            else:
+                self.max_abs.mul_(self.momentum).add_(
+                    observed, alpha=1.0 - self.momentum
+                )
         if not self.fake_quant_enabled:
             return value
+        if not bool(self.observer_initialized.item()):
+            raise RuntimeError("fake quantization requires an initialized observer")
         quant_max = float((1 << (self.bits - 1)) - 1)
         scale = self._reshape_scale(self.max_abs.clamp_min(1e-8) / quant_max, value)
         quantized = torch.round(value / scale).clamp(-quant_max, quant_max) * scale
@@ -76,13 +88,23 @@ class SymmetricFakeQuant(nn.Module):
 class QATConv2d(nn.Conv2d):
     """在标准 Conv2d 前插入激活和权重伪量化，保持卷积参数接口不变。"""
 
-    def __init__(self, *args, quant_bits: int = 8, observer_momentum: float = 0.95, **kwargs):
+    def __init__(
+        self,
+        *args,
+        activation_bits: int = 8,
+        weight_bits: int = 8,
+        observer_momentum: float = 0.95,
+        **kwargs,
+    ):
         """构建卷积本体以及激活 per-tensor、权重 per-channel 两个观察器。"""
 
         super().__init__(*args, **kwargs)
-        self.activation_fake_quant = SymmetricFakeQuant(bits=quant_bits, momentum=observer_momentum)
+        self.activation_fake_quant = SymmetricFakeQuant(
+            bits=activation_bits,
+            momentum=observer_momentum,
+        )
         self.weight_fake_quant = SymmetricFakeQuant(
-            bits=quant_bits,
+            bits=weight_bits,
             per_channel=True,
             channel_axis=0,
             momentum=observer_momentum,
@@ -93,7 +115,8 @@ class QATConv2d(nn.Conv2d):
         cls,
         module: nn.Conv2d,
         *,
-        bits: int = 8,
+        activation_bits: int = 8,
+        weight_bits: int = 8,
         observer_momentum: float = 0.95,
     ) -> QATConv2d:
         """从已有浮点卷积复制结构和权重，供模型原位 QAT 改写。"""
@@ -110,12 +133,14 @@ class QATConv2d(nn.Conv2d):
             padding_mode=module.padding_mode,
             device=module.weight.device,
             dtype=module.weight.dtype,
-            quant_bits=bits,
+            activation_bits=activation_bits,
+            weight_bits=weight_bits,
             observer_momentum=observer_momentum,
         )
         result.weight.data.copy_(module.weight.data)
         if module.bias is not None:
             result.bias.data.copy_(module.bias.data)
+        result.train(module.training)
         return result
 
     def forward(self, value: Tensor) -> Tensor:
@@ -136,23 +161,33 @@ class QATConv2d(nn.Conv2d):
 
 @dataclass(frozen=True)
 class QATReport:
-    """记录已转换和因首尾层策略被排除的卷积数量。"""
+    """记录 QAT 转换/排除的卷积数量与权重元素覆盖率。"""
 
     converted_convolutions: int
     excluded_convolutions: int
+    converted_weight_elements: int
+    excluded_weight_elements: int
 
     @property
     def simulated_int8_ratio(self) -> float:
-        """返回按卷积层数量估算的模拟 INT8 覆盖率。"""
+        """返回按卷积层数量估算的覆盖率，仅用于结构检查。"""
 
         total = self.converted_convolutions + self.excluded_convolutions
         return self.converted_convolutions / total if total else 0.0
+
+    @property
+    def simulated_int8_weight_ratio(self) -> float:
+        """返回按卷积权重元素计算的伪 INT8 覆盖率。"""
+
+        total = self.converted_weight_elements + self.excluded_weight_elements
+        return self.converted_weight_elements / total if total else 0.0
 
 
 def prepare_qat(
     model: nn.Module,
     *,
-    bits: int = 8,
+    activation_bits: int = 8,
+    weight_bits: int = 8,
     observer_momentum: float = 0.95,
     exclude_modules: Iterable[str] = ("intro", "ending"),
 ) -> QATReport:
@@ -160,11 +195,13 @@ def prepare_qat(
     excluded_prefixes = tuple(exclude_modules)
     converted = 0
     excluded = 0
+    converted_weights = 0
+    excluded_weights = 0
 
     def visit(parent: nn.Module, prefix: str = "") -> None:
         """深度优先遍历模块树，按完整名称匹配排除前缀。"""
 
-        nonlocal converted, excluded
+        nonlocal converted, converted_weights, excluded, excluded_weights
         for name, child in list(parent.named_children()):
             full_name = f"{prefix}.{name}" if prefix else name
             if isinstance(child, nn.Conv2d):
@@ -173,22 +210,30 @@ def prepare_qat(
                     for item in excluded_prefixes
                 ):
                     excluded += 1
+                    excluded_weights += child.weight.numel()
                 else:
                     setattr(
                         parent,
                         name,
                         QATConv2d.from_float(
                             child,
-                            bits=bits,
+                            activation_bits=activation_bits,
+                            weight_bits=weight_bits,
                             observer_momentum=observer_momentum,
                         ),
                     )
                     converted += 1
+                    converted_weights += child.weight.numel()
             else:
                 visit(child, full_name)
 
     visit(model)
-    return QATReport(converted, excluded)
+    return QATReport(
+        converted,
+        excluded,
+        converted_weights,
+        excluded_weights,
+    )
 
 
 def set_observer_enabled(model: nn.Module, enabled: bool) -> None:
