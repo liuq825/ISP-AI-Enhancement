@@ -35,6 +35,30 @@ CLI 默认读取 `resources/sidd_validation_scenes.yaml` 并执行 held-out 硬�
 `sqrt(mean(beta1*0.18 + beta2))`。它只是 16 通道上下文的可复现标量摘要，完整
 六个 NLF 系数仍保存在 Manifest 元数据中。
 
+### 从超大场景 ZIP 选择性获取训练帧
+
+SIDD Full 的单个场景 noisy/GT ZIP 可分别超过 3 GB 和 8 GB，但当前阶段每个场景
+只需一对可审计 RAW 做数据链路与初步训练验证。`fetch-sidd-subset` 使用
+`remotezip==0.12.3` 读取 ZIP 中央目录，再通过 HTTP Range 只传输目标成员的压缩
+字节，而不把整包下载到本地：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe fetch-sidd-subset `
+  --config resources/sidd_training_subset.yaml `
+  --output datasets/SIDD_Training_Subset
+```
+
+版本化配置当前覆盖五款相机，并额外加入 `scene_id=010` 验证锚点。下载器先完整校验
+配置及 held-out 名单，再顺序访问公共镜像；每个成员必须精确匹配
+`<instance>_{NOISY|GT}_RAW_010.MAT`。ZipExtFile 完整读取时验证 ZIP CRC，落盘后再次
+核对大小/CRC 并记录 SHA256，最终文件和场景/集合收据都采用原子替换。网络中断后重跑
+会复核并复用完整文件；残缺 `.partial` 不会被当作训练数据。
+
+选择性子集只够验证真实数据训练闭环，不等于覆盖 SIDD Full，更不能替代目标 Sensor
+数据。默认 `split_seed=20260726` 下，物理 `scene_id=010` 进入 val；配置中的
+`scene_id=001` 会进入 test，避免子集全部落入 train。扩充配置时应先检查物理场景分布，
+而不是只按相机或实例编号挑选。
+
 ### SIDD RAW 验证块
 
 官方 `ValidationNoisyBlocksRaw.mat` 与 `ValidationGtBlocksRaw.mat` 的变量形状均为

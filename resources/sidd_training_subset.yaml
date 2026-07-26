@@ -1,0 +1,25 @@
+# 第一阶段真实 RAW 训练子集：每款相机选一个非 held-out 中高 ISO 场景，并加入一个
+# scene_id=010 的验证锚点。每个远程 ZIP 含约 150 帧，本命令仅 Range 提取 frame 010，
+# 禁止整包下载。默认 seed=20260726 下 001/002/003 为 train/test，010 为 val。
+source_page: https://abdokamel.github.io/sidd/dataset.html
+checked_on: "2026-07-27"
+frame_index: 10
+scenes:
+  - scene: 0027_001_G4_00800_00350_5500_L
+    noisy_url: https://competitions.codalab.org/my/datasets/download/e8900d20-e0a3-434a-a588-91ede13e0502
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/15e0117b-e726-459e-ac02-2ed22e81945b
+  - scene: 0065_003_GP_10000_08460_4400_N
+    noisy_url: https://competitions.codalab.org/my/datasets/download/deb5f3c6-029d-4e0b-995d-8bfe67c8fc4e
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/f3a3c445-787c-4b3b-8a02-01897daa62ff
+  - scene: 0070_003_IP_02000_04000_3200_N
+    noisy_url: https://competitions.codalab.org/my/datasets/download/2b3ca732-1493-436f-837c-4e66d67c6383
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/aebba58f-cee0-41bf-ba48-1a0f1ca5728b
+  - scene: 0050_002_N6_03200_03200_5500_L
+    noisy_url: https://competitions.codalab.org/my/datasets/download/d52d2ffb-ecc7-48fb-a11b-3f4103bee7a9
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/043888db-3a19-45c2-8e5e-d91dbc6b6167
+  - scene: 0013_001_S6_03200_01250_3200_L
+    noisy_url: https://competitions.codalab.org/my/datasets/download/5cf81729-0d48-419b-bf56-62e793f1b9ce
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/9312c11e-7be2-4b34-ab1f-2ad7d0d2cdad
+  - scene: 0198_010_GP_00100_00200_5500_N
+    noisy_url: https://competitions.codalab.org/my/datasets/download/c6aa6a17-9dc5-470f-81a9-257a1c7d39ae
+    ground_truth_url: https://competitions.codalab.org/my/datasets/download/4a29e0f4-34d8-40c0-a916-cdcb8e87c5c4

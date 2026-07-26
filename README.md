@@ -28,15 +28,22 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-导入已解压的 SIDD RAW 数据（数据本体不进入 Git）：
+从官方超大场景 ZIP 按 HTTP Range 获取版本化 RAW 子集，然后导入（数据本体不进入
+Git；命令可安全重跑并复用 CRC 已验证的文件）：
 
 ```powershell
+.\.venv\Scripts\isp-ai.exe fetch-sidd-subset `
+  --config resources/sidd_training_subset.yaml `
+  --output datasets/SIDD_Training_Subset
 .\.venv\Scripts\isp-ai.exe import-sidd `
-  --source datasets/SIDD `
+  --source datasets/SIDD_Training_Subset `
   --output data/sidd `
   --nlf-csv datasets/SIDD/noise_level_functions.csv
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/sidd/manifest.jsonl
 ```
+
+`fetch-sidd-pair` 也可只获取一对指定帧。两种入口都会在联网前对照
+`resources/sidd_validation_scenes.yaml`，禁止把官方 held-out 场景用作训练。
 
 导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
 

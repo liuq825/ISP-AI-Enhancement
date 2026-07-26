@@ -15,6 +15,10 @@ from isp_ai_enhancement.data.sidd import (
     import_sidd_dataset,
     import_sidd_validation_blocks,
 )
+from isp_ai_enhancement.data.sidd_remote import (
+    fetch_sidd_raw_pair,
+    fetch_sidd_raw_subset,
+)
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
 from isp_ai_enhancement.evaluation import evaluate_manifest
 from isp_ai_enhancement.export import export_onnx
@@ -168,6 +172,37 @@ def _import_sidd_blocks(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fetch_sidd_pair(args: argparse.Namespace) -> int:
+    """按 HTTP Range 从官方超大场景 ZIP 中提取一对指定 RAW 帧。"""
+
+    print(
+        fetch_sidd_raw_pair(
+            scene_name=args.scene,
+            noisy_zip_url=args.noisy_url,
+            ground_truth_zip_url=args.ground_truth_url,
+            frame_index=args.frame,
+            output_dir=args.output,
+            held_out_scenes=args.held_out_scenes,
+            max_member_bytes=args.max_member_bytes,
+        )
+    )
+    return 0
+
+
+def _fetch_sidd_subset(args: argparse.Namespace) -> int:
+    """按版本化场景清单顺序获取 RAW 训练子集，并打印集合收据。"""
+
+    print(
+        fetch_sidd_raw_subset(
+            config=args.config,
+            output_dir=args.output,
+            held_out_scenes=args.held_out_scenes,
+            max_member_bytes=args.max_member_bytes,
+        )
+    )
+    return 0
+
+
 def _train(args: argparse.Namespace) -> int:
     """调用配置驱动训练入口并打印最终检查点位置。"""
 
@@ -300,6 +335,40 @@ def build_parser() -> argparse.ArgumentParser:
         default="test",
     )
     sidd_blocks.set_defaults(function=_import_sidd_blocks)
+
+    sidd_fetch = commands.add_parser("fetch-sidd-pair")
+    sidd_fetch.add_argument("--scene", required=True)
+    sidd_fetch.add_argument("--noisy-url", required=True)
+    sidd_fetch.add_argument("--ground-truth-url", required=True)
+    sidd_fetch.add_argument("--frame", type=int, default=10)
+    sidd_fetch.add_argument("--output", required=True)
+    sidd_fetch.add_argument(
+        "--held-out-scenes",
+        default="resources/sidd_validation_scenes.yaml",
+    )
+    sidd_fetch.add_argument(
+        "--max-member-bytes",
+        type=int,
+        default=512 * 1024 * 1024,
+    )
+    sidd_fetch.set_defaults(function=_fetch_sidd_pair)
+
+    sidd_subset = commands.add_parser("fetch-sidd-subset")
+    sidd_subset.add_argument(
+        "--config",
+        default="resources/sidd_training_subset.yaml",
+    )
+    sidd_subset.add_argument("--output", required=True)
+    sidd_subset.add_argument(
+        "--held-out-scenes",
+        default="resources/sidd_validation_scenes.yaml",
+    )
+    sidd_subset.add_argument(
+        "--max-member-bytes",
+        type=int,
+        default=512 * 1024 * 1024,
+    )
+    sidd_subset.set_defaults(function=_fetch_sidd_subset)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)

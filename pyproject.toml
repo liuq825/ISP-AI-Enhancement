@@ -27,6 +27,10 @@ data = [
   "rawpy>=0.21,<1",
   "scipy>=1.13,<2",
 ]
+# 超大官方场景 ZIP 只按 HTTP Range 提取指定帧，避免下载数 GB 无关成员。
+acquisition = [
+  "remotezip==0.12.3",
+]
 # 固定已验证版本，避免 DepGraph API 漂移悄然改变剪枝结果。
 pruning = [
   "torch-pruning==1.6.1",
@@ -36,7 +40,7 @@ quality = [
   "ruff>=0.9,<1",
 ]
 all = [
-  "isp-ai-enhancement[export,data,pruning,quality]",
+  "isp-ai-enhancement[acquisition,export,data,pruning,quality]",
 ]
 
 [project.scripts]

@@ -327,3 +327,53 @@
   只有逐域画质与全部端侧证据通过才为 `PASS`。
 - 防复发：Gate 核验输入 YAML、OM 和交付文档 SHA256；单测覆盖完整通过、单域失败
   不可被平均抵消、缺 DDK 版本必须阻塞三种路径。
+
+## 2026-07-27：SIDD RAW 训练数据选择性获取
+
+### 官网 Small 链接与第三方镜像不满足 RAW 训练
+
+- 现象：官网 SIDD Small/Medium 下载入口仍指向不可达的旧主机；可访问的 Kaggle
+  镜像只有 `SIDD_Small_sRGB_Only` PNG。
+- 风险：为了省事改用 sRGB 会把 ISP 去马赛克、降噪与色调映射结果混入标签，无法
+  训练本项目要求的 RAW 域模块。
+- 处理：拒绝该 sRGB 镜像，改用官网逐场景表中的 Codalab Raw-RGB Mirror 2。
+
+### 为一帧下载 11.7 GB 整包不可持续
+
+- 现象：实测一个场景 noisy ZIP 为 3,186,321,585 字节，GT ZIP 为
+  8,506,719,167 字节；目标 frame 010 的压缩成员合计仅约 78 MB。
+- 处理：固定 `remotezip==0.12.3`，读取 ZIP 中央目录后只对目标压缩区间发 HTTP
+  Range GET，首个样例节省约 99.3% 传输量。
+- 完整性：要求精确成员名、ZIP CRC、解压大小和本地 SHA256 全部一致，写场景及集合
+  收据；中断只留下可删除的 `.partial`。
+
+### Codalab 的 HEAD 与 Range GET 行为不同
+
+- 现象：预签名下载 URL 的 `HEAD` 返回 `SignatureDoesNotMatch`，但同一 URL 的
+  `GET Range` 正常。
+- 处理：RemoteZip 启用 `support_suffix_range=True`，直接用后缀 Range 读取中央目录，
+  不把 HEAD 失败误判为数据不可用。
+
+### 跨表格行正则把 0013 URL 错配到 0014
+
+- 现象：最初一次性正则跨越 HTML `<tr>` 边界，把下一行 URL 绑定给当前场景。
+- 保护效果：下载器在中央目录中要求唯一存在 `0013_*_RAW_010.MAT`，发现归档实际是
+  0014 后在创建数据文件前失败，没有形成错误配对。
+- 处理：来源解析改为先逐 `<tr>` 隔离，再读取该行的 Raw-RGB Mirror 2；配置保存
+  完整场景名，批量入口在联网前校验重复项和 held-out 名单。
+- 防复发：URL 可访问并不代表内容属于目标场景，成员身份检查不可省略。
+
+### 只按相机和高 ISO 选样会缺验证集
+
+- 现象：首批五个实例覆盖五款相机，但物理 `scene_id` 只有 001/002/003；默认稳定
+  哈希分别落入 test/train/train，没有任何 val。
+- 处理：增加非 held-out 的 `scene_id=010` 作为 val 锚点。后续扩充必须审计物理
+  scene 分布，实例数或相机数不能代替切分覆盖。
+
+### 当前 PowerShell 的 ArgumentList API 不可用
+
+- 现象：本机 `ProcessStartInfo.ArgumentList` 为 null，调用 `Add` 后仍启动了一个
+  无参数隐藏 Python 进程。
+- 处理：立即终止该精确 PID，改用不含空格的相对参数和 `Arguments` 字符串启动。
+- 防复发：后台启动必须同时检查 PowerShell 错误流、实际 PID 和目标 `.partial`；
+  打印出 PID 不等于业务命令已正确运行。

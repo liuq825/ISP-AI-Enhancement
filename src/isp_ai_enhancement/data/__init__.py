@@ -10,6 +10,7 @@ from .context import (
 from .governance import enforce_data_policy, validate_data_policy
 from .manifest import ManifestRecord, read_manifest, validate_manifest
 from .sidd import import_sidd_dataset, import_sidd_validation_blocks
+from .sidd_remote import fetch_sidd_raw_pair, fetch_sidd_raw_subset
 
 __all__ = [
     "ContextBuilder",
@@ -20,6 +21,8 @@ __all__ = [
     "enforce_data_policy",
     "import_sidd_dataset",
     "import_sidd_validation_blocks",
+    "fetch_sidd_raw_pair",
+    "fetch_sidd_raw_subset",
     "load_context_config",
     "read_manifest",
     "validate_data_policy",
