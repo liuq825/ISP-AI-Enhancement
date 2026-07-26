@@ -20,6 +20,11 @@
 ONNX 支持和参数会变化；`deploy/hiai/invoke_converter.ps1` 要求产品团队提供并
 版本化真实参数文件。
 
+进入 DDK 转换前，ONNX 必须具有通过
+`resources/model_manifest.schema.json` 约束的伴生清单；清单包含 raw16-v1
+通道顺序、源文件哈希、ORT 对照和算子审计。其状态仍保持
+`UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING`，直到真机 Gate 完成。
+
 ### B. MindSpore Lite（备用验证）
 
 用于验证宿主 API、Tile、回退和 Android/HarmonyOS 集成。它不是 OM 性能结论的

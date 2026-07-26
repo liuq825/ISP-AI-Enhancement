@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from time import time
 from typing import Any
 
 import numpy as np
@@ -13,6 +14,26 @@ from torch import Tensor, nn
 
 from isp_ai_enhancement.config import load_yaml
 from isp_ai_enhancement.models.factory import build_model_from_file
+from isp_ai_enhancement.onnx_audit import audit_onnx
+
+_INPUT_CHANNEL_SEMANTICS = [
+    "raw_r",
+    "raw_gr",
+    "raw_gb",
+    "raw_b",
+    "noise_sigma",
+    "exposure_log2_normalized",
+    "fusion_confidence",
+    "motion_ghost",
+    "camera_embedding_0",
+    "camera_embedding_1",
+    "camera_embedding_2",
+    "camera_embedding_3",
+    "white_balance_rg_log2_normalized",
+    "white_balance_bg_log2_normalized",
+    "capture_mode",
+    "valid_mask",
+]
 
 
 class _StaticExportWrapper(nn.Module):
@@ -75,6 +96,7 @@ def export_onnx(
         raise ValueError("static export dimensions must be multiples of 16")
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_output = output_path.with_name(f"{output_path.name}.tmp")
     generator = torch.Generator().manual_seed(20260726)
     sample = torch.rand(
         batch,
@@ -83,13 +105,15 @@ def export_onnx(
         width,
         generator=generator,
     )
+    # 相机嵌入允许负值；导出对照样例必须覆盖契约真实范围，而不是全通道 [0,1]。
+    sample[:, 8:12] = sample[:, 8:12] * 2.0 - 1.0
     # 第 15 通道是有效区 mask；静态样例无 Pad，因此整张设为 1。
     sample[:, 15] = 1.0
     export_model = _StaticExportWrapper(model)
     torch.onnx.export(
         export_model,
         sample,
-        output_path,
+        temporary_output,
         input_names=[str(settings.get("input_name", "context_raw"))],
         output_names=[str(settings.get("output_name", "raw_residual"))],
         opset_version=int(settings.get("opset", 17)),
@@ -102,9 +126,12 @@ def export_onnx(
         import onnxruntime as ort
     except ImportError as error:
         raise RuntimeError("install the 'export' extra before exporting ONNX") from error
-    onnx_model = onnx.load(str(output_path))
+    onnx_model = onnx.load(str(temporary_output))
     onnx.checker.check_model(onnx_model)
-    session = ort.InferenceSession(str(output_path), providers=["CPUExecutionProvider"])
+    session = ort.InferenceSession(
+        str(temporary_output),
+        providers=["CPUExecutionProvider"],
+    )
     with torch.inference_mode():
         torch_output = model.forward_static(sample).cpu().numpy()
     runtime_output = session.run(
@@ -123,28 +150,60 @@ def export_onnx(
         rtol=float(settings.get("verify_rtol", 1e-3)),
     )
     # manifest 是模型文件的伴生证据，不把 ONNX 成功误报成麒麟 NPU 已验证。
+    model_config_path = Path(model_config)
+    checkpoint_path = Path(checkpoint)
+    export_config_path = Path(export_config) if export_config is not None else None
+    onnx_sha256 = sha256_file(temporary_output)
+    onnx_audit = audit_onnx(temporary_output)
+    # 只有 Checker、ORT 数值对照和结构审计全部成功后，才替换正式 ONNX。
+    temporary_output.replace(output_path)
     manifest = {
-        "format_version": 1,
+        "format_version": 2,
+        "context_contract_version": "raw16-v1",
         "model_name": "nafnet_raw_student",
+        "created_unix": int(time()),
+        "source": {
+            "model_config": str(model_config_path),
+            "model_config_sha256": sha256_file(model_config_path),
+            "checkpoint": str(checkpoint_path),
+            "checkpoint_sha256": sha256_file(checkpoint_path),
+            "export_config": str(export_config_path) if export_config_path else None,
+            "export_config_sha256": (
+                sha256_file(export_config_path) if export_config_path else None
+            ),
+        },
         "input_shape": [batch, model.input_channels, height, width],
         "input_dtype": "float32-export; fp16-device-candidate",
+        "input_channel_semantics": _INPUT_CHANNEL_SEMANTICS,
         "output_shape": [batch, model.output_channels, height, width],
         "output_dtype": "float32-export; fp16-device-candidate",
         "output_semantics": "four-channel canonical RAW residual",
         "physical_parameter_count": model.parameter_count(),
         "onnx_opset": int(settings.get("opset", 17)),
-        "onnx_sha256": sha256_file(output_path),
+        "onnx_sha256": onnx_sha256,
+        "toolchain": {
+            "torch": torch.__version__,
+            "onnx": onnx.__version__,
+            "onnxruntime": ort.__version__,
+            "torch_onnx_exporter": "legacy_torchscript_dynamo_false",
+        },
         "verification": {
             "onnx_checker": "passed",
             "onnxruntime_version": ort.__version__,
             "max_absolute_error": max_absolute_error,
             "max_relative_error": max_relative_error,
+            "onnx_audit": onnx_audit,
         },
         "deployment_status": "UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING",
     }
     manifest_path = output_path.with_suffix(".manifest.json")
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    manifest_text = json.dumps(
+        manifest,
+        indent=2,
+        ensure_ascii=False,
+        sort_keys=True,
+    ) + "\n"
+    temporary_manifest = manifest_path.with_name(f"{manifest_path.name}.tmp")
+    temporary_manifest.write_text(manifest_text, encoding="utf-8")
+    temporary_manifest.replace(manifest_path)
     return output_path

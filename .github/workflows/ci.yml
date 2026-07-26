@@ -18,6 +18,6 @@ jobs:
           python-version: "3.12"
           cache: pip
       # pruning 额外依赖用于执行真实 DepGraph 回归，而非跳过可选后端测试。
-      - run: python -m pip install -e ".[quality,pruning,data]"
+      - run: python -m pip install -e ".[quality,pruning,data,export]"
       - run: ruff check .
       - run: pytest

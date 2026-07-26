@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/liuq825/ISP-AI-Enhancement/model_manifest.schema.json",
+  "title": "AI Enhancement 模型交付清单",
+  "description": "约束 ONNX 产物的来源、16 通道契约、数值验证和部署状态。",
+  "type": "object",
+  "required": [
+    "format_version",
+    "context_contract_version",
+    "model_name",
+    "source",
+    "input_shape",
+    "input_channel_semantics",
+    "output_shape",
+    "output_semantics",
+    "physical_parameter_count",
+    "onnx_sha256",
+    "verification",
+    "deployment_status"
+  ],
+  "properties": {
+    "format_version": {
+      "description": "清单结构版本。",
+      "const": 2
+    },
+    "context_contract_version": {
+      "description": "训练与端侧必须共同实现的 16 通道 ABI 版本。",
+      "const": "raw16-v1"
+    },
+    "model_name": {
+      "description": "稳定模型族名称。",
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "description": "模型配置、checkpoint 和导出配置的路径与 SHA256。",
+      "type": "object",
+      "required": [
+        "model_config",
+        "model_config_sha256",
+        "checkpoint",
+        "checkpoint_sha256"
+      ],
+      "additionalProperties": true
+    },
+    "input_shape": {
+      "description": "静态 NCHW 输入 shape。",
+      "type": "array",
+      "prefixItems": [
+        {"type": "integer", "minimum": 1},
+        {"const": 16},
+        {"type": "integer", "minimum": 16},
+        {"type": "integer", "minimum": 16}
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "input_channel_semantics": {
+      "description": "16 个输入通道的有序语义；顺序变化必须升级契约。",
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {"type": "string"}
+    },
+    "output_shape": {
+      "description": "四通道 RAW residual 的静态 NCHW shape。",
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "output_semantics": {
+      "description": "输出不是最终图像，而是 canonical RAW residual。",
+      "type": "string"
+    },
+    "physical_parameter_count": {
+      "description": "从实际模型图统计的参数元素数量。",
+      "type": "integer",
+      "minimum": 1
+    },
+    "onnx_sha256": {
+      "description": "最终 ONNX 文件的 SHA256。",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "verification": {
+      "description": "ONNX Checker、ORT 对照与算子审计证据。",
+      "type": "object"
+    },
+    "deployment_status": {
+      "description": "未完成目标 DDK 和真机 profiler 前必须保持未验证状态。",
+      "const": "UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING"
+    }
+  },
+  "additionalProperties": true
+}
