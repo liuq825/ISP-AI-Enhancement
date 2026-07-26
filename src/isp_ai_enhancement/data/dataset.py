@@ -76,7 +76,12 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         return raw, extras
 
     def _crop(self, input_raw: Tensor, target: Tensor, extras: dict[str, Tensor]) -> tuple:
-        """对输入、目标和条件图应用同一随机窗口裁剪。"""
+        """对输入、目标和条件图应用同一窗口裁剪。
+
+        训练集开启增强时使用随机窗口；验证/测试集关闭增强时固定取中心窗口。
+        这样既保留训练 patch 的多样性，又保证同一 checkpoint 的验证指标不会
+        因裁剪坐标变化而漂移。
+        """
 
         if self.crop_size is None:
             return input_raw, target, extras
@@ -84,8 +89,13 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         height, width = input_raw.shape[-2:]
         if height < size or width < size:
             raise ValueError(f"crop {size} is larger than sample {height}×{width}")
-        top = int(torch.randint(0, height - size + 1, ()).item())
-        left = int(torch.randint(0, width - size + 1, ()).item())
+        if self.augment:
+            top = int(torch.randint(0, height - size + 1, ()).item())
+            left = int(torch.randint(0, width - size + 1, ()).item())
+        else:
+            # 奇数差值时向左上取整；该规则不依赖随机数，也便于跨实现复现。
+            top = (height - size) // 2
+            left = (width - size) // 2
         crop = (..., slice(top, top + size), slice(left, left + size))
         return (
             input_raw[crop],

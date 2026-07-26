@@ -27,6 +27,10 @@ mosaic，并不是本项目所需的四通道 canonical RAW。`import-sidd` 根�
 CFA 与逐场景 NLF。数据切分使用三位 `scene_id` 分组；同一物理场景即使由不同相机
 或 ISO 拍摄，也不会跨越 train/val/test。
 
+CLI 默认读取 `resources/sidd_validation_scenes.yaml` 并执行 held-out 硬隔离。
+若解压目录意外包含官方 40 个 benchmark 场景中的任意一个，导入会在创建输出目录前
+失败。不能通过重新随机切分把这些场景改名为训练集，否则公开验证结论已经泄漏。
+
 `noise_sigma` 根据官方 NLF 在线性 18% 参考灰处计算
 `sqrt(mean(beta1*0.18 + beta2))`。它只是 16 通道上下文的可复现标量摘要，完整
 六个 NLF 系数仍保存在 Manifest 元数据中。

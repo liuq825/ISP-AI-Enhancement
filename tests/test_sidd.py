@@ -77,6 +77,26 @@ def test_import_sidd_packs_and_preserves_scene_split(tmp_path: Path) -> None:
         assert archive["raw"].shape == (4, 4, 4)
 
 
+def test_import_sidd_rejects_official_held_out_scene(tmp_path: Path) -> None:
+    """训练源目录若混入官方 benchmark 场景，导入必须在写产物前失败。"""
+
+    source = tmp_path / "source"
+    leaked_name = "0009_001_S6_00800_00350_3200_L"
+    _create_scene(source, leaked_name)
+    scene_order = tmp_path / "held_out.yaml"
+    scene_order.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        f"  - {leaked_name}\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "converted"
+
+    with pytest.raises(ValueError, match="held-out benchmark"):
+        import_sidd_dataset(source, output, held_out_scenes=scene_order)
+    assert not output.exists()
+
+
 def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:
     """缺失官方 NLF 六个系数字段的 CSV 必须被拒绝。"""
 

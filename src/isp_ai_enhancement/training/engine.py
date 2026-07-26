@@ -282,7 +282,9 @@ def train_from_config(path: str | Path) -> Path:
         "num_workers": num_workers,
         "worker_init_fn": _seed_worker,
         "pin_memory": device.type == "cuda",
-        "persistent_workers": num_workers > 0,
+        # 常驻 worker 的 Python/NumPy/Torch RNG 状态不在 checkpoint 中；
+        # 每轮重建 worker 才能通过已保存的 Generator 状态精确恢复下一轮增强序列。
+        "persistent_workers": False,
     }
     train_loader = DataLoader(
         train_data,

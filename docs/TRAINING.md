@@ -53,6 +53,12 @@ resume_checkpoint: runs/student_distill/epoch_0040.pt
 训练器拒绝恢复。单元测试从第一轮 checkpoint 恢复第二轮，并要求权重与连续训练逐元素
 完全一致。
 
+训练集裁剪随增强随机变化，验证集裁剪固定为中心窗口，因此同一权重不会因验证裁剪
+坐标变化而产生分数漂移。多进程 DataLoader 默认不启用 `persistent_workers`：
+常驻 worker 内部的 Python/NumPy/Torch 随机状态无法随 checkpoint 保存；每轮重建
+worker 后，已保存的 DataLoader Generator 才能精确派生下一轮增强种子。该选择会增加
+少量 epoch 启动开销，但保证中断恢复的实验可比性。
+
 ## QAT 微调
 
 QAT 必须从已经完成物理剪枝和 FP32 微调的权重开始：

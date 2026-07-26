@@ -139,6 +139,7 @@ def _import_sidd(args: argparse.Namespace) -> int:
             args.source,
             args.output,
             nlf_csv=args.nlf_csv,
+            held_out_scenes=args.held_out_scenes,
             split_seed=args.split_seed,
             train_ratio=args.train_ratio,
             val_ratio=args.val_ratio,
@@ -259,6 +260,11 @@ def build_parser() -> argparse.ArgumentParser:
     sidd.add_argument("--source", required=True)
     sidd.add_argument("--output", required=True)
     sidd.add_argument("--nlf-csv")
+    sidd.add_argument(
+        "--held-out-scenes",
+        default="resources/sidd_validation_scenes.yaml",
+        help="官方 benchmark 场景表；导入训练数据时命中任一场景即拒绝",
+    )
     sidd.add_argument("--split-seed", type=int, default=20260726)
     sidd.add_argument("--train-ratio", type=float, default=0.8)
     sidd.add_argument("--val-ratio", type=float, default=0.1)

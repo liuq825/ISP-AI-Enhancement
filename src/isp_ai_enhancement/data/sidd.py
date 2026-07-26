@@ -340,6 +340,7 @@ def import_sidd_dataset(
     output_dir: str | Path,
     *,
     nlf_csv: str | Path | None = None,
+    held_out_scenes: str | Path | None = None,
     split_seed: int = 20260726,
     train_ratio: float = 0.8,
     val_ratio: float = 0.1,
@@ -347,14 +348,13 @@ def import_sidd_dataset(
     """把解压后的官方 SIDD RAW 树转换为项目统一的 packed RAW 数据集。
 
     每一对源文件都会记录 SHA256；分组键使用场景 ID，确保同一场景的多个
-    噪声帧不会被拆到训练和测试集合。输出 NPZ 的通道顺序恒为
-    ``[R, Gr, Gb, B]``，与手机原始 CFA 类型无关。
+    噪声帧不会被拆到训练和测试集合。若提供 ``held_out_scenes``，任何官方
+    benchmark 场景一旦出现在训练源目录中都会被硬拒绝。输出 NPZ 的通道顺序
+    恒为 ``[R, Gr, Gb, B]``，与手机原始 CFA 类型无关。
     """
 
     source = Path(source_dir)
     output = Path(output_dir)
-    sample_dir = output / "samples"
-    sample_dir.mkdir(parents=True, exist_ok=True)
     nlf_values = load_sidd_nlf(nlf_csv) if nlf_csv is not None else {}
     scene_dirs = sorted(
         path
@@ -363,7 +363,25 @@ def import_sidd_dataset(
     )
     if not scene_dirs:
         raise ValueError(f"{source}: no SIDD scene directories found")
+    if held_out_scenes is not None:
+        # 只比较完整场景实例名，不能只按三位 scene_id 拒绝：官方训练实例与
+        # benchmark 实例会共享物理场景号，但拍摄条件和实例编号不同。
+        held_out_names = {
+            (
+                f"{scene.instance_id}_{scene.scene_id}_{scene.camera_id}_{scene.iso:05d}_"
+                f"{scene.shutter_denominator:05d}_{scene.cct:04d}_{scene.brightness}"
+            )
+            for scene in load_sidd_scene_order(held_out_scenes)
+        }
+        leaked = sorted(path.name for path in scene_dirs if path.name in held_out_names)
+        if leaked:
+            raise ValueError(
+                "SIDD source contains official held-out benchmark scenes; "
+                f"remove them before import: {leaked}"
+            )
 
+    sample_dir = output / "samples"
+    sample_dir.mkdir(parents=True, exist_ok=True)
     records: list[ManifestRecord] = []
     for scene_dir in scene_dirs:
         scene = SIDDScene.from_directory(scene_dir)
@@ -390,8 +408,8 @@ def import_sidd_dataset(
             sample_id = f"sidd_{scene.instance_id}_{pair_index:03d}"
             converted_input = sample_dir / f"{sample_id}_input.npz"
             converted_target = sample_dir / f"{sample_id}_target.npz"
-            np.savez_compressed(converted_input, raw=noisy)
-            np.savez_compressed(converted_target, raw=target)
+            _save_raw_npz(converted_input, noisy)
+            _save_raw_npz(converted_target, target)
             records.append(
                 ManifestRecord(
                     sample_id=sample_id,
