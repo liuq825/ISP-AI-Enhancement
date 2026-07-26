@@ -1,3 +1,9 @@
+"""基于 JSONL 清单的配对 RAW 训练数据集。
+
+模块只接受项目定义的紧凑 NPZ 容器，并在读取时构建与部署完全一致的
+16 通道输入；这样数据增强不会绕过输入契约或破坏目标配对关系。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,7 +19,11 @@ from .manifest import ManifestRecord, read_manifest
 
 
 class RawPairDataset(Dataset[dict[str, Any]]):
-    """Manifest-backed paired RAW dataset using compact NumPy containers."""
+    """读取清单驱动的噪声 RAW/干净 RAW 配对数据。
+
+    裁剪和翻转同时作用于输入、标签及所有空间条件图，保证监督像素始终对齐。
+    ``split`` 在初始化阶段固定过滤，避免 DataLoader 运行中混入其他集合。
+    """
 
     def __init__(
         self,
@@ -24,6 +34,8 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         crop_size: int | None = None,
         augment: bool = False,
     ) -> None:
+        """加载指定划分的记录并保存裁剪、增强和上下文构建配置。"""
+
         self.manifest_path = Path(manifest_path)
         self.root = self.manifest_path.parent
         self.records = [
@@ -36,14 +48,20 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         self.augment = augment
 
     def __len__(self) -> int:
+        """返回当前数据划分中的配对样本数。"""
+
         return len(self.records)
 
     def _resolve(self, value: str) -> Path:
+        """把清单中的相对路径解析为相对于清单目录的文件路径。"""
+
         path = Path(value)
         return path if path.is_absolute() else self.root / path
 
     @staticmethod
     def _load_raw(path: Path) -> tuple[Tensor, dict[str, Tensor]]:
+        """从 NPZ 读取四通道 RAW 及可选空间条件图，禁止反序列化对象。"""
+
         with np.load(path, allow_pickle=False) as archive:
             if "raw" not in archive:
                 raise ValueError(f"{path} does not contain a 'raw' array")
@@ -58,6 +76,8 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         return raw, extras
 
     def _crop(self, input_raw: Tensor, target: Tensor, extras: dict[str, Tensor]) -> tuple:
+        """对输入、目标和条件图应用同一随机窗口裁剪。"""
+
         if self.crop_size is None:
             return input_raw, target, extras
         size = self.crop_size
@@ -79,6 +99,8 @@ class RawPairDataset(Dataset[dict[str, Any]]):
     def _augment(
         self, input_raw: Tensor, target: Tensor, extras: dict[str, Tensor]
     ) -> tuple[Tensor, Tensor, dict[str, Tensor]]:
+        """以独立概率执行水平/垂直翻转，并保持所有配对张量严格同步。"""
+
         if not self.augment:
             return input_raw, target, extras
         dimensions: list[int] = []
@@ -95,6 +117,8 @@ class RawPairDataset(Dataset[dict[str, Any]]):
         )
 
     def __getitem__(self, index: int) -> dict[str, Any]:
+        """读取一个样本，构建 16 通道输入并返回训练引擎需要的字段。"""
+
         record: ManifestRecord = self.records[index]
         input_raw, extras = self._load_raw(self._resolve(record.input_path))
         target, _ = self._load_raw(self._resolve(record.target_path))
@@ -113,6 +137,7 @@ class RawPairDataset(Dataset[dict[str, Any]]):
                 for value in metadata_values.get("camera_embedding", (0.0, 0.0, 0.0, 0.0))
             ),
         )
+        # 上下文构建放在裁剪和增强之后，可避免先生成 12 个大尺寸条件平面。
         context = self.context_builder.build(
             input_raw,
             metadata,

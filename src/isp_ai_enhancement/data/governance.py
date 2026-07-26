@@ -1,3 +1,10 @@
+"""数据许可、来源与相机上下文覆盖的训练前门禁。
+
+本项目当前目标是达到商用模型技术要求，而非直接将数据或模型投入生产，
+因此常规研发使用 ``commercial_grade``。保留更严格的 ``production`` 模式，
+用于未来正式量产时校验审批人、许可快照和目标传感器数据。
+"""
+
 from __future__ import annotations
 
 import re
@@ -15,6 +22,8 @@ _PURPOSES = {"smoke", "research", "commercial_grade", "production"}
 
 
 def _dataset_index(catalog: Mapping[str, Any]) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    """把数据集目录转换为按 ID 索引的映射，并收集结构错误。"""
+
     errors: list[str] = []
     raw_entries = catalog.get("datasets")
     if not isinstance(raw_entries, list):
@@ -36,6 +45,8 @@ def _dataset_index(catalog: Mapping[str, Any]) -> tuple[dict[str, dict[str, Any]
 
 
 def _approval_index(approval: Mapping[str, Any]) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    """解析正式生产审批文件，确保每个条目都是结构化映射。"""
+
     raw_entries = approval.get("approved_datasets")
     if not isinstance(raw_entries, Mapping):
         return {}, ["approval file must contain an 'approved_datasets' mapping"]
@@ -50,6 +61,8 @@ def _approval_index(approval: Mapping[str, Any]) -> tuple[dict[str, dict[str, An
 
 
 def _validate_production_approval(dataset_id: str, value: Mapping[str, Any]) -> list[str]:
+    """验证一个数据集的生产审批字段及两份证据快照哈希。"""
+
     errors: list[str] = []
     approved_uses = value.get("approved_uses", [])
     if not isinstance(approved_uses, list) or "production" not in approved_uses:
@@ -68,7 +81,12 @@ def validate_context_coverage(
     records: Iterable[ManifestRecord],
     context_config: ContextConfig,
 ) -> list[str]:
-    """Require a versioned registry entry for every Sensor used by training."""
+    """要求训练涉及的每个传感器都存在版本化相机嵌入。
+
+    若清单内同时写入了嵌入值，则必须与注册表完全相同，防止相同
+    ``sensor_id`` 在不同样本中被赋予不同语义。
+    """
+
     errors: list[str] = []
     for record in records:
         registered = context_config.camera_embeddings.get(record.sensor_id)
@@ -98,7 +116,12 @@ def validate_data_policy(
     purpose: str,
     approval_path: str | Path | None = None,
 ) -> list[str]:
-    """Fail closed when a manifest is not licensed for the declared training purpose."""
+    """按声明用途检查数据许可；无法证明允许时采用拒绝策略。
+
+    ``commercial_grade`` 表示以商用质量指标研发、但不直接投入生产。
+    ``production`` 会额外要求审批文件、证据哈希和目标传感器数据。
+    """
+
     normalized_purpose = purpose.lower()
     if normalized_purpose not in _PURPOSES:
         return [f"unknown training purpose {purpose!r}; expected one of {sorted(_PURPOSES)}"]
@@ -120,6 +143,7 @@ def validate_data_policy(
                 f"dataset {dataset_id!r} is not allowed for {normalized_purpose} use"
             )
 
+    # 研发阶段只需要用途被数据目录明确允许；正式生产才进入人工审批门禁。
     if normalized_purpose != "production":
         return errors
 
@@ -156,6 +180,8 @@ def enforce_data_policy(
     context_config: ContextConfig,
     approval_path: str | Path | None = None,
 ) -> None:
+    """组合执行许可和上下文校验，任一失败即阻止训练启动。"""
+
     items = list(records)
     errors = validate_data_policy(
         items,

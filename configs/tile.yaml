@@ -1,3 +1,4 @@
+# 大分辨率 RAW 的分块推理参数；halo 吸收卷积感受野，Hann 权重平滑接缝。
 tile:
   size: 512
   halo: 48

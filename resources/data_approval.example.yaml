@@ -1,6 +1,8 @@
+# 正式生产数据审批模板；commercial_grade 技术研发阶段不要求填写此文件。
 approval_version: 1
 approved_datasets:
   target_sensor_capture:
+    # 下列占位字段必须替换为可追溯审批人与两份证据快照，禁止直接使用示例值。
     approved_uses: [production]
     reviewer: "replace-with-named-reviewer"
     approved_on: "YYYY-MM-DD"

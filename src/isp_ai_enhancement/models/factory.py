@@ -1,3 +1,5 @@
+"""从版本化 YAML 配置构建 NAFNetRaw，统一训练、剪枝和导出的模型入口。"""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -10,6 +12,8 @@ from .nafnet import ExpansionSpec, NAFNetRaw
 
 
 def build_model(config: Mapping[str, Any]) -> NAFNetRaw:
+    """解析模型映射并实例化 NAFNetRaw，支持 baseline 或显式逐块宽度。"""
+
     model_config = config.get("model", config)
     expansion_value = model_config.get("expansion_spec", "baseline")
     expansion = (
@@ -27,4 +31,6 @@ def build_model(config: Mapping[str, Any]) -> NAFNetRaw:
 
 
 def build_model_from_file(path: str | Path) -> NAFNetRaw:
+    """读取 UTF-8 YAML 文件后构建模型，避免各命令重复实现配置解析。"""
+
     return build_model(load_yaml(path))

@@ -1,3 +1,5 @@
+"""静态检查 ONNX 输入输出、算子构成和潜在 HiAI CANN 风险点。"""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -6,7 +8,8 @@ from typing import Any
 
 
 def audit_onnx(path: str | Path) -> dict[str, Any]:
-    """Return a structural audit without claiming target NPU support."""
+    """返回结构审计报告，但不把通用 ONNX 合法性等同于目标 NPU 支持。"""
+
     try:
         import onnx
     except ImportError as error:
@@ -28,6 +31,8 @@ def audit_onnx(path: str | Path) -> dict[str, Any]:
     }
 
     def value_shape(value_info) -> list[int | str]:
+        """把 ONNX TensorShape 转成整数或明确的 dynamic 标记。"""
+
         dimensions = value_info.type.tensor_type.shape.dim
         return [
             dimension.dim_value
@@ -43,6 +48,7 @@ def audit_onnx(path: str | Path) -> dict[str, Any]:
         for shape in (*inputs.values(), *outputs.values())
         for dimension in shape
     )
+    # 静态部署图若出现这些算子，通常意味着 Pad/裁剪逻辑污染了导出路径。
     dynamic_shape_operators = {
         name: operator_counts[name]
         for name in ("Shape", "Gather", "Mod", "Pad", "Slice")

@@ -1,3 +1,5 @@
+"""数据输入、清单、治理、合成冒烟集和 SIDD 转换的公共接口。"""
+
 from .context import (
     ContextBuilder,
     ContextConfig,

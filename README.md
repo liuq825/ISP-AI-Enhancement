@@ -15,6 +15,8 @@
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[all]"
 .\.venv\Scripts\isp-ai.exe model-summary --config configs/model_student.yaml
+.\.venv\Scripts\isp-ai.exe pruning-summary --source configs/model_student.yaml `
+  --target configs/model_student_pruned15.yaml --backend torch-pruning
 .\.venv\Scripts\isp-ai.exe make-smoke-data --output data/smoke --samples 16
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/smoke/manifest.jsonl
 .\.venv\Scripts\python.exe -m pytest
@@ -51,6 +53,15 @@ py -m venv .venv
 
 精确定义见 `docs/INPUT_CONTRACT.md`；量产边界与端侧路线见
 `docs/DEPLOYMENT_KIRIN9000.md`。
+
+## 代码注释与剪枝
+
+所有 Python 模块、类和函数都必须提供中文说明，C++ 公共接口与部署脚本同样记录所有权、
+失败语义和工具链约束；CI 会自动检查 Python 覆盖面。规范见
+`docs/CODE_COMMENT_STANDARD.md`。
+
+结构化剪枝默认使用 `torch-pruning==1.6.1` 的 DepGraph 物理删除通道，并保留手工重建
+后端作为交叉验证。SimpleGate 成对索引、已知兼容性问题和参考结果见 `docs/PRUNING.md`。
 
 ## 数据使用边界
 

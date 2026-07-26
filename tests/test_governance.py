@@ -1,3 +1,5 @@
+"""验证研发与生产两级数据许可治理门禁。"""
+
 from pathlib import Path
 
 import yaml
@@ -11,6 +13,8 @@ from isp_ai_enhancement.data.manifest import ManifestRecord
 
 
 def _record(dataset_id: str, sensor_id: str = "sensor") -> ManifestRecord:
+    """构造只包含治理测试所需字段的最小清单记录。"""
+
     return ManifestRecord(
         sample_id=f"{dataset_id}_sample",
         dataset_id=dataset_id,
@@ -27,11 +31,15 @@ def _record(dataset_id: str, sensor_id: str = "sensor") -> ManifestRecord:
 
 
 def _write_yaml(path: Path, value: dict) -> Path:
+    """写出临时 YAML 并返回路径，减少测试样板代码。"""
+
     path.write_text(yaml.safe_dump(value, sort_keys=False), encoding="utf-8")
     return path
 
 
 def _catalog(tmp_path: Path) -> Path:
+    """创建覆盖冒烟、目标传感器和非商用基准的测试目录。"""
+
     return _write_yaml(
         tmp_path / "datasets.yaml",
         {
@@ -61,6 +69,8 @@ def _catalog(tmp_path: Path) -> Path:
 
 
 def _approval(tmp_path: Path) -> Path:
+    """创建字段完整的目标传感器生产审批记录。"""
+
     return _write_yaml(
         tmp_path / "approval.yaml",
         {
@@ -79,6 +89,8 @@ def _approval(tmp_path: Path) -> Path:
 
 
 def test_smoke_policy_allows_only_catalogued_smoke_data(tmp_path: Path) -> None:
+    """已登记的合成数据应仅能通过冒烟用途检查。"""
+
     assert (
         validate_data_policy(
             [_record("synthetic_smoke")],
@@ -90,6 +102,8 @@ def test_smoke_policy_allows_only_catalogued_smoke_data(tmp_path: Path) -> None:
 
 
 def test_production_requires_approval_and_target_sensor(tmp_path: Path) -> None:
+    """生产用途缺少审批文件时必须被阻止。"""
+
     errors = validate_data_policy(
         [_record("target")],
         catalog_path=_catalog(tmp_path),
@@ -101,6 +115,8 @@ def test_production_requires_approval_and_target_sensor(tmp_path: Path) -> None:
 def test_commercial_grade_research_does_not_require_production_approval(
     tmp_path: Path,
 ) -> None:
+    """商用质量研发阶段不应被未来生产审批流程错误阻塞。"""
+
     catalog = _catalog(tmp_path)
     value = yaml.safe_load(catalog.read_text(encoding="utf-8"))
     value["datasets"][1]["allowed_uses"].append("commercial_grade")
@@ -116,6 +132,8 @@ def test_commercial_grade_research_does_not_require_production_approval(
 
 
 def test_production_accepts_complete_target_sensor_approval(tmp_path: Path) -> None:
+    """目标传感器数据与完整审批应通过生产门禁。"""
+
     context = ContextConfig(camera_embeddings={"sensor": (0.0, 0.0, 0.0, 0.0)})
     enforce_data_policy(
         [_record("target")],
@@ -127,6 +145,8 @@ def test_production_accepts_complete_target_sensor_approval(tmp_path: Path) -> N
 
 
 def test_production_rejects_noncommercial_dataset(tmp_path: Path) -> None:
+    """目录明确禁止生产的数据不得被审批文件绕过。"""
+
     errors = validate_data_policy(
         [_record("dnd")],
         catalog_path=_catalog(tmp_path),

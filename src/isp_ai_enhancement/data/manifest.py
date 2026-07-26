@@ -1,3 +1,9 @@
+"""训练数据清单的数据结构、读写与防泄漏校验。
+
+清单采用一行一个 JSON 对象的 JSONL 格式，便于增量生成、代码审查和流式读取。
+``session_id + scene_id`` 被视为不可跨训练/验证/测试划分的最小分组。
+"""
+
 from __future__ import annotations
 
 import json
@@ -8,6 +14,8 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class ManifestRecord:
+    """描述一对 RAW 输入/标签及其数据治理和分组元数据。"""
+
     sample_id: str
     dataset_id: str
     input_path: str
@@ -22,6 +30,8 @@ class ManifestRecord:
 
     @classmethod
     def from_dict(cls, value: dict[str, object]) -> ManifestRecord:
+        """从字典构建记录，并在入口处检查所有不可缺少的字段。"""
+
         required = {
             "sample_id",
             "dataset_id",
@@ -52,6 +62,8 @@ class ManifestRecord:
         )
 
     def as_dict(self) -> dict[str, object]:
+        """转换为可直接写入 JSONL 的普通字典。"""
+
         return {
             "sample_id": self.sample_id,
             "dataset_id": self.dataset_id,
@@ -68,6 +80,8 @@ class ManifestRecord:
 
 
 def read_manifest(path: str | Path) -> list[ManifestRecord]:
+    """读取 UTF-8 JSONL 清单，并在错误信息中保留准确行号。"""
+
     source = Path(path)
     records: list[ManifestRecord] = []
     with source.open("r", encoding="utf-8") as handle:
@@ -85,6 +99,8 @@ def read_manifest(path: str | Path) -> list[ManifestRecord]:
 
 
 def write_manifest(records: Iterable[ManifestRecord], path: str | Path) -> None:
+    """以稳定键序和 LF 换行写出清单，便于跨平台比较与版本控制。"""
+
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open("w", encoding="utf-8", newline="\n") as handle:
@@ -99,6 +115,12 @@ def validate_manifest(
     root: str | Path | None = None,
     require_files: bool = True,
 ) -> list[str]:
+    """检查 ID、划分、文件存在性以及场景级数据泄漏。
+
+    返回全部错误而不是遇到第一项就退出，以便数据准备人员一次完成修复。
+    ``golden`` 是独立发布门禁集，可与常规划分并存但不参与泄漏判定。
+    """
+
     items = list(records)
     errors: list[str] = []
     seen_ids: set[str] = set()
@@ -113,6 +135,7 @@ def validate_manifest(
             errors.append(f"{record.sample_id}: dataset_id must not be empty")
         if record.split not in valid_splits:
             errors.append(f"{record.sample_id}: invalid split {record.split!r}")
+        # 同一拍摄会话中的同一场景必须整体分到一个集合，不能按 patch 随机拆分。
         group = (record.session_id, record.scene_id)
         group_splits.setdefault(group, set()).add(record.split)
         if require_files:

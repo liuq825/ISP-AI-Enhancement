@@ -1,3 +1,5 @@
+"""验证官方 SIDD 元数据、CFA、配对、NLF 与转换流程。"""
+
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +16,8 @@ from isp_ai_enhancement.data.sidd import (
 
 
 def _create_scene(root: Path, name: str) -> Path:
+    """生成符合 SIDD 命名规则的最小 NumPy 测试场景。"""
+
     scene = root / name
     scene.mkdir(parents=True)
     mosaic = np.arange(64, dtype=np.float32).reshape(8, 8) / 64.0
@@ -23,6 +27,8 @@ def _create_scene(root: Path, name: str) -> Path:
 
 
 def test_official_sidd_cfa_mapping() -> None:
+    """五种官方相机代号必须使用已核验的 CFA 排列。"""
+
     assert SIDD_CFA_PATTERNS == {
         "GP": "BGGR",
         "IP": "RGGB",
@@ -33,6 +39,8 @@ def test_official_sidd_cfa_mapping() -> None:
 
 
 def test_parse_scene_and_discover_pairs(tmp_path: Path) -> None:
+    """场景目录元数据和噪声/真值文件应被正确解析配对。"""
+
     name = "0052_002_S6_01600_01000_5500_N"
     scene_dir = _create_scene(tmp_path, name)
     scene = SIDDScene.from_directory(scene_dir)
@@ -42,6 +50,8 @@ def test_parse_scene_and_discover_pairs(tmp_path: Path) -> None:
 
 
 def test_import_sidd_packs_and_preserves_scene_split(tmp_path: Path) -> None:
+    """同一场景号应保持相同划分，输出需为四通道 packed RAW。"""
+
     source = tmp_path / "source"
     first = "0051_002_S6_00100_00060_5500_N"
     second = "0052_002_S6_01600_01000_5500_N"
@@ -65,6 +75,8 @@ def test_import_sidd_packs_and_preserves_scene_split(tmp_path: Path) -> None:
 
 
 def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:
+    """缺失官方 NLF 六个系数字段的 CSV 必须被拒绝。"""
+
     path = tmp_path / "bad.csv"
     path.write_text("scene_instance_id,beta1_r\nx,1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="invalid SIDD NLF"):

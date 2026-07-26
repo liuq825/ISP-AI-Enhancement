@@ -17,6 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# 导出依赖独立安装，训练环境无需强制携带 ONNX Runtime。
 export = [
   "onnx>=1.17,<2",
   "onnxruntime>=1.20,<2",
@@ -26,12 +27,16 @@ data = [
   "rawpy>=0.21,<1",
   "scipy>=1.13,<2",
 ]
+# 固定已验证版本，避免 DepGraph API 漂移悄然改变剪枝结果。
+pruning = [
+  "torch-pruning==1.6.1",
+]
 quality = [
   "pytest>=8.3,<10",
   "ruff>=0.9,<1",
 ]
 all = [
-  "isp-ai-enhancement[export,data,quality]",
+  "isp-ai-enhancement[export,data,pruning,quality]",
 ]
 
 [project.scripts]

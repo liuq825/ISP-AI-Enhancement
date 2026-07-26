@@ -33,6 +33,9 @@ RAW / fused RAW
 参考配置不是最终通道索引。生产剪枝必须使用真实训练权重和分域敏感度，确保
 SimpleGate 两半、Depthwise、SCA 和前后 1×1 的索引同步。
 
+当前默认由 Torch-Pruning DepGraph 执行上述联动删除，手工重建后端作为独立基线。
+实现约束、命令和已知兼容性问题见 `PRUNING.md`。
+
 ## 部署后端决策
 
 麒麟端侧存在两条不同交付路线：

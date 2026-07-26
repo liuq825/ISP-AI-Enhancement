@@ -1,3 +1,4 @@
+# 学生模型的商用品质研发配置；该用途不等于已经取得正式生产授权。
 seed: 20260726
 device: cuda
 student_config: configs/model_student.yaml
@@ -7,6 +8,7 @@ context_config: configs/context.yaml
 manifest: data/production/manifest.jsonl
 output_dir: runs/student_distill
 data_policy:
+  # commercial_grade 校验公开数据研发用途，但不触发未来量产审批门禁。
   purpose: commercial_grade
   catalog: resources/datasets.yaml
 epochs: 100
@@ -17,6 +19,7 @@ learning_rate: 0.0001
 weight_decay: 0.0
 amp: true
 loss:
+  # 前三项为真值监督，后两项分别约束教师输出和中间特征。
   charbonnier: 1.0
   gradient: 0.10
   color: 0.05

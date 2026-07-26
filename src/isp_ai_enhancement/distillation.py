@@ -1,3 +1,5 @@
+"""Student 到 Teacher 的多尺度特征投影与蒸馏损失。"""
+
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
@@ -19,7 +21,7 @@ _STAGE_MULTIPLIERS = {
 
 
 class FeatureDistiller(nn.Module):
-    """Training-only 1×1 projections from Student features to Teacher features."""
+    """仅训练期使用 1×1 卷积对齐 Student/Teacher 通道并计算特征损失。"""
 
     def __init__(
         self,
@@ -27,6 +29,8 @@ class FeatureDistiller(nn.Module):
         teacher_width: int,
         keys: Sequence[str] = ("enc2", "enc4", "middle", "dec2"),
     ) -> None:
+        """校验特征层名称，并按各 stage 的倍率创建独立投影层。"""
+
         super().__init__()
         unknown = sorted(set(keys) - _STAGE_MULTIPLIERS.keys())
         if unknown:
@@ -50,6 +54,8 @@ class FeatureDistiller(nn.Module):
         student_features: Mapping[str, Tensor],
         teacher_features: Mapping[str, Tensor],
     ) -> Tensor:
+        """逐层投影 Student 特征后与停止梯度的 Teacher 特征计算 Smooth-L1。"""
+
         losses: list[Tensor] = []
         for key in self.keys:
             if key not in student_features or key not in teacher_features:

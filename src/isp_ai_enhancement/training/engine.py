@@ -1,3 +1,9 @@
+"""训练、验证、蒸馏、检查点保存和数据门禁的一体化执行引擎。
+
+训练入口先验证清单、许可用途和传感器上下文，再创建 DataLoader。模型预测
+四通道残差并与原始 packed RAW 相加；可选教师模型提供输出和中间特征蒸馏。
+"""
+
 from __future__ import annotations
 
 import json
@@ -24,6 +30,8 @@ from isp_ai_enhancement.models.factory import build_model_from_file
 
 
 def _seed_everything(seed: int) -> None:
+    """固定 Python、NumPy、CPU 与 CUDA 随机源，提高实验可复现性。"""
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -39,6 +47,8 @@ def _save_checkpoint(
     config: dict[str, Any],
     distiller: nn.Module | None = None,
 ) -> None:
+    """保存可恢复训练的版本化检查点，并在启用蒸馏时包含适配器状态。"""
+
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "format_version": 1,
@@ -59,6 +69,8 @@ def _evaluate(
     loader: DataLoader,
     device: torch.device,
 ) -> float:
+    """在验证集上计算平均 packed RAW PSNR，不创建梯度图。"""
+
     model.eval()
     values: list[float] = []
     for batch in loader:
@@ -70,6 +82,12 @@ def _evaluate(
 
 
 def train_from_config(path: str | Path) -> Path:
+    """按 YAML 配置完成训练并返回最后一个检查点路径。
+
+    该入口执行“先治理、后训练”：只有清单文件、数据用途和相机嵌入全部
+    通过预检才会创建输出目录并开始优化，避免不合规数据产生不可追溯权重。
+    """
+
     config_path = Path(path)
     config = load_yaml(config_path)
     seed = int(config.get("seed", 20260726))
@@ -114,6 +132,7 @@ def train_from_config(path: str | Path) -> Path:
     approval_path = Path(str(approval_value)) if approval_value is not None else None
     if approval_path is not None and not approval_path.is_absolute():
         approval_path = config_path.parent.parent / approval_path
+    # 数据许可与相机上下文属于训练硬门禁，不能仅依赖人工检查文档。
     enforce_data_policy(
         records,
         catalog_path=catalog_path,
@@ -152,6 +171,7 @@ def train_from_config(path: str | Path) -> Path:
     teacher: nn.Module | None = None
     distiller: FeatureDistiller | None = None
     teacher_feature_weight = 0.0
+    # 教师配置和权重必须成对出现，避免误以为已经启用知识蒸馏。
     if config.get("teacher_config") or config.get("teacher_checkpoint"):
         if not config.get("teacher_config") or not config.get("teacher_checkpoint"):
             raise ValueError("teacher_config and teacher_checkpoint must be provided together")
@@ -200,6 +220,7 @@ def train_from_config(path: str | Path) -> Path:
             for batch in train_loader:
                 inputs = batch["input"].to(device)
                 target = batch["target"].to(device)
+                # 第 16 通道是输入契约定义的有效像素掩码，只参与损失加权。
                 valid_mask = inputs[:, 15:16]
                 optimizer.zero_grad(set_to_none=True)
                 residual, student_features = model.forward_features(inputs)
@@ -207,6 +228,7 @@ def train_from_config(path: str | Path) -> Path:
                 teacher_enhanced = None
                 teacher_features = None
                 if teacher is not None:
+                    # 教师固定为推理态；只让学生和特征适配器接收梯度。
                     with torch.no_grad():
                         teacher_residual, teacher_features = teacher.forward_features(inputs)
                         teacher_enhanced = torch.clamp(inputs[:, :4] + teacher_residual, 0.0, 1.0)

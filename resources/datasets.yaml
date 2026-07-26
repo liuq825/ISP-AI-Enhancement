@@ -1,6 +1,8 @@
+# 机器可读的数据来源与用途目录；可下载不等于可用于任意目的。
 catalog_version: 2
 checked_on: "2026-07-26"
 policy:
+  # 当前 commercial_grade 研发不触发此审批；未来直接生产交付时必须执行。
   production_rule: >
     A production checkpoint may use a dataset only after a named reviewer has
     approved the exact license version and provenance snapshot. Downloadable
@@ -26,6 +28,7 @@ datasets:
     official_url: https://abdokamel.github.io/sidd/
     license_url: https://abdokamel.github.io/sidd/
     license_status: MIT stated for dataset and associated code
+    # 官方页面声明数据集与配套代码采用 MIT；正式生产仍保留证据快照复核。
     allowed_uses: [research, commercial_grade, production]
     production_default: review_required
     automated_download: false
@@ -72,6 +75,7 @@ datasets:
     expected_use: research evaluation after internal approval
 
   - id: target_sensor_capture
+    # 达到目标麒麟设备上的商用品质最终仍依赖自有传感器数据和标定。
     name: Product-owned target Sensor RAW corpus
     role: target_sensor
     task: production training, calibration, golden and visual review

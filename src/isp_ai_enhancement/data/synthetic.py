@@ -1,3 +1,9 @@
+"""生成仅用于流水线冒烟验证的合成 RAW 配对数据。
+
+这里的程序纹理和简化噪声不代表真实手机成像分布，不能用于宣称模型质量。
+它的价值是无需下载外部数据即可验证清单、训练、导出和回归测试能否闭环。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,6 +14,8 @@ from .manifest import ManifestRecord, write_manifest
 
 
 def _procedural_clean_raw(height: int, width: int, rng: np.random.Generator) -> np.ndarray:
+    """合成含渐变、周期纹理和简单几何结构的四通道干净 RAW。"""
+
     y, x = np.mgrid[0:height, 0:width].astype(np.float32)
     x /= max(1, width - 1)
     y /= max(1, height - 1)
@@ -31,6 +39,8 @@ def _add_sensor_noise(
     shot_scale: float,
     read_sigma: float,
 ) -> np.ndarray:
+    """叠加信号相关散粒噪声、读出噪声、行列噪声和黑电平漂移。"""
+
     variance = shot_scale * clean + read_sigma**2
     noise = rng.normal(size=clean.shape).astype(np.float32) * np.sqrt(variance)
     row_noise = rng.normal(0, read_sigma * 0.35, size=(4, clean.shape[1], 1)).astype(np.float32)
@@ -47,7 +57,12 @@ def generate_smoke_dataset(
     width: int = 96,
     seed: int = 20260726,
 ) -> Path:
-    """Generate deterministic, license-free data for smoke tests only."""
+    """生成可复现且无需外部许可的冒烟测试数据，并返回清单路径。
+
+    数据按完整场景样本划分，噪声强度覆盖四个 ISO 桶。固定随机种子保证
+    CI 的训练与数值检查可重复，但这些样本绝不能替代真实 RAW 质量评测。
+    """
+
     if samples < 4:
         raise ValueError("at least four samples are required")
     if height % 16 or width % 16:
@@ -66,6 +81,7 @@ def generate_smoke_dataset(
             split = "val"
         else:
             split = "test"
+        # 循环覆盖四档噪声，使很小的冒烟集也能走过分桶统计路径。
         iso_index = index % 4
         iso_bucket = ("low", "medium", "high", "extreme")[iso_index]
         shot_scale = (0.0004, 0.001, 0.003, 0.008)[iso_index]

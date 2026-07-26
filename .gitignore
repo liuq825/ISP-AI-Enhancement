@@ -10,7 +10,7 @@ build/
 dist/
 *.egg-info/
 
-# Local datasets, weights, exports, and experiments are intentionally not versioned.
+# 本地数据集、权重、导出物和实验目录体积大或受许可约束，不进入版本控制。
 /data/
 /datasets/
 /checkpoints/
@@ -24,10 +24,10 @@ dist/
 *.om
 *.ms
 
-# Local document-review intermediates.
+# DOCX/PDF 视觉复核产生的本地中间文件不进入版本控制。
 .codex-doc-review/
 
-# Editors and operating systems.
+# 编辑器与操作系统生成文件。
 .idea/
 .vscode/
 .DS_Store

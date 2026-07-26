@@ -1,5 +1,6 @@
-# One argument per line. Copy this file into a versioned product-specific file.
-# Do not assume flags are portable across HiAI CANN DDK releases.
+# 每行填写一个参数；正式项目应复制为带产品和 DDK 版本号的专用文件。
+# 不同 HiAI/CANN DDK 版本的参数并不保证兼容，转换前必须查阅随 DDK 提供的文档。
+# 示例只表达输入/输出路径，不代表已完成麒麟 9000 的量化或算子配置。
 --model
 artifacts/student_512.onnx
 --output

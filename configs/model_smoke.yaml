@@ -1,3 +1,4 @@
+# 极小 NAFNet，仅用于 CPU 冒烟测试，不能作为质量或性能结论。
 model:
   name: nafnet_raw
   input_channels: 16

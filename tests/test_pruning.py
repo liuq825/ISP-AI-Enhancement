@@ -1,3 +1,5 @@
+"""验证手工结构化剪枝基线的参数缩减与数值保持行为。"""
+
 import torch
 
 from isp_ai_enhancement.models.nafnet import NAFNetRaw, reference_pruned_spec
@@ -5,6 +7,8 @@ from isp_ai_enhancement.pruning.physical import physical_prune
 
 
 def test_physical_pruning_rebuilds_smaller_graph() -> None:
+    """参考剪枝规格应真正移除约 15% 参数，而不是只写零掩码。"""
+
     torch.manual_seed(7)
     source = NAFNetRaw()
     target, report = physical_prune(source, reference_pruned_spec())
@@ -14,6 +18,8 @@ def test_physical_pruning_rebuilds_smaller_graph() -> None:
 
 
 def test_noop_pruning_preserves_output() -> None:
+    """目标宽度不变时，重建模型输出必须与源模型一致。"""
+
     torch.manual_seed(9)
     source = NAFNetRaw(
         width=4,

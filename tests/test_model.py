@@ -1,9 +1,13 @@
+"""验证 NAFNet RAW 模型形状、参数基线和静态导出路径。"""
+
 import torch
 
 from isp_ai_enhancement.models.nafnet import NAFNetRaw
 
 
 def test_small_model_shape_and_padding() -> None:
+    """非 16 倍数输入应自动补边并裁回原始空间尺寸。"""
+
     model = NAFNetRaw(
         width=4,
         encoder_blocks=(1, 1, 1, 1),
@@ -18,11 +22,15 @@ def test_small_model_shape_and_padding() -> None:
 
 
 def test_reference_parameter_count() -> None:
+    """参考学生模型参数量变化必须由显式架构决策触发。"""
+
     model = NAFNetRaw()
     assert model.parameter_count() == 14_348_516
 
 
 def test_static_path_matches_regular_path_for_aligned_input() -> None:
+    """对齐尺寸下的 ONNX 静态路径应与常规前向数值一致。"""
+
     model = NAFNetRaw(
         width=4,
         encoder_blocks=(1, 1, 1, 1),

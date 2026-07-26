@@ -1,3 +1,5 @@
+"""把训练 checkpoint 导出为静态 ONNX，并执行 Checker、ORT 数值对照与哈希落盘。"""
+
 from __future__ import annotations
 
 import hashlib
@@ -14,15 +16,23 @@ from isp_ai_enhancement.models.factory import build_model_from_file
 
 
 class _StaticExportWrapper(nn.Module):
+    """强制导出器走无动态 Pad 的 ``forward_static`` 路径。"""
+
     def __init__(self, model: nn.Module) -> None:
+        """保存待导出的 NAFNet 模型，不改变其参数命名。"""
+
         super().__init__()
         self.model = model
 
     def forward(self, value: Tensor) -> Tensor:
+        """返回固定输入尺寸对应的四通道 RAW 残差。"""
+
         return self.model.forward_static(value)
 
 
 def sha256_file(path: str | Path) -> str:
+    """以 1 MiB 分块计算文件 SHA256，避免把大型 ONNX 一次读入内存。"""
+
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
@@ -31,6 +41,8 @@ def sha256_file(path: str | Path) -> str:
 
 
 def load_checkpoint_state(path: str | Path) -> dict[str, Any]:
+    """兼容完整训练 checkpoint 和裸 state_dict，并统一映射到 CPU。"""
+
     value = torch.load(path, map_location="cpu", weights_only=False)
     if isinstance(value, dict) and "model_state" in value:
         return value["model_state"]
@@ -46,6 +58,12 @@ def export_onnx(
     output: str | Path,
     export_config: str | Path | None = None,
 ) -> Path:
+    """导出静态 ONNX、验证 PyTorch/ORT 一致性并生成部署清单。
+
+    输入 H/W 必须是 16 的倍数，确保图中不残留 Shape/Pad/Slice 动态子图。
+    只有 Checker 和数值对照通过后才写 manifest；目标 NPU 支持仍需 DDK 实测。
+    """
+
     model = build_model_from_file(model_config)
     model.load_state_dict(load_checkpoint_state(checkpoint), strict=True)
     model.eval()
@@ -65,6 +83,7 @@ def export_onnx(
         width,
         generator=generator,
     )
+    # 第 15 通道是有效区 mask；静态样例无 Pad，因此整张设为 1。
     sample[:, 15] = 1.0
     export_model = _StaticExportWrapper(model)
     torch.onnx.export(
@@ -92,6 +111,7 @@ def export_onnx(
         [str(settings.get("output_name", "raw_residual"))],
         {str(settings.get("input_name", "context_raw")): sample.numpy()},
     )[0]
+    # 同时记录绝对/相对误差；近零输出会放大相对误差，因此放行仍使用 atol+rtol。
     absolute_error = np.abs(torch_output - runtime_output)
     relative_error = absolute_error / np.maximum(np.abs(torch_output), 1e-6)
     max_absolute_error = float(absolute_error.max())
@@ -102,6 +122,7 @@ def export_onnx(
         atol=float(settings.get("verify_atol", 1e-4)),
         rtol=float(settings.get("verify_rtol", 1e-3)),
     )
+    # manifest 是模型文件的伴生证据，不把 ONNX 成功误报成麒麟 NPU 已验证。
     manifest = {
         "format_version": 1,
         "model_name": "nafnet_raw_student",

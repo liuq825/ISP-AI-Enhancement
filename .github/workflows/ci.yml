@@ -1,5 +1,6 @@
 name: CI
 
+# 每次提交与拉取请求都执行静态检查、中文说明门禁和 CPU 单元测试。
 on:
   push:
   pull_request:
@@ -16,6 +17,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install -e ".[quality]"
+      # pruning 额外依赖用于执行真实 DepGraph 回归，而非跳过可选后端测试。
+      - run: python -m pip install -e ".[quality,pruning]"
       - run: ruff check .
       - run: pytest

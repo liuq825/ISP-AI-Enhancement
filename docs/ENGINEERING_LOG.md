@@ -104,3 +104,50 @@
   数据源码确实进入索引。
 - 防复发：提交前同时执行测试、`git status`、`git check-ignore -v` 和干净检出验证；
   本地通过不能替代对版本控制内容的核验。
+
+## 2026-07-26：中文注释门禁与 Torch-Pruning
+
+### SimpleGate 不能按普通卷积独立剪枝
+
+- 现象：DepGraph 可以跟踪卷积和 SCA，但 SimpleGate 把通道一分为二后逐元素相乘。
+- 风险：只删除索引 `i` 会造成左右两半错位；即使 shape 能运行，门控语义也已经损坏。
+- 处理：每个逻辑通道使用 `[i, i + hidden]` 成对删除，并校验 depthwise、SCA 和前后
+  1×1 卷积的联动 shape。
+- 防复发：单测对第一块的所有相关卷积通道和完整前向 shape 做断言。
+
+### DepGraph 不会更新普通 Python 通道属性
+
+- 现象：Torch-Pruning 完成物理删除后，卷积 shape 已正确缩小，但前向仍按旧
+  `hidden_channels` 执行 `torch.split`。
+- 根因：依赖图只修改张量/模块，不知道 SimpleGate 中整数属性也是图契约的一部分。
+- 处理：每次剪枝后同步 `dw_hidden_channels`、`ffn_hidden_channels`、
+  `gate1.hidden_channels` 和 `gate2.hidden_channels`。
+
+### Torch-Pruning 的示例输入不应强制梯度
+
+- 现象：在当前 PyTorch 与 Torch-Pruning 1.6.1 组合中，为示例输入设置
+  `requires_grad=True` 会在 unbind 索引映射中触发 `UnboundLocalError`。
+- 处理：保持全局 Autograd 开启以便 DepGraph 跟踪，但示例输入本身使用默认
+  `requires_grad=False`。
+
+### 安装版本与模块版本字符串不一致
+
+- 现象：安装发行包为 1.6.1，但 `torch_pruning.__version__` 返回 1.6.0。
+- 处理：模型审计报告改用 `importlib.metadata.version("torch-pruning")`。
+- 防复发：测试断言报告版本与发行包元数据一致。
+
+### “详细中文注释”容易在后续提交中退化
+
+- 处理：为 Python 模块、类、函数补齐中文 docstring，为关键 ABI 和成对剪枝逻辑补充
+  行内解释；C++ 接口使用中文 Doxygen，PowerShell 使用 comment-based help。
+- 防复发：`tests/test_chinese_documentation.py` 扫描 `src/` 与 `tests/`，新增代码缺少
+  中文说明时 CI 失败。
+
+### Windows 后台下载把含空格的路径拆成两个参数
+
+- 现象：`Start-Process -ArgumentList` 传递含空格的绝对 `--output` 路径时，curl
+  命令行中的引号丢失；目标路径后半段被当成 URL，官方 MAT 内容写入 stdout 日志。
+- 处理：停止错误进程，确认 stdout 内容具有 MATLAB 文件头后恢复为 partial 文件；
+  重启时设置工作目录并使用不含空格的相对输出路径，再从服务器续传。
+- 防复发：后台启动后立即读取实际进程命令行，并同时检查目标文件与 stdout 大小；
+  不能只依赖 curl 进度日志判断落盘位置。

@@ -1,3 +1,5 @@
+"""导出 QAT 卷积、伪量化器、控制开关和结构报告。"""
+
 from .fake_quant import (
     QATConv2d,
     QATReport,

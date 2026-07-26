@@ -1,3 +1,4 @@
+# ONNX 静态导出契约；高宽必须能被四级编码器的 16 倍下采样整除。
 export:
   opset: 17
   batch: 1
@@ -6,5 +7,6 @@ export:
   input_name: context_raw
   output_name: raw_residual
   dynamic_axes: false
+  # PyTorch 与 ONNX Runtime 的逐元素比较容差。
   verify_atol: 0.0001
   verify_rtol: 0.001

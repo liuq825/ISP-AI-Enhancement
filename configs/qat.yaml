@@ -1,14 +1,15 @@
+# 后端无关 QAT 配置；最终量化尺度仍须由目标 DDK 转换和真机审计确认。
 qat:
   weight_bits: 8
   activation_bits: 8
   observer_momentum: 0.95
   exclude_modules:
+    # 首尾层保留较高精度，降低 RAW 输入和残差输出的量化误差。
     - intro
     - ending
   observer_warmup_steps: 10000
   total_steps: 100000
   target_int8_compute_ratio: 0.95
   note: >
-    This configuration performs backend-neutral fake quantization. Final scales,
-    mixed-precision boundaries, and OM operator placement must be regenerated
-    and audited with the exact HiAI CANN DDK used by the target firmware.
+    本配置只执行后端无关的伪量化。最终尺度、混合精度边界和 OM 算子落点，
+    必须使用目标固件对应的准确 HiAI CANN DDK 重新生成并审计。
