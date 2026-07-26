@@ -1,8 +1,9 @@
-"""从 SIDD 官方场景页和 Mirror 2 清单生成版本化 Range 获取配置。
+"""从 SIDD 官方场景页和两份镜像清单生成版本化 Range 获取配置。
 
-官网另行发布的 Mirror 2 文本按每个非 held-out 场景依次列出 noisy RAW、GT RAW、
-noisy sRGB、GT sRGB 和 metadata 五个 URL。本模块逐 HTML 表格行提取场景身份，
-再按严格的 ``场景数×5`` 契约绑定 URL，避免跨行正则造成静默错配。
+官网另行发布的 Mirror 1/2 文本均按每个非 held-out 场景依次列出 noisy RAW、
+GT RAW、noisy sRGB、GT sRGB 和 metadata 五个 URL。本模块逐 HTML 表格行提取
+场景身份，再按严格的 ``场景数×5`` 契约分别绑定两份 URL，避免跨行正则造成
+静默错配；运行时可在主镜像连接失败后切换到备用镜像。
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ import yaml
 from .sidd import SIDDScene
 
 SIDD_SCENE_PAGE = "https://abdokamel.github.io/sidd/dataset.html"
+SIDD_MIRROR1_LIST = "https://abdokamel.github.io/sidd/files/SIDD_URLs.txt"
 SIDD_MIRROR2_LIST = "https://abdokamel.github.io/sidd/files/SIDD_URLs_Mirror_2.txt"
 
 # 只在单个已隔离表格行内搜索完整场景令牌；相机与末尾亮度字段沿用官方枚举。
@@ -132,20 +134,48 @@ def _validated_frames(frame_indices: Sequence[int]) -> list[int]:
     return frames
 
 
+def _validated_mirror_groups(
+    *,
+    content: bytes,
+    source_name: str,
+    scene_count: int,
+) -> list[list[str]]:
+    """把一份官方镜像清单严格拆成逐场景五角色 URL 组。
+
+    Mirror 1 使用 HTTP/IP，Mirror 2 使用 HTTPS/CodaLab，因此这里只要求 HTTP(S)
+    且不把传输协议当作数据身份。成员名、CRC 和 SHA256 仍由下载器逐层校验。
+    """
+
+    urls = content.decode("utf-8").split()
+    expected_urls = scene_count * 5
+    if len(urls) != expected_urls:
+        raise ValueError(f"{source_name} URL 数应为 {expected_urls}，实际 {len(urls)}")
+    if len(urls) != len(set(urls)):
+        raise ValueError(f"{source_name} 清单含重复 URL")
+    if any(not url.startswith(("http://", "https://")) for url in urls):
+        raise ValueError(f"{source_name} 清单必须全部使用 HTTP(S) URL")
+    return [
+        urls[index * 5 : (index + 1) * 5]
+        for index in range(scene_count)
+    ]
+
+
 def build_sidd_range_config(
     *,
     output: str | Path,
     frame_indices: Sequence[int] = (10, 20),
     source_page: str = SIDD_SCENE_PAGE,
     mirror_list: str = SIDD_MIRROR2_LIST,
+    fallback_mirror_list: str | None = SIDD_MIRROR1_LIST,
     expected_training_scenes: int = 160,
     fetcher: TextFetcher | None = None,
 ) -> Path:
-    """生成非 held-out SIDD 场景的双帧 Range 获取 YAML。
+    """生成带可选备用镜像的非 held-out SIDD 双帧 Range 获取 YAML。
 
-    两份官方来源先完整下载并计算 SHA256。Mirror 2 每个训练场景必须恰有五个
-    HTTPS URL，且场景页训练数必须等于预期值；任一数量变化都拒绝生成配置。
-    输出只保留两个 RAW URL，sRGB 与 metadata URL 不进入训练获取队列。
+    场景页、主镜像清单和可选备用清单均完整下载并计算 SHA256。每份镜像对每个
+    训练场景必须恰有五个 HTTP(S) URL，且场景页训练数必须等于预期值；任一数量
+    变化都拒绝生成配置。输出只保留 noisy/GT 两个 RAW URL，sRGB 与 metadata
+    URL 不进入训练获取队列。
     """
 
     if expected_training_scenes <= 0:
@@ -154,30 +184,44 @@ def build_sidd_range_config(
     loader = fetcher or _default_fetcher
     page_content = loader(source_page)
     mirror_content = loader(mirror_list)
+    fallback_content = (
+        loader(fallback_mirror_list)
+        if fallback_mirror_list is not None
+        else None
+    )
     scenes, held_out_count = _training_scene_names(page_content)
     if len(scenes) != expected_training_scenes:
         raise ValueError(
             f"官方训练场景数应为 {expected_training_scenes}，实际 {len(scenes)}"
         )
-    urls = mirror_content.decode("utf-8").split()
-    expected_urls = len(scenes) * 5
-    if len(urls) != expected_urls:
-        raise ValueError(f"Mirror 2 URL 数应为 {expected_urls}，实际 {len(urls)}")
-    if len(urls) != len(set(urls)):
-        raise ValueError("Mirror 2 清单含重复 URL")
-    if any(not url.startswith("https://") for url in urls):
-        raise ValueError("Mirror 2 清单必须全部使用 HTTPS URL")
+    primary_groups = _validated_mirror_groups(
+        content=mirror_content,
+        source_name="主镜像",
+        scene_count=len(scenes),
+    )
+    fallback_groups = (
+        _validated_mirror_groups(
+            content=fallback_content,
+            source_name="备用镜像",
+            scene_count=len(scenes),
+        )
+        if fallback_content is not None
+        else None
+    )
 
     entries: list[dict[str, str]] = []
     for index, scene_name in enumerate(scenes):
-        group = urls[index * 5 : (index + 1) * 5]
-        entries.append(
-            {
-                "scene": scene_name,
-                "noisy_url": group[0],
-                "ground_truth_url": group[1],
-            }
-        )
+        primary = primary_groups[index]
+        entry = {
+            "scene": scene_name,
+            "noisy_url": primary[0],
+            "ground_truth_url": primary[1],
+        }
+        if fallback_groups is not None:
+            fallback = fallback_groups[index]
+            entry["fallback_noisy_url"] = fallback[0]
+            entry["fallback_ground_truth_url"] = fallback[1]
+        entries.append(entry)
     config = {
         "source_page": source_page,
         "source_page_sha256": hashlib.sha256(page_content).hexdigest(),
@@ -188,6 +232,11 @@ def build_sidd_range_config(
         "frame_indices": frames,
         "scenes": entries,
     }
+    if fallback_mirror_list is not None and fallback_content is not None:
+        config["fallback_mirror_list"] = fallback_mirror_list
+        config["fallback_mirror_list_sha256"] = hashlib.sha256(
+            fallback_content
+        ).hexdigest()
     destination = Path(output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_name(f"{destination.name}.tmp")

@@ -1,4 +1,4 @@
-"""验证官方场景表与 Mirror 2 批量 URL 的严格逐行绑定。"""
+"""验证官方场景表与主/备镜像批量 URL 的严格逐行绑定。"""
 
 from pathlib import Path
 
@@ -32,9 +32,11 @@ def test_build_sidd_range_config_binds_five_url_groups_and_excludes_heldout(
     """生成器应按训练行绑定 noisy/GT，并保留双帧和来源哈希。"""
 
     page, mirror = _official_fixture()
+    fallback = mirror.replace(b"https://example.test", b"http://fallback.test")
     contents = {
         "https://example.test/scenes": page,
         "https://example.test/urls": mirror,
+        "https://example.test/fallback-urls": fallback,
     }
 
     def fetcher(url: str) -> bytes:
@@ -47,6 +49,7 @@ def test_build_sidd_range_config_binds_five_url_groups_and_excludes_heldout(
         frame_indices=(10, 20),
         source_page="https://example.test/scenes",
         mirror_list="https://example.test/urls",
+        fallback_mirror_list="https://example.test/fallback-urls",
         expected_training_scenes=2,
         fetcher=fetcher,
     )
@@ -61,8 +64,13 @@ def test_build_sidd_range_config_binds_five_url_groups_and_excludes_heldout(
     assert config["scenes"][0]["ground_truth_url"].endswith("archive-1")
     assert config["scenes"][1]["noisy_url"].endswith("archive-5")
     assert config["scenes"][1]["ground_truth_url"].endswith("archive-6")
+    assert config["scenes"][0]["fallback_noisy_url"].startswith(
+        "http://fallback.test/"
+    )
+    assert config["scenes"][0]["fallback_ground_truth_url"].endswith("archive-1")
     assert len(config["source_page_sha256"]) == 64
     assert len(config["mirror_list_sha256"]) == 64
+    assert len(config["fallback_mirror_list_sha256"]) == 64
 
 
 def test_build_sidd_range_config_rejects_shifted_or_incomplete_url_list(
@@ -82,6 +90,7 @@ def test_build_sidd_range_config_rejects_shifted_or_incomplete_url_list(
             output=tmp_path / "range.yaml",
             source_page="https://example.test/scenes",
             mirror_list="https://example.test/urls",
+            fallback_mirror_list=None,
             expected_training_scenes=2,
             fetcher=fetcher,
         )
@@ -95,6 +104,12 @@ def test_versioned_medium_config_and_training_thresholds_are_achievable() -> Non
     assert len(scenes) == 160
     assert acquisition["held_out_scene_count"] == 40
     assert acquisition["frame_indices"] == [10, 20]
+    assert len(acquisition["fallback_mirror_list_sha256"]) == 64
+    assert all(
+        row["fallback_noisy_url"].startswith("http://130.63.97.225/")
+        and row["fallback_ground_truth_url"].startswith("http://130.63.97.225/")
+        for row in scenes
+    )
     assert {row["scene"].split("_")[1] for row in scenes} == {
         f"{value:03d}" for value in range(1, 11)
     }

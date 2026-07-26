@@ -66,9 +66,10 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
   --patch-size 256 --patches-per-pair 16 --patch-seed 20260727
 ```
 
-生成器会核对 160 个训练场景、40 个 held-out 场景和 `160×5` 个官方 Mirror 2 URL；
-获取器对同一场景只打开一次 noisy ZIP 和一次 GT ZIP，并可安全断点重跑。
-patch 导入保留独立 `source_pair_id`，正式训练门禁同时检查源配对数和派生 patch 数。
+生成器会核对 160 个训练场景、40 个 held-out 场景，以及 Mirror 1/2 各自
+`160×5` 个官方 URL；主镜像发生网络异常时立即切换备用镜像。获取器对所选来源的
+同一场景只打开一次 noisy ZIP 和一次 GT ZIP，并可安全断点重跑。patch 导入保留
+独立 `source_pair_id`，正式训练门禁同时检查源配对数和派生 patch 数。
 
 导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
 

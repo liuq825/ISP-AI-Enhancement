@@ -17,6 +17,7 @@ from isp_ai_enhancement.data.sidd import (
     import_sidd_validation_blocks,
 )
 from isp_ai_enhancement.data.sidd_catalog import (
+    SIDD_MIRROR1_LIST,
     SIDD_MIRROR2_LIST,
     SIDD_SCENE_PAGE,
     build_sidd_range_config,
@@ -231,7 +232,7 @@ def _fetch_sidd_subset(args: argparse.Namespace) -> int:
 
 
 def _build_sidd_range_config(args: argparse.Namespace) -> int:
-    """从官方场景表和 Mirror 2 清单生成双帧训练获取配置。"""
+    """从官方场景表和两份镜像清单生成双帧训练获取配置。"""
 
     print(
         build_sidd_range_config(
@@ -239,6 +240,7 @@ def _build_sidd_range_config(args: argparse.Namespace) -> int:
             frame_indices=args.frames,
             source_page=args.source_page,
             mirror_list=args.mirror_list,
+            fallback_mirror_list=args.fallback_mirror_list or None,
         )
     )
     return 0
@@ -443,6 +445,11 @@ def build_parser() -> argparse.ArgumentParser:
     sidd_catalog.add_argument("--frames", type=int, nargs="+", default=[10, 20])
     sidd_catalog.add_argument("--source-page", default=SIDD_SCENE_PAGE)
     sidd_catalog.add_argument("--mirror-list", default=SIDD_MIRROR2_LIST)
+    sidd_catalog.add_argument(
+        "--fallback-mirror-list",
+        default=SIDD_MIRROR1_LIST,
+        help="主镜像连接失败时使用的官方备用清单；传空字符串可禁用",
+    )
     sidd_catalog.set_defaults(function=_build_sidd_range_config)
 
     sidd_status = commands.add_parser("sidd-fetch-status")

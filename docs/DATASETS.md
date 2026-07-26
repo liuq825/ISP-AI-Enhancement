@@ -60,18 +60,22 @@ SIDD Full 的单个场景 noisy/GT ZIP 可分别超过 3 GB 和 8 GB，但当前
 而不是只按相机或实例编号挑选。导入时复用官方验证包内的
 `noise_level_functions.csv`，避免 16 通道输入中的噪声强度上下文退化成未知值 0。
 
-`build-sidd-range-config` 进一步读取官网场景表与独立的
-`SIDD_URLs_Mirror_2.txt`，逐 `<tr>` 提取 200 个场景，排除其中 40 个 held-out，
-再要求剩余 160 个场景严格对应 `160×5=800` 个角色 URL。仓库已生成
-`resources/sidd_medium_range.yaml`，选择 frame 010/020，共 320 对，规模与官方
-SIDD Medium 相同但帧选择由本项目显式固定。配置保存两份来源 SHA256，任一上游数量
-或顺序变化都会失败，不能靠“URL 可下载”猜测身份。
+`build-sidd-range-config` 进一步读取官网场景表，以及独立的 Mirror 1
+`SIDD_URLs.txt` 和 Mirror 2 `SIDD_URLs_Mirror_2.txt`。它逐 `<tr>` 提取 200 个
+场景，排除其中 40 个 held-out，再要求剩余 160 个场景在每份清单中都严格对应
+`160×5=800` 个角色 URL。仓库已生成 `resources/sidd_medium_range.yaml`，选择
+frame 010/020，共 320 对，规模与官方 SIDD Medium 相同但帧选择由本项目显式固定。
+配置保存三份来源 SHA256，任一上游数量或顺序变化都会失败，不能靠“URL 可下载”
+猜测身份。
 
 双帧获取时，同一场景的 noisy/GT 归档各只打开一次，再在归档内依次校验两个成员；
 相比逐配对打开可少 320 次中央目录请求。长时间后台任务可用
 `--progress-file outputs/sidd_medium_download.log` 记录已完成场景。预计 RAW 本体
 约 20 GB，仍由 `.gitignore` 隔离。`sidd-fetch-status` 利用已完成 pair 收据快速
 报告场景/配对百分比、残留 partial 和结构错误，不为查看进度重复计算数百个大文件哈希。
+主 CodaLab 镜像发生连接异常时，同一轮立即尝试 York University Mirror 1；收据记录
+实际使用的一对 URL。离线恢复只接受当前版本配置列出的主/备 URL 对，不能把任意第三方
+镜像混入已验证数据。
 
 训练导入使用 `--patch-size 256 --patches-per-pair 16`。每个 noisy/GT 源配对只加载
 和 CFA 打包一次，再按 `patch_seed` 生成 16 个不重复 packed RAW 坐标，避免训练时

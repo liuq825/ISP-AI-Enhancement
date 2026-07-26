@@ -372,3 +372,79 @@ def test_fetch_sidd_subset_retries_network_error_but_not_content_error(
             retry_backoff_seconds=0,
         )
     assert bad_calls == 1
+
+
+def test_fetch_sidd_subset_falls_back_and_reuses_fallback_receipt(
+    tmp_path: Path,
+) -> None:
+    """主镜像连接失败时应立即切换备用源，重跑还能离线接受该来源收据。"""
+
+    scene = "0001_001_S6_00100_00060_3200_L"
+    noisy_zip = tmp_path / "noisy.zip"
+    target_zip = tmp_path / "target.zip"
+    _create_zip(noisy_zip, "0001_NOISY_RAW_010.MAT", b"fallback-noisy")
+    _create_zip(target_zip, "0001_GT_RAW_010.MAT", b"fallback-target")
+    held_out = tmp_path / "held_out.yaml"
+    held_out.write_text(
+        "source_url: https://example.test\n"
+        "scenes:\n"
+        "  - 0009_001_S6_00800_00350_3200_L\n",
+        encoding="utf-8",
+    )
+    config = tmp_path / "subset.yaml"
+    config.write_text(
+        "frame_index: 10\n"
+        "scenes:\n"
+        f"  - scene: {scene}\n"
+        "    noisy_url: https://primary.test/noisy.zip\n"
+        "    ground_truth_url: https://primary.test/target.zip\n"
+        "    fallback_noisy_url: http://fallback.test/noisy.zip\n"
+        "    fallback_ground_truth_url: http://fallback.test/target.zip\n",
+        encoding="utf-8",
+    )
+    calls: list[str] = []
+    progress: list[str] = []
+
+    def fallback_factory(url: str) -> ZipFile:
+        """让主源确定性模拟连接重置，备用源映射到本地正确归档。"""
+
+        calls.append(url)
+        if "primary.test" in url:
+            raise OSError("primary reset")
+        return ZipFile(noisy_zip if "noisy" in url else target_zip)
+
+    receipt_path = fetch_sidd_raw_subset(
+        config=config,
+        output_dir=tmp_path / "output",
+        held_out_scenes=held_out,
+        archive_factory=fallback_factory,
+        progress_callback=progress.append,
+        max_attempts=1,
+        retry_backoff_seconds=0,
+    )
+    receipt = json.loads(
+        (receipt_path.parent / scene / "0001_RAW_010.receipt.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert receipt["noisy_zip_url"] == "http://fallback.test/noisy.zip"
+    assert receipt["ground_truth_zip_url"] == "http://fallback.test/target.zip"
+    assert calls == [
+        "https://primary.test/noisy.zip",
+        "http://fallback.test/noisy.zip",
+        "http://fallback.test/target.zip",
+    ]
+    assert any("尝试备用镜像" in message for message in progress)
+
+    def forbidden_factory(_url: str) -> ZipFile:
+        """完整备用源收据存在时，离线复核不得重新打开任一镜像。"""
+
+        raise AssertionError("完整备用源收据应支持离线复用")
+
+    second = fetch_sidd_raw_subset(
+        config=config,
+        output_dir=tmp_path / "output",
+        held_out_scenes=held_out,
+        archive_factory=forbidden_factory,
+    )
+    assert second == receipt_path

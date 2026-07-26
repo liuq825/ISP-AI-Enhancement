@@ -290,6 +290,18 @@ def _validate_subset_spec(config_path: Path) -> tuple[list[int], list[dict[str, 
         if any(not isinstance(raw_scene.get(key), str) for key in required):
             raise ValueError(f"{config_path}: scenes[{index}] 缺少字符串字段 {required}")
         scene = {key: str(raw_scene[key]) for key in required}
+        fallback_fields = ("fallback_noisy_url", "fallback_ground_truth_url")
+        has_fallback = [key in raw_scene for key in fallback_fields]
+        if any(has_fallback) and not all(has_fallback):
+            raise ValueError(
+                f"{config_path}: scenes[{index}] 必须同时定义 {fallback_fields}"
+            )
+        if all(has_fallback):
+            if any(not isinstance(raw_scene.get(key), str) for key in fallback_fields):
+                raise ValueError(
+                    f"{config_path}: scenes[{index}] 的备用 URL 必须是字符串"
+                )
+            scene.update({key: str(raw_scene[key]) for key in fallback_fields})
         # 解析规范场景名并预检 URL，避免前几个场景下载完成后才发现末尾配置错误。
         canonical_name = _scene_name(SIDDScene.from_directory(Path(scene["scene"])))
         scene["scene"] = canonical_name
@@ -299,9 +311,40 @@ def _validate_subset_spec(config_path: Path) -> tuple[list[int], list[dict[str, 
             raise ValueError(f"{config_path}: {scene['scene']} noisy_url 不是 HTTP(S)")
         if not scene["ground_truth_url"].startswith(("http://", "https://")):
             raise ValueError(f"{config_path}: {scene['scene']} ground_truth_url 不是 HTTP(S)")
+        if all(has_fallback):
+            if not scene["fallback_noisy_url"].startswith(("http://", "https://")):
+                raise ValueError(
+                    f"{config_path}: {scene['scene']} fallback_noisy_url 不是 HTTP(S)"
+                )
+            if not scene["fallback_ground_truth_url"].startswith(
+                ("http://", "https://")
+            ):
+                raise ValueError(
+                    f"{config_path}: {scene['scene']} "
+                    "fallback_ground_truth_url 不是 HTTP(S)"
+                )
+            if (
+                scene["fallback_noisy_url"] == scene["noisy_url"]
+                and scene["fallback_ground_truth_url"] == scene["ground_truth_url"]
+            ):
+                raise ValueError(f"{config_path}: {scene['scene']} 备用镜像与主镜像相同")
         seen_names.add(canonical_name)
         scenes.append(scene)
     return frame_indices, scenes
+
+
+def _scene_sources(scene: dict[str, str]) -> list[tuple[str, str]]:
+    """按优先级返回同一场景的主镜像和可选备用镜像 URL 对。"""
+
+    sources = [(scene["noisy_url"], scene["ground_truth_url"])]
+    if "fallback_noisy_url" in scene:
+        sources.append(
+            (
+                scene["fallback_noisy_url"],
+                scene["fallback_ground_truth_url"],
+            )
+        )
+    return sources
 
 
 def _verified_local_scene_receipts(
@@ -327,11 +370,14 @@ def _verified_local_scene_receipts(
     ):
         try:
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt_source = (
+                receipt.get("noisy_zip_url"),
+                receipt.get("ground_truth_zip_url"),
+            )
             if (
                 receipt.get("scene_name") != scene["scene"]
                 or receipt.get("frame_index") != frame_index
-                or receipt.get("noisy_zip_url") != scene["noisy_url"]
-                or receipt.get("ground_truth_zip_url") != scene["ground_truth_url"]
+                or receipt_source not in _scene_sources(scene)
             ):
                 raise ValueError("收据身份或来源 URL 与当前配置不一致")
             frame = f"{frame_index:03d}"
@@ -409,35 +455,60 @@ def fetch_sidd_raw_subset(
                 )
         else:
             for attempt in range(1, max_attempts + 1):
-                try:
-                    receipt_paths = fetch_sidd_raw_frames(
-                        scene_name=scene["scene"],
-                        noisy_zip_url=scene["noisy_url"],
-                        ground_truth_zip_url=scene["ground_truth_url"],
-                        frame_indices=frame_indices,
-                        output_dir=output,
-                        held_out_scenes=held_out_scenes,
-                        max_member_bytes=max_member_bytes,
-                        archive_factory=archive_factory,
-                    )
-                    break
-                except ValueError:
-                    # 身份、held-out、大小或 CRC 错误是确定性数据问题，重试不会修复，
-                    # 必须立即失败以防把错配内容当作暂时网络异常。
-                    raise
-                except Exception as error:
-                    if attempt >= max_attempts:
+                source_errors: list[Exception] = []
+                sources = _scene_sources(scene)
+                for source_index, (noisy_url, ground_truth_url) in enumerate(
+                    sources,
+                    start=1,
+                ):
+                    try:
+                        receipt_paths = fetch_sidd_raw_frames(
+                            scene_name=scene["scene"],
+                            noisy_zip_url=noisy_url,
+                            ground_truth_zip_url=ground_truth_url,
+                            frame_indices=frame_indices,
+                            output_dir=output,
+                            held_out_scenes=held_out_scenes,
+                            max_member_bytes=max_member_bytes,
+                            archive_factory=archive_factory,
+                        )
+                    except ValueError:
+                        # 身份、held-out、大小或 CRC 错误是确定性数据问题，切换镜像
+                        # 可能掩盖来源错配，必须立即失败。
                         raise
+                    except Exception as error:
+                        source_errors.append(error)
+                        if (
+                            progress_callback is not None
+                            and source_index < len(sources)
+                        ):
+                            progress_callback(
+                                f"[{scene_index}/{len(scenes)}] 镜像 "
+                                f"{source_index}/{len(sources)} "
+                                f"{type(error).__name__}: {error}；尝试备用镜像"
+                            )
+                        continue
+                    break
+                else:
+                    # 同一轮的主/备镜像均失败后才进入场景级退避；下一轮仍从主镜像
+                    # 开始，避免永久偏向一次偶发成功但随后损坏的备用端点。
+                    error = source_errors[-1]
+                    if attempt >= max_attempts:
+                        raise error
                     delay = retry_backoff_seconds * attempt
                     if progress_callback is not None:
                         progress_callback(
-                            f"[{scene_index}/{len(scenes)}] {type(error).__name__}: "
-                            f"{error}；{delay:g} 秒后进行第 "
+                            f"[{scene_index}/{len(scenes)}] 全部 {len(sources)} 个镜像"
+                            f"均失败，最后错误 {type(error).__name__}: {error}；"
+                            f"{delay:g} 秒后进行第 "
                             f"{attempt + 1}/{max_attempts} 次尝试"
                         )
-                    # 退避只作用于可恢复的场景级异常，默认最长 15 秒，避免快速压测公共镜像。
+                    # 退避只作用于可恢复的场景级异常，默认最长 15 秒，避免快速压测
+                    # 两个公共镜像。
                     if delay > 0:
                         time.sleep(delay)
+                    continue
+                break
         if receipt_paths is None:  # pragma: no cover - 循环穷尽时异常已在上方重新抛出
             raise RuntimeError("SIDD 场景获取未返回收据")
         for frame_index, receipt_path in zip(
