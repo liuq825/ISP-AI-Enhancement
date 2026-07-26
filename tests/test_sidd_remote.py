@@ -265,6 +265,7 @@ def test_fetch_sidd_subset_cli_separates_progress_from_result(
         progress_file=str(tmp_path / "progress.log"),
         max_attempts=4,
         retry_backoff_seconds=5.0,
+        prefer_fallback=False,
     )
     assert cli._fetch_sidd_subset(arguments) == 0
     captured = capsys.readouterr()
@@ -480,6 +481,22 @@ def test_fetch_sidd_subset_falls_back_and_reuses_fallback_receipt(
         archive_factory=forbidden_factory,
     )
     assert second == receipt_path
+
+    calls.clear()
+    preferred_receipt = fetch_sidd_raw_subset(
+        config=config,
+        output_dir=tmp_path / "preferred-output",
+        held_out_scenes=held_out,
+        archive_factory=fallback_factory,
+        max_attempts=1,
+        retry_backoff_seconds=0,
+        prefer_fallback=True,
+    )
+    assert preferred_receipt.is_file()
+    assert calls == [
+        "http://fallback.test/noisy.zip",
+        "http://fallback.test/target.zip",
+    ]
 
 
 def test_write_sidd_subset_audit_receipt_rehashes_every_raw_file(

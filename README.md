@@ -56,6 +56,8 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
   --config resources/sidd_medium_range.yaml `
   --output datasets/SIDD_Medium_Range `
   --progress-file outputs/sidd_medium_download.log
+# 仅在已确认 CodaLab 持续故障时，可保持同一配置并先尝试官方备用镜像：
+#   --prefer-fallback
 .\.venv\Scripts\isp-ai.exe sidd-fetch-status `
   --config resources/sidd_medium_range.yaml `
   --output datasets/SIDD_Medium_Range

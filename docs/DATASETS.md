@@ -76,6 +76,8 @@ frame 010/020，共 320 对，规模与官方 SIDD Medium 相同但帧选择由�
 主 CodaLab 镜像发生连接异常时，同一轮立即尝试 York University Mirror 1；收据记录
 实际使用的一对 URL。离线恢复只接受当前版本配置列出的主/备 URL 对，不能把任意第三方
 镜像混入已验证数据。
+默认仍优先 HTTPS CodaLab；确认其持续故障后可加 `--prefer-fallback`，只调整本次网络
+候选顺序，不改变配置 SHA、实际来源记录或最终内容校验。
 
 全部完成后运行 `audit-sidd-subset`。它重新计算 640 个 MAT 的 SHA256/CRC32，核对
 集合收据中的 320 个逐配对收据哈希和实际主/备来源，再写

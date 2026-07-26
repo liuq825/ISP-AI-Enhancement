@@ -414,6 +414,7 @@ def fetch_sidd_raw_subset(
     progress_callback: ProgressCallback | None = None,
     max_attempts: int = 4,
     retry_backoff_seconds: float = 5.0,
+    prefer_fallback: bool = False,
 ) -> Path:
     """按版本化配置顺序获取多场景 RAW 配对，并生成集合级可审计收据。
 
@@ -431,6 +432,8 @@ def fetch_sidd_raw_subset(
         raise ValueError("max_attempts 必须为正整数")
     if retry_backoff_seconds < 0:
         raise ValueError("retry_backoff_seconds 不能为负数")
+    if not isinstance(prefer_fallback, bool):
+        raise ValueError("prefer_fallback 必须为 bool")
     frame_indices, scenes = _validate_subset_spec(config_path)
     config_sha256, _config_crc32 = _sha256_and_crc32(config_path)
     held_out_names = {
@@ -462,6 +465,10 @@ def fetch_sidd_raw_subset(
             for attempt in range(1, max_attempts + 1):
                 source_errors: list[Exception] = []
                 sources = _scene_sources(scene)
+                if prefer_fallback and len(sources) > 1:
+                    # 只改变本次网络尝试顺序，不改变版本化配置及来源身份；最终审计
+                    # 仍会把第二个配置来源记为 fallback。
+                    sources = sources[1:] + sources[:1]
                 for source_index, (noisy_url, ground_truth_url) in enumerate(
                     sources,
                     start=1,
@@ -539,6 +546,7 @@ def fetch_sidd_raw_subset(
         "frame_indices": frame_indices,
         "pair_count": len(receipts),
         "max_attempts": max_attempts,
+        "prefer_fallback": prefer_fallback,
         "scene_count": len(scenes),
         "pairs": receipts,
     }
