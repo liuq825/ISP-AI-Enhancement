@@ -1,0 +1,29 @@
+{
+  "deployment_status": "UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING",
+  "format_version": 1,
+  "input_dtype": "float32-export; fp16-device-candidate",
+  "input_shape": [
+    1,
+    16,
+    512,
+    512
+  ],
+  "model_name": "nafnet_raw_student",
+  "onnx_opset": 17,
+  "onnx_sha256": "582788525f3c165b79c43b6acba9a60657791c6d64c24c0debada5d2a28ad0d3",
+  "output_dtype": "float32-export; fp16-device-candidate",
+  "output_semantics": "four-channel canonical RAW residual",
+  "output_shape": [
+    1,
+    4,
+    512,
+    512
+  ],
+  "physical_parameter_count": 291724,
+  "verification": {
+    "max_absolute_error": 4.172325134277344e-07,
+    "max_relative_error": 0.023255813866853714,
+    "onnx_checker": "passed",
+    "onnxruntime_version": "1.28.0"
+  }
+}

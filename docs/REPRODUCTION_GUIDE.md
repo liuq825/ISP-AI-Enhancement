@@ -52,6 +52,8 @@ py -3.12 -m venv .venv
 ```
 
 结果和边界见 `docs/LOCAL_QAT_SMOKE_RUN.md`；这不是正式麒麟候选模型。
+仓库同时版本化该本机闭环的 checkpoint、训练 history、ONNX 与 manifest；克隆仓库后可直接
+审计这些交付物，也可用上述命令在本机重新生成。数据集、虚拟环境和缓存不纳入 Git。
 
 ## 3. 获取 SIDD Medium 规模 RAW
 

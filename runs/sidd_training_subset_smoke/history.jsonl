@@ -1,0 +1,4 @@
+{"epoch": 1, "grad_scale": 1.0, "learning_rate": 0.0002, "loss": 0.07558093219995499, "loss_charbonnier": 0.0652303621172905, "loss_color": 0.10598486661911011, "loss_gradient": 0.05051329359412193, "step": 1}
+{"epoch": 1, "grad_scale": 1.0, "learning_rate": 0.0002, "loss": 0.15348148345947266, "loss_charbonnier": 0.13236071169376373, "loss_color": 0.2416193038225174, "loss_gradient": 0.09039810299873352, "step": 2}
+{"epoch": 1, "grad_scale": 1.0, "learning_rate": 0.0002, "loss": 0.24028775095939636, "loss_charbonnier": 0.21439942717552185, "loss_color": 0.23365053534507751, "loss_gradient": 0.14205792546272278, "step": 3}
+{"best_validation_psnr": 13.668558120727539, "epoch": 1, "is_best": true, "learning_rate": 0.0002, "step": 3, "validation_psnr": 13.668558120727539}
