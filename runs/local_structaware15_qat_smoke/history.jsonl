@@ -1,0 +1,2 @@
+{"converted_convolutions": 62, "event": "qat_prepared", "excluded_convolutions": 2, "observer_warmup_steps": 10000, "simulated_int8_layer_ratio": 0.96875, "simulated_int8_weight_ratio": 0.9940554821664465}
+{"best_validation_psnr": 27.17436695098877, "epoch": 1, "is_best": true, "learning_rate": 2e-05, "step": 12, "validation_psnr": 27.17436695098877}

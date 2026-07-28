@@ -1,0 +1,123 @@
+{
+  "context_contract_version": "raw16-v1",
+  "created_unix": 1785252598,
+  "deployment_status": "UNVERIFIED_UNTIL_TARGET_HIAI_CANN_PROFILING",
+  "format_version": 2,
+  "input_channel_semantics": [
+    "raw_r",
+    "raw_gr",
+    "raw_gb",
+    "raw_b",
+    "noise_sigma",
+    "exposure_log2_normalized",
+    "fusion_confidence",
+    "motion_ghost",
+    "camera_embedding_0",
+    "camera_embedding_1",
+    "camera_embedding_2",
+    "camera_embedding_3",
+    "white_balance_rg_log2_normalized",
+    "white_balance_bg_log2_normalized",
+    "capture_mode",
+    "valid_mask"
+  ],
+  "input_dtype": "float32-export; fp16-device-candidate",
+  "input_shape": [
+    1,
+    16,
+    64,
+    64
+  ],
+  "model_name": "nafnet_raw_student",
+  "onnx_opset": 17,
+  "onnx_sha256": "6afb5f75b9adf524dc093486845b8fd0cd05bfdc7e170984f7274882c9324fe3",
+  "output_dtype": "float32-export; fp16-device-candidate",
+  "output_semantics": "four-channel canonical RAW residual",
+  "output_shape": [
+    1,
+    4,
+    64,
+    64
+  ],
+  "physical_parameter_count": 247634,
+  "quantization": {
+    "converted_convolutions": 62,
+    "dequantize_linear_nodes": 124,
+    "excluded_convolutions": 2,
+    "mode": "qat_qdq_int8",
+    "quantize_linear_nodes": 124,
+    "simulated_int8_weight_ratio": 0.9940554821664465,
+    "target_status": "requires exact HiAI CANN DDK QDQ conversion and profiler"
+  },
+  "source": {
+    "checkpoint": "runs\\local_structaware15_qat_smoke\\best.pt",
+    "checkpoint_sha256": "03f11ae422012714b2a1ce5229e752c1113635436a7536ec8e24abf76861ad0e",
+    "export_config": "configs\\export_local_qat_smoke.yaml",
+    "export_config_sha256": "d00bda33a21c7674dda8c262f78a476acdf40f3b370361bbe832a6c26600965a",
+    "model_config": "configs\\model_smoke_structaware15.yaml",
+    "model_config_sha256": "7334e55436988b538c8f5b7a1900918be91856e396f9424f716df36c845c334d",
+    "qat_config": "configs\\qat.yaml",
+    "qat_config_sha256": "9a8ce43ea74a2dc591c7acdf565e9de4e996f5c70ce1248b28cf3a8480f82ca2"
+  },
+  "toolchain": {
+    "onnx": "1.22.0",
+    "onnxruntime": "1.28.0",
+    "torch": "2.13.0+cpu",
+    "torch_onnx_exporter": "legacy_torchscript_dynamo_false"
+  },
+  "verification": {
+    "max_absolute_error": 4.3213367462158203e-07,
+    "max_relative_error": 0.003462775144726038,
+    "onnx_audit": {
+      "dynamic_shape_operator_counts": {},
+      "high_risk_operator_counts": {
+        "DepthToSpace": 4,
+        "Mul": 99,
+        "ReduceMean": 36,
+        "Split": 18,
+        "Sqrt": 18
+      },
+      "inputs": {
+        "context_raw": [
+          1,
+          16,
+          64,
+          64
+        ]
+      },
+      "ir_version": 8,
+      "operator_counts": {
+        "Add": 58,
+        "Clip": 124,
+        "Constant": 488,
+        "Conv": 64,
+        "DepthToSpace": 4,
+        "DequantizeLinear": 124,
+        "Div": 142,
+        "GlobalAveragePool": 9,
+        "Mul": 99,
+        "QuantizeLinear": 124,
+        "ReduceMean": 36,
+        "Reshape": 62,
+        "Split": 18,
+        "Sqrt": 18,
+        "Sub": 18
+      },
+      "opset_imports": {
+        "ai.onnx": 17
+      },
+      "outputs": {
+        "raw_residual": [
+          1,
+          4,
+          64,
+          64
+        ]
+      },
+      "static_io": true,
+      "target_support_status": "requires exact HiAI CANN DDK conversion log"
+    },
+    "onnx_checker": "passed",
+    "onnxruntime_version": "1.28.0"
+  }
+}

@@ -1,0 +1,24 @@
+# 物理剪枝后的 CPU 恢复微调烟雾配置；初始权重由 prune-checkpoint 生成。
+seed: 20260728
+device: cpu
+model_config: configs/model_smoke_structaware15.yaml
+initial_checkpoint: checkpoints/local_smoke_structaware15_1511.pt
+context_config: configs/context.yaml
+manifest: data/local_phase2_smoke/manifest.jsonl
+output_dir: runs/local_structaware15_finetune_smoke
+data_policy:
+  purpose: smoke
+  catalog: resources/datasets.yaml
+epochs: 1
+batch_size: 1
+num_workers: 0
+crop_size: 64
+learning_rate: 0.00005
+weight_decay: 0.0
+amp: false
+log_every: 20
+save_every_epochs: 1
+loss:
+  charbonnier: 1.0
+  gradient: 0.1
+  color: 0.05

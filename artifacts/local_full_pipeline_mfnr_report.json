@@ -1,0 +1,21 @@
+{
+  "model": "artifacts\\local_full_pipeline_qat_64.onnx",
+  "mode": "mfnr",
+  "input_layout": "packed",
+  "context_shape": [
+    1,
+    16,
+    64,
+    64
+  ],
+  "output_layout": "mosaic",
+  "output_shape": [
+    128,
+    128
+  ],
+  "output_range": [
+    0.0,
+    1.0
+  ],
+  "next_stage": "demosaic_or_traditional_isp"
+}

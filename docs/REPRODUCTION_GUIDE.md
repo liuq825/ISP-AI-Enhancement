@@ -55,6 +55,9 @@ py -3.12 -m venv .venv
 仓库同时版本化该本机闭环的 checkpoint、训练 history、ONNX 与 manifest；克隆仓库后可直接
 审计这些交付物，也可用上述命令在本机重新生成。数据集、虚拟环境和缓存不纳入 Git。
 
+使用 ONNX 对单帧 Sensor RAW 或 HDR/MFNR 融合 RAW 做 Demosaic 前验证的命令见
+`docs/ONNX_RAW_INFERENCE.md`。
+
 ## 3. 获取 SIDD Medium 规模 RAW
 
 生成固定 160 场景×2 帧配置：

@@ -584,3 +584,26 @@
   `configs/export_onnx.yaml` 的严格阈值；模型 manifest 记录导出配置哈希和实测误差。
 - 防复发：不能用“QAT 有舍入误差”作为放宽正式阈值的理由。任何分辨率、QAT 图或运行时
   变化，都必须重新执行 Checker、ORT 对照和目标 DDK/真机审计。
+
+## 2026-07-28：CPU 全流程与 RAW ONNX 接口验证
+
+### 流程冒烟配置也要真的经过 Teacher、蒸馏、剪枝和 QAT
+
+- 处理：新增 CPU Teacher、Feature+Attention Student、结构感知物理剪枝、剪枝恢复微调和
+  剪枝后 QAT 五份独立配置；全部使用训练引擎和 Torch-Pruning 正式代码路径，不以 mock
+  文件替代 checkpoint。
+- 实际结果：Teacher、联合蒸馏、剪枝、恢复微调、QAT 与静态 ONNX 审计均成功。极小模型从
+  `291,724` 到 `247,634` 参数，物理剪枝率 `15.1136%`；Q/DQ ONNX 为静态
+  `1×16×64×64→1×4×64×64`。
+- 边界：该结果只证明工程流程可执行。真实 Student 和麒麟发布仍必须经 CUDA 收敛、目标
+  Sensor 数据、HiAI/CANN DDK 转换和真机 profiler。
+
+### ONNX 输出必须保持在 Demosaic 前的 RAW 域
+
+- 处理：新增 `verify_onnx_raw_pipeline.py`，单帧 Bayer 统一按 CFA 打包，HDR/MFNR 只接受
+  已融合的 canonical packed RAW，并显式承载融合置信度/鬼影图；模型残差与输入 RAW 相加
+  后输出 packed 或还原 Bayer mosaic。
+- 验证：单帧 Sensor 路径与 MFNR packed 路径均得到范围 `[0,1]` 的 `128×128` mosaic，可交给
+  后续 Demosaic/传统 ISP。
+- 防复发：不能把 RGB、未归一化 ADC 码值或未融合多帧直接送入模型；黑白电平、CFA、相机
+  嵌入和拍摄模式必须随输入记录并与训练/部署 ABI 一致。

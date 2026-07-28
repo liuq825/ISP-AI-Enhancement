@@ -1,0 +1,28 @@
+# CPU 联合蒸馏烟雾训练：同时覆盖输出、feature 和 attention 三路损失。
+seed: 20260728
+device: cpu
+model_config: configs/model_smoke.yaml
+teacher_config: configs/model_smoke.yaml
+teacher_checkpoint: runs/local_teacher_smoke/best.pt
+context_config: configs/context.yaml
+manifest: data/local_phase2_smoke/manifest.jsonl
+output_dir: runs/local_feature_attention_distill_smoke
+data_policy:
+  purpose: smoke
+  catalog: resources/datasets.yaml
+epochs: 1
+batch_size: 1
+num_workers: 0
+crop_size: 64
+learning_rate: 0.0002
+weight_decay: 0.0
+amp: false
+log_every: 20
+save_every_epochs: 1
+loss:
+  charbonnier: 1.0
+  gradient: 0.1
+  color: 0.05
+  teacher_output: 0.10
+  teacher_feature: 0.15
+  teacher_attention: 0.10
