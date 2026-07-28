@@ -1,0 +1,24 @@
+# 本机 CPU FP32 基线：从新生成的合成 RAW 开始，供本地 QAT 链路继续加载。
+# 仅用于验证工程全流程，不代表真实 RAW 去噪画质或麒麟 9000 的训练结果。
+seed: 20260728
+device: cpu
+model_config: configs/model_smoke.yaml
+context_config: configs/context.yaml
+manifest: data/local_phase2_smoke/manifest.jsonl
+output_dir: runs/local_fp32_smoke
+data_policy:
+  purpose: smoke
+  catalog: resources/datasets.yaml
+epochs: 1
+batch_size: 1
+num_workers: 0
+crop_size: 64
+learning_rate: 0.0002
+weight_decay: 0.0
+amp: false
+log_every: 1
+save_every_epochs: 1
+loss:
+  charbonnier: 1.0
+  gradient: 0.1
+  color: 0.05

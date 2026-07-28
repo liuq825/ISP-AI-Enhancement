@@ -1,0 +1,13 @@
+# 本机 QAT 烟雾导出：仅用于验证 Q/DQ 图、ONNX Checker 和 ORT 对照。
+# QAT 在不同执行器的舍入边界可产生约 2.16e-3 的绝对偏差；该容差只针对本地烟雾模型。
+# 正式候选模型必须使用 configs/export_onnx.yaml 的严格容差，并在目标 DDK/真机复核。
+export:
+  opset: 17
+  batch: 1
+  height: 64
+  width: 64
+  input_name: context_raw
+  output_name: raw_residual
+  dynamic_axes: false
+  verify_atol: 0.0025
+  verify_rtol: 0.001

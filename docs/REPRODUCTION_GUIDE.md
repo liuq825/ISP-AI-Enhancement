@@ -36,6 +36,23 @@ py -3.12 -m venv .venv
 预期生成 `runs/smoke/epoch_0001.pt` 和 `runs/smoke/history.jsonl`。该权重只验证代码，
 没有画质意义。本机资源与任务边界见 `docs/LOCAL_DEVELOPMENT_PROFILE.md`。
 
+若要从零演练 FP32→QAT→ONNX 的本地闭环，执行：
+
+```powershell
+.\.venv\Scripts\isp-ai.exe make-smoke-data --output data/local_phase2_smoke --samples 16
+.\.venv\Scripts\isp-ai.exe train --config configs/train_local_fp32_smoke.yaml
+.\.venv\Scripts\isp-ai.exe train --config configs/train_local_qat_smoke.yaml
+.\.venv\Scripts\isp-ai.exe export-onnx `
+  --config configs/model_smoke.yaml `
+  --checkpoint runs/local_qat_smoke/best.pt `
+  --qat-config configs/qat.yaml `
+  --export-config configs/export_local_qat_smoke.yaml `
+  --output artifacts/local_qat_smoke_64.onnx
+.\.venv\Scripts\isp-ai.exe audit-onnx --model artifacts/local_qat_smoke_64.onnx
+```
+
+结果和边界见 `docs/LOCAL_QAT_SMOKE_RUN.md`；这不是正式麒麟候选模型。
+
 ## 3. 获取 SIDD Medium 规模 RAW
 
 生成固定 160 场景×2 帧配置：

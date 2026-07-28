@@ -562,3 +562,25 @@
   micro-batch 数归一化，`global_step` 只在 optimizer 更新后增加。
 - 防复发：复现指南中的每个输入 checkpoint 必须能由前一条版本化命令直接产生，
   不允许依赖未记录的手工复制、重命名或个人目录。
+
+## 2026-07-28：CPU QAT 全链路演练
+
+### 本机 QAT 跑通不等于目标 NPU 已通过
+
+- 处理：新增 `train_local_fp32_smoke.yaml`、`train_local_qat_smoke.yaml` 与
+  `export_local_qat_smoke.yaml`，从新生成的合成 RAW 依次执行 FP32、QAT、Q/DQ ONNX
+  和 ONNX 审计；运行产物保留在被 Git 忽略的 `data/`、`runs/` 与 `artifacts/`。
+- 实际结果：QAT checkpoint 可加载，导出静态 `1×16×64×64` 图，包含 124 个
+  QuantizeLinear 与 124 个 DequantizeLinear；Checker 和 ORT 对照通过。
+- 边界：该模型仅有 291,724 参数、合成数据训练一轮；它只能证明部署前工程链路，不能
+  支持真实画质、麒麟 9000 时延、功耗或 OM 兼容性结论。
+
+### QAT 导出误差必须按输入规格审计，不能全局放宽阈值
+
+- 现象：同一 QAT 烟雾权重在 `512×512` ONNX/ORT 对照中出现最大绝对误差
+  `2.156e-3`，超过正式导出配置的 `1e-4` 绝对容差；在本地演练使用的 `64×64` 静态图
+  中误差为 `3.28e-7`。
+- 处理：只为本地烟雾模型增加独立 `export_local_qat_smoke.yaml`，保留正式
+  `configs/export_onnx.yaml` 的严格阈值；模型 manifest 记录导出配置哈希和实测误差。
+- 防复发：不能用“QAT 有舍入误差”作为放宽正式阈值的理由。任何分辨率、QAT 图或运行时
+  变化，都必须重新执行 Checker、ORT 对照和目标 DDK/真机审计。

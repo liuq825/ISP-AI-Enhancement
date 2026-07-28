@@ -1,0 +1,26 @@
+# 本机 CPU QAT 烟雾配置：验证 FP32 权重加载、伪量化、检查点和 ONNX 导出链路。
+# 它使用合成数据与极小模型，绝不能用来证明真实画质、麒麟 NPU 性能或最终部署合格。
+seed: 20260728
+device: cpu
+model_config: configs/model_smoke.yaml
+initial_checkpoint: runs/local_fp32_smoke/best.pt
+qat_config: configs/qat.yaml
+context_config: configs/context.yaml
+manifest: data/local_phase2_smoke/manifest.jsonl
+output_dir: runs/local_qat_smoke
+data_policy:
+  purpose: smoke
+  catalog: resources/datasets.yaml
+epochs: 1
+batch_size: 1
+num_workers: 0
+crop_size: 64
+learning_rate: 0.00002
+weight_decay: 0.0
+amp: false
+log_every: 1
+save_every_epochs: 1
+loss:
+  charbonnier: 1.0
+  gradient: 0.10
+  color: 0.05
