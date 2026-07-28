@@ -153,6 +153,7 @@ Teacher/Student 采用输出辅助 + feature + 空间 attention 联合蒸馏，�
 正式 CUDA 训练配置不会为了迁就本地 CPU 而降级为无意义的长时间运行。
 新成员从环境安装到数据、训练、剪枝、QAT、导出和放行的最短路径见
 `docs/REPRODUCTION_GUIDE.md`。
+没有 Codex 的 CUDA 训练机操作人员应直接遵循 `docs/CUDA_TRAINING_HANDOFF_GUIDE.md`。
 ONNX 伴生证据和 JSON Schema 见 `docs/MODEL_MANIFEST.md`。
 
 ## 数据使用边界

@@ -4,11 +4,22 @@ device: cuda
 model_config: configs/model_student_structaware15.yaml
 initial_checkpoint: checkpoints/student_structaware15.pt
 context_config: configs/context.yaml
-manifest: data/production/manifest.jsonl
+manifest: data/sidd_training/manifest.jsonl
 output_dir: runs/student_structaware15_finetune
 data_policy:
   purpose: commercial_grade
   catalog: resources/datasets.yaml
+data_requirements:
+  # 与 Teacher/Student 保持同一公开 RAW 数据门槛，防止后续阶段悄然换成小样本。
+  min_train_records: 3200
+  min_val_records: 64
+  min_train_source_pairs: 200
+  min_val_source_pairs: 4
+  min_train_scene_groups: 6
+  min_val_scene_groups: 1
+  required_train_sensors: [sidd_GP, sidd_IP, sidd_S6, sidd_N6, sidd_G4]
+  required_train_iso_buckets: [low, medium, high, extreme]
+  required_train_modes: [single]
 epochs: 30
 batch_size: 1
 gradient_accumulation_steps: 8
