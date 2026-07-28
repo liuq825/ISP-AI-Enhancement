@@ -22,10 +22,11 @@ def test_small_model_shape_and_padding() -> None:
 
 
 def test_reference_parameter_count() -> None:
-    """参考学生模型参数量变化必须由显式架构决策触发。"""
+    """升级后的 Student 应采用可配置 `[2,2,6,8]` 并锁定精确参数基线。"""
 
     model = NAFNetRaw()
-    assert model.parameter_count() == 14_348_516
+    assert model.encoder_blocks == (2, 2, 6, 8)
+    assert model.parameter_count() == 14_586_340
 
 
 def test_static_path_matches_regular_path_for_aligned_input() -> None:

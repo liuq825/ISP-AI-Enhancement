@@ -811,9 +811,9 @@ def write_sidd_subset_audit_receipt(
         "dataset_id": "sidd",
         "source_evidence": source_evidence,
         "acquisition": {
-            "config": str(config_path),
+            "config": config_path.as_posix(),
             "config_sha256": config_sha256,
-            "local_collection_receipt": str(collection_path),
+            "local_collection_receipt": collection_path.as_posix(),
             "local_collection_receipt_sha256": _sha256_and_crc32(collection_path)[0],
             "scene_count": len(scenes),
             "pair_count": expected_pair_count,

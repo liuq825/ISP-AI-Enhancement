@@ -1,0 +1,63 @@
+# SIDD Medium packed RAW 导入审计回执；NPZ 数据本体不进入 Git。
+receipt_version: 1
+checked_on: '2026-07-28'
+dataset_id: sidd
+source_evidence:
+  acquisition_receipt: resources/sidd_medium_receipt.yaml
+  acquisition_receipt_sha256: cd1b74d6cb54a618d5b7dd792af94e27a2495f25d353e5d7e3b62c20b89c4aa2
+  nlf_csv: datasets/SIDD_Blocks/noise_level_functions.csv
+  nlf_csv_sha256: e48a235ae008bf6076402633df0dd1dc1fa3b6afce1ee0558a05ed358593d6b9
+import:
+  manifest: data/sidd_training/manifest.jsonl
+  manifest_sha256: e9b2f305f72119b13ddae458f24fe179726a7adb564731617d5548de5f03189a
+  training_config: configs/train_student_public_baseline.yaml
+  training_config_sha256: 10714995cb845a4b4a4c85dcf67ff8571b9a0e799aacad32148c183302245c7d
+  patch_sizes:
+  - 256
+  patch_seeds:
+  - 20260727
+  patches_per_source_pair:
+  - 16
+dataset:
+  record_count: 5120
+  referenced_npz_count: 10240
+  compressed_npz_bytes: 6155310343
+  uncompressed_array_bytes: 10737418240
+  array_shapes:
+    4x256x256: 10240
+  array_content_sha256: d9dba6d6ac422d8cc0cf20f9b69f9bd21e019f4c5b5925d543b360d47dae3876
+  source_pair_count: 320
+  source_pair_identity_sha256: 7d3f7ab26b053eb8520cb8fd066e5963d1f1a062cfecf15802c907a5c2c90184
+  split_records:
+    test: 1728
+    train: 3296
+    val: 96
+  split_source_pairs:
+    test: 108
+    train: 206
+    val: 6
+  split_scene_groups:
+    test: 3
+    train: 6
+    val: 1
+  train_sensors:
+  - sidd_G4
+  - sidd_GP
+  - sidd_IP
+  - sidd_N6
+  - sidd_S6
+  train_iso_buckets:
+  - extreme
+  - high
+  - low
+  - medium
+  train_modes:
+  - single
+verification:
+  manifest_passed: true
+  data_requirements_passed: true
+  arrays_single_raw_float32_finite_normalized: true
+  input_target_shapes_match: true
+limitations:
+- 回执证明公开 SIDD packed RAW 导入完整性，不代表模型已经训练收敛
+- 公开数据充分性门槛通过不替代目标 Sensor、目标 DDK 与麒麟 9000 真机证据

@@ -16,13 +16,13 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[all]"
 .\.venv\Scripts\isp-ai.exe model-summary --config configs/model_student.yaml
 .\.venv\Scripts\isp-ai.exe pruning-summary --source configs/model_student.yaml `
-  --target configs/model_student_pruned15.yaml --backend torch-pruning
+  --target configs/model_student_structaware15.yaml --backend torch-pruning
 # P0 权重收敛后生成可重建的物理剪枝 checkpoint：
 .\.venv\Scripts\isp-ai.exe prune-checkpoint `
   --source-config configs/model_student.yaml `
-  --source-checkpoint checkpoints/student_p0.pt `
-  --target-config configs/model_student_pruned15.yaml `
-  --output checkpoints/student_pruned15.pt
+  --source-checkpoint runs/student_feature_attention_distill/best.pt `
+  --target-config configs/model_student_structaware15.yaml `
+  --output checkpoints/student_structaware15.pt
 .\.venv\Scripts\isp-ai.exe make-smoke-data --output data/smoke --samples 16
 .\.venv\Scripts\isp-ai.exe validate-manifest --manifest data/smoke/manifest.jsonl
 .\.venv\Scripts\python.exe -m pytest
@@ -71,12 +71,22 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
   --output data/sidd_training `
   --nlf-csv datasets/SIDD_Blocks/noise_level_functions.csv `
   --patch-size 256 --patches-per-pair 16 --patch-seed 20260727
+# 逐个解压复核 10,240 个 NPZ，并验证正式训练数据门槛：
+.\.venv\Scripts\isp-ai.exe audit-sidd-import `
+  --manifest data/sidd_training/manifest.jsonl `
+  --training-config configs/train_student_public_baseline.yaml `
+  --acquisition-receipt resources/sidd_medium_receipt.yaml `
+  --nlf-csv datasets/SIDD_Blocks/noise_level_functions.csv `
+  --output resources/sidd_medium_import_receipt.yaml
 ```
 
 生成器会核对 160 个训练场景、40 个 held-out 场景，以及 Mirror 1/2 各自
 `160×5` 个官方 URL；主镜像发生网络异常时立即切换备用镜像。获取器对所选来源的
 同一场景只打开一次 noisy ZIP 和一次 GT ZIP，并可安全断点重跑。patch 导入保留
 独立 `source_pair_id`，正式训练门禁同时检查源配对数和派生 patch 数。
+本次 320 对实际获取、5,120 条 patch 导入和全量审计结果见
+`docs/SIDD_MEDIUM_ACQUISITION.md`、`resources/sidd_medium_receipt.yaml` 与
+`resources/sidd_medium_import_receipt.yaml`。
 
 导入官方 SIDD RAW 验证块（40 场景 × 32 块，转换后每块为 `4×128×128`）：
 
@@ -106,10 +116,10 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
   --output artifacts/student_512.onnx
 # QAT checkpoint 必须同时提供训练时的 QAT 配置，导出标准 INT8 Q/DQ 节点：
 .\.venv\Scripts\isp-ai.exe export-onnx `
-  --config configs/model_student_pruned15.yaml `
-  --checkpoint runs/student_pruned15_qat/best.pt `
+  --config configs/model_student_structaware15.yaml `
+  --checkpoint runs/student_structaware15_qat/best.pt `
   --qat-config configs/qat.yaml `
-  --output artifacts/student_pruned15_qat_512.onnx
+  --output artifacts/student_structaware15_qat_512.onnx
 # 真机证据齐全后执行三态商用级放行 Gate：
 .\.venv\Scripts\isp-ai.exe check-release `
   --evidence evidence/kirin9000_release.yaml `
@@ -134,9 +144,15 @@ Git；命令可安全重跑并复用 CRC 已验证的文件）：
 失败语义和工具链约束；CI 会自动检查 Python 覆盖面。规范见
 `docs/CODE_COMMENT_STANDARD.md`。
 
-结构化剪枝默认使用 `torch-pruning==1.6.1` 的 DepGraph 物理删除通道，并保留手工重建
-后端作为交叉验证。SimpleGate 成对索引、已知兼容性问题和参考结果见 `docs/PRUNING.md`。
-AMP、余弦学习率、原子 checkpoint 和确定性恢复约束见 `docs/TRAINING.md`。
+Student P0 使用可配置的 `encoder_blocks=[2,2,6,8]`；结构化剪枝默认使用
+`torch-pruning==1.6.1` 的 DepGraph，并按浅层保护、stage 边界保护和深层差异化压缩
+执行结构感知约 15% 物理删除。SimpleGate 成对索引和参考结果见 `docs/PRUNING.md`。
+Teacher/Student 采用输出辅助 + feature + 空间 attention 联合蒸馏，详见
+`docs/DISTILLATION.md`；AMP、原子 checkpoint 和确定性恢复约束见 `docs/TRAINING.md`。
+当前开发机的 CPU、内存、磁盘和任务边界见 `docs/LOCAL_DEVELOPMENT_PROFILE.md`；
+正式 CUDA 训练配置不会为了迁就本地 CPU 而降级为无意义的长时间运行。
+新成员从环境安装到数据、训练、剪枝、QAT、导出和放行的最短路径见
+`docs/REPRODUCTION_GUIDE.md`。
 ONNX 伴生证据和 JSON Schema 见 `docs/MODEL_MANIFEST.md`。
 
 ## 数据使用边界

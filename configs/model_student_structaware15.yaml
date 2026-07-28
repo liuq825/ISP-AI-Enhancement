@@ -1,0 +1,21 @@
+# Student 的结构感知约 15% 物理剪枝目标；不是所有 block 统一乘 0.85。
+model:
+  name: nafnet_raw
+  input_channels: 16
+  output_channels: 4
+  width: 32
+  encoder_blocks: [2, 2, 6, 8]
+  middle_blocks: 4
+  decoder_blocks: [2, 2, 2, 2]
+  # 高分辨率浅层完整保留；enc3/enc4 首尾块比内部块宽，保护跨尺度和 skip 接口。
+  # 解码器按深到浅排列；全部数值均为 SimpleGate 之后的逻辑隐藏宽度并保持 16 对齐。
+  expansion_spec:
+    enc1: [32, 32]
+    enc2: [64, 64]
+    enc3: [128, 112, 112, 112, 112, 128]
+    enc4: [256, 224, 208, 208, 208, 208, 224, 256]
+    middle: [448, 400, 400, 432]
+    dec1: [224, 240]
+    dec2: [112, 128]
+    dec3: [64, 64]
+    dec4: [32, 32]

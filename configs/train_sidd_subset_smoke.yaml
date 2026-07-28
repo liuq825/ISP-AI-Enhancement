@@ -1,5 +1,6 @@
 # 真实 SIDD 子集单轮 CPU 烟雾训练：只验证 MAT→Manifest→16 通道→checkpoint 闭环。
 # 模型、样本量和训练轮数均不具有画质结论，禁止将产物标记为 P0 或商用品质权重。
+# 当前本地机为 8 逻辑线程/15.79 GiB RAM/无 CUDA；Windows 下固定单 worker 避免换页。
 seed: 20260726
 device: cpu
 model_config: configs/model_smoke.yaml

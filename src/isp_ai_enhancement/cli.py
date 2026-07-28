@@ -15,6 +15,7 @@ from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
 from isp_ai_enhancement.data.sidd import (
     import_sidd_dataset,
     import_sidd_validation_blocks,
+    write_sidd_import_audit_receipt,
 )
 from isp_ai_enhancement.data.sidd_catalog import (
     SIDD_MIRROR1_LIST,
@@ -33,7 +34,10 @@ from isp_ai_enhancement.evaluation import evaluate_manifest
 from isp_ai_enhancement.export import export_onnx
 from isp_ai_enhancement.models.factory import build_model_from_file
 from isp_ai_enhancement.onnx_audit import audit_onnx
-from isp_ai_enhancement.pruning.physical import physical_prune
+from isp_ai_enhancement.pruning.physical import (
+    physical_prune,
+    stage_hidden_retention,
+)
 from isp_ai_enhancement.pruning.torch_pruning_adapter import (
     torch_pruning_physical_prune,
 )
@@ -92,6 +96,11 @@ def _pruning_summary(args: argparse.Namespace) -> int:
                 "source_parameters": report.source_parameters,
                 "target_parameters": report.target_parameters,
                 "physical_pruning_ratio": report.pruning_ratio,
+                "encoder_blocks": list(source.encoder_blocks),
+                "stage_hidden_retention": stage_hidden_retention(
+                    source.expansion_spec,
+                    target_config.expansion_spec,
+                ),
             },
             indent=2,
             sort_keys=True,
@@ -270,6 +279,21 @@ def _audit_sidd_subset(args: argparse.Namespace) -> int:
             config=args.config,
             output_dir=args.source,
             destination=args.output,
+        )
+    )
+    return 0
+
+
+def _audit_sidd_import(args: argparse.Namespace) -> int:
+    """逐 NPZ 复核 SIDD 导入结果，并写入数值内容与数据门槛回执。"""
+
+    print(
+        write_sidd_import_audit_receipt(
+            manifest_path=args.manifest,
+            training_config=args.training_config,
+            destination=args.output,
+            acquisition_receipt=args.acquisition_receipt,
+            nlf_csv=args.nlf_csv,
         )
     )
     return 0
@@ -482,6 +506,20 @@ def build_parser() -> argparse.ArgumentParser:
     sidd_audit.add_argument("--source", required=True)
     sidd_audit.add_argument("--output", required=True)
     sidd_audit.set_defaults(function=_audit_sidd_subset)
+
+    sidd_import_audit = commands.add_parser("audit-sidd-import")
+    sidd_import_audit.add_argument("--manifest", required=True)
+    sidd_import_audit.add_argument("--training-config", required=True)
+    sidd_import_audit.add_argument("--output", required=True)
+    sidd_import_audit.add_argument(
+        "--acquisition-receipt",
+        help="可选的上游 RAW 获取审计回执；存在时记录路径与 SHA256",
+    )
+    sidd_import_audit.add_argument(
+        "--nlf-csv",
+        help="可选的官方 NLF CSV；存在时记录路径与 SHA256",
+    )
+    sidd_import_audit.set_defaults(function=_audit_sidd_import)
 
     train = commands.add_parser("train")
     train.add_argument("--config", required=True)

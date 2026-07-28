@@ -16,7 +16,7 @@ from isp_ai_enhancement.export import load_checkpoint_state, sha256_file
 from isp_ai_enhancement.models.factory import build_model_from_file
 from isp_ai_enhancement.models.nafnet import NAFNetRaw
 
-from .physical import PruningReport, physical_prune
+from .physical import PruningReport, physical_prune, stage_hidden_retention
 from .torch_pruning_adapter import (
     TorchPruningReport,
     torch_pruning_physical_prune,
@@ -128,6 +128,10 @@ def prune_checkpoint(
         "source_parameters": structural_report.source_parameters,
         "target_parameters": structural_report.target_parameters,
         "physical_pruning_ratio": structural_report.pruning_ratio,
+        "stage_hidden_retention": stage_hidden_retention(
+            source.expansion_spec,
+            configured_target.expansion_spec,
+        ),
         "backend": _backend_metadata(backend, backend_report),
     }
     output_path = Path(output)

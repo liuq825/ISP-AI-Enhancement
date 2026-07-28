@@ -7,7 +7,7 @@
 1. 校验 Manifest 文件、重复 ID 和场景级划分泄漏；
 2. 按声明的 `data_policy.purpose` 检查数据目录与许可；
 3. 确认每个 `sensor_id` 都存在版本化相机嵌入；
-4. 构建配对数据、模型、可选教师和特征蒸馏适配器；
+4. 构建配对数据、模型、可选教师和 feature + attention 蒸馏适配器；
 5. 恢复 checkpoint 或从固定随机种子开始训练。
 
 商用品质配置还必须声明 `data_requirements`。训练器在创建输出目录前检查 train/val
@@ -68,18 +68,36 @@ resume_checkpoint: runs/student_distill/epoch_0040.pt
 worker 后，已保存的 DataLoader Generator 才能精确派生下一轮增强种子。该选择会增加
 少量 epoch 启动开销，但保证中断恢复的实验可比性。
 
+## Feature + Attention 蒸馏
+
+`configs/distill.yaml` 使用 `[2,2,6,8]` Student，并组合低权重 Teacher 输出、
+多尺度 1×1 投影 feature 和通道无关的空间 attention。三项未加权损失分别写入训练
+历史。Teacher 固定为 eval 且停止梯度；蒸馏适配器随 checkpoint 保存，但不进入部署图。
+
+attention 层位本身没有可训练参数，因此实现额外注册语义 buffer；中断恢复若改变
+`attention_keys`，严格状态加载会拒绝，不能静默换配方。完整公式、层位和消融 Gate
+见 `DISTILLATION.md`。
+
+宽 Teacher 先通过 `configs/train_teacher.yaml` 训练，最佳权重固定为
+`runs/teacher/best.pt`；`configs/distill.yaml` 直接引用该路径，避免人工复制或重命名
+checkpoint。为降低未知 CUDA 训练机的峰值显存，两份正式配置使用 micro-batch 1 和
+8 步梯度累积，保持有效 batch 8。`global_step` 只统计真实 optimizer 更新，最后不足
+8 个 micro-batch 的分组按实际数量归一化。
+
 ## QAT 微调
 
 QAT 必须从已经完成物理剪枝和 FP32 微调的权重开始：
 
 ```yaml
-model_config: configs/model_student_pruned15.yaml
-initial_checkpoint: checkpoints/student_pruned15.pt
+model_config: configs/model_student_structaware15.yaml
+initial_checkpoint: runs/student_structaware15_finetune/best.pt
 qat_config: configs/qat.yaml
 ```
 
-`initial_checkpoint` 只载入模型权重并开始一个新优化过程；`resume_checkpoint` 恢复同一
-训练过程的全部状态，两者互斥。观察器在 `observer_warmup_steps` 后冻结；模型进入
+QAT 必须读取结构感知剪枝后已经完成 FP32 恢复微调的最佳权重，不能直接读取刚删除
+通道的 `checkpoints/student_structaware15.pt`。`initial_checkpoint` 只载入模型权重
+并开始一个新优化过程；`resume_checkpoint` 恢复同一训练过程的全部状态，两者互斥。
+观察器在 `observer_warmup_steps` 后冻结；模型进入
 `eval()` 时也不会使用验证数据更新尺度。训练日志记录转换/排除卷积、按层覆盖率和按权重
 元素覆盖率。
 

@@ -91,4 +91,6 @@ def test_prune_checkpoint_is_rebuildable_from_target_config(tmp_path: Path) -> N
     assert any(value.numel() for value in state.values())
     assert metadata["target_parameters"] < metadata["source_parameters"]
     assert metadata["backend"]["version"] == "1.6.1"
+    assert metadata["stage_hidden_retention"]["enc1"] == 0.75
+    assert metadata["stage_hidden_retention"]["enc2"] == 1.0
     assert output.with_suffix(".pt.manifest.json").is_file()

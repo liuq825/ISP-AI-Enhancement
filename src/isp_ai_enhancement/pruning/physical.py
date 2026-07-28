@@ -14,6 +14,18 @@ from torch import Tensor, nn
 
 from isp_ai_enhancement.models.nafnet import ExpansionSpec, NAFBlock, NAFNetRaw
 
+_STAGE_NAMES = (
+    "enc1",
+    "enc2",
+    "enc3",
+    "enc4",
+    "middle",
+    "dec1",
+    "dec2",
+    "dec3",
+    "dec4",
+)
+
 
 @dataclass(frozen=True)
 class PruningReport:
@@ -27,6 +39,33 @@ class PruningReport:
         """返回被实际移除的参数占源模型参数量的比例。"""
 
         return 1.0 - self.target_parameters / self.source_parameters
+
+
+def stage_hidden_retention(
+    source: ExpansionSpec,
+    target: ExpansionSpec,
+) -> dict[str, float]:
+    """统计每个 stage 的逻辑隐藏通道保留率，显式证明剪枝分配并非统一比例。
+
+    该指标按一个 stage 内所有 NAFBlock 的隐藏宽度求和；它不等同于参数或 MAC
+    保留率，但能直接审计结构策略是否保护浅层、stage 边界和 skip 敏感区域。
+    目标若改变 block 数或扩张任一 block 会立即失败，避免把架构搜索误报为剪枝。
+    """
+
+    retention: dict[str, float] = {}
+    for name in _STAGE_NAMES:
+        source_widths = source.stage(name)
+        target_widths = target.stage(name)
+        if len(source_widths) != len(target_widths):
+            raise ValueError(f"{name}: source/target block counts differ")
+        if any(target_width > source_width for source_width, target_width in zip(
+            source_widths,
+            target_widths,
+            strict=True,
+        )):
+            raise ValueError(f"{name}: structured pruning cannot expand hidden channels")
+        retention[name] = sum(target_widths) / sum(source_widths)
+    return retention
 
 
 def _copy_parameter(target: Tensor, source: Tensor) -> None:

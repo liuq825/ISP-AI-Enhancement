@@ -1,17 +1,18 @@
-# 从物理剪枝 checkpoint 微调参考 P3；先恢复画质，再进入 QAT。
+# 从结构感知物理剪枝 checkpoint 微调参考 P3；先恢复画质，再进入 QAT。
 seed: 20260726
 device: cuda
-model_config: configs/model_student_pruned15.yaml
-initial_checkpoint: checkpoints/student_pruned15.pt
+model_config: configs/model_student_structaware15.yaml
+initial_checkpoint: checkpoints/student_structaware15.pt
 context_config: configs/context.yaml
 manifest: data/production/manifest.jsonl
-output_dir: runs/student_pruned15_finetune
+output_dir: runs/student_structaware15_finetune
 data_policy:
   purpose: commercial_grade
   catalog: resources/datasets.yaml
 epochs: 30
-batch_size: 8
-num_workers: 8
+batch_size: 1
+gradient_accumulation_steps: 8
+num_workers: 2
 crop_size: 256
 learning_rate: 0.00005
 weight_decay: 0.0

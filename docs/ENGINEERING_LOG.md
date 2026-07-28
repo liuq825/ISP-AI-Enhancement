@@ -481,3 +481,84 @@
 - 安全边界：通用 basename 只有在父目录组件精确等于当前实例+角色令牌时才匹配；
   测试把 `NOISY_RAW_010.MAT` 放进 `0033_NOISY_RAW`，对 0032 请求必须拒绝，不能
   为兼容格式而放松场景身份。
+
+### 320 对实际获取结果
+
+- 完成：160 个非 held-out 场景、frame 010/020，共 320 对、640 个 MAT，
+  `21,618,970,008` 字节；最终状态为 100%，无错误、无 `.partial`。
+- 来源：最初 8 对来自 CodaLab，持续故障后 312 对来自官网列出的 Mirror 1；逐 pair
+  收据保留实际 URL，不能把来源切换隐藏在汇总数字中。
+- 最终复核：重新读取全部 MAT 并核对 CRC32/SHA256、配置、集合收据和 320 个 pair
+  收据。可提交审计收据为 `resources/sidd_medium_receipt.yaml`，详细报告见
+  `docs/SIDD_MEDIUM_ACQUISITION.md`。
+
+### Windows 环境同时存在 Path/PATH 会让 Start-Process 在业务代码前失败
+
+- 现象：尝试把 5,120 条 patch 导入放到隐藏后台进程时，`Start-Process` 报告
+  “已添加项，字典中的关键字 Path/PATH”，加 `-UseNewEnvironment` 仍失败。
+- 判断：目标目录尚未创建，且没有业务 Python 进程，说明异常发生在 PowerShell
+  构建子进程环境阶段，不是 SIDD 导入器崩溃；不能看到启动命令就假设任务在执行。
+- 处理：改为直接以前台 `.venv\Scripts\python.exe -m isp_ai_enhancement.cli`
+  运行同一命令，导入在 998.3 秒后正常完成。失败尝试没有留下半成品。
+- 防复发：后台任务启动后同时检查错误流、实际命令行和首个业务产物；受影响主机优先
+  前台执行，若必须后台运行则先用最小显式环境构造子进程，不能依赖继承的重复键。
+
+### 数量正确仍不足以证明上万个 NPZ 可训练
+
+- 风险：Manifest 有 5,120 行、目录有 10,240 个文件，只能证明路径数量对得上；
+  NPZ 可能含对象数组、额外字段、错误 dtype、NaN、越界 RAW 或 noisy/GT shape 错配。
+- 处理：新增 `audit-sidd-import`，逐个以 `allow_pickle=False` 打开 NPZ，要求唯一
+  `raw`、float32、`4×H×W`、有限且位于 `[0,1]`，同时核对 patch 元数据、源 SHA、
+  文件唯一引用、input/target shape 和正式训练数据门槛。
+- 可移植摘要：压缩 NPZ 的 ZIP 时间戳可能导致文件 SHA 跨重建变化，因此按相对路径、
+  dtype、shape 和解压数组字节生成内容摘要；数值相同即得到相同摘要。
+- 实际结果：5,120 条记录、10,240 个 NPZ 全部通过；压缩文件
+  `6,155,310,343` 字节，解压数组 `10,737,418,240` 字节，内容 SHA256 为
+  `d9dba6d6ac422d8cc0cf20f9b69f9bd21e019f4c5b5925d543b360d47dae3876`。
+
+## 2026-07-28：Student、结构感知剪枝与联合蒸馏升级
+
+### Student enc3 加深后所有参数基线必须重算
+
+- 变更：Student 从 `encoder_blocks=[2,2,4,8]` 升级为 `[2,2,6,8]`，增加两个
+  中尺度 enc3 block；模型仍由 YAML 驱动，不能在训练或部署脚本中散落块数常量。
+- 影响：P0 参数从历史 `14,348,516` 变为 `14,586,340`。旧剪枝目标的 enc3 宽度
+  数量与新拓扑不匹配，会在模型构造期被严格拒绝，不能直接沿用旧 checkpoint。
+- 防复发：模型测试同时锁定 `encoder_blocks` 和精确参数数；剪枝目标 YAML 必须和
+  P0 的九个 stage block 数一致。
+
+### 全局 15% 不能被误解为每个 block 统一缩 15%
+
+- 风险：统一比例会同时伤害高分辨率浅层、stage 边界和 skip 接口，却可能仅凭总体
+  参数率“达标”；总数正确不能证明结构合理。
+- 处理：enc1/enc2/dec3/dec4 完整保留，enc3/enc4 首尾 block 比内部更宽，Middle
+  和深层 Decoder 承担更多预算。当前图为 `14,586,340 → 12,405,108`，
+  物理剪枝率 `14.953936%`。
+- 可审计性：CLI 和 checkpoint manifest 增加 `stage_hidden_retention`；当前
+  enc1/enc2 为 100%、enc4 为 87.5%、Middle 为 82.03125%，明确证明不是统一模板。
+- 边界：这仍是结构先验起点。正式通道数必须用收敛 P0 做逐 block 短微调和逐域敏感度
+  回退；随机权重的重要性与静态宽度表都不能作为商用品质结论。
+
+### 只有输出蒸馏会把监督集中在图尾
+
+- 现状：工程已经有多尺度 feature 投影，但缺少空间 attention 迁移，配置仍容易被
+  概括为“Teacher 输出蒸馏”。
+- 处理：输出权重从 0.30 降为 0.10 辅助项，新增 0.15 feature 和 0.10 attention。
+  attention 对每层通道均方能量做逐样本 L2 归一化，不要求 Teacher/Student 通道一致。
+- 恢复坑：attention key 没有天然参数，若只保存投影权重，改变层位后
+  `strict=True` 也可能不报错。实现为每个 attention key 注册持久语义 buffer，使层位
+  变化必然触发 checkpoint 状态不匹配。
+- 验证：单测证明联合损失只向 Student/投影层传播梯度；极小训练闭环的 history 同时
+  出现 output、feature、attention 三项，checkpoint 保存 distiller 语义状态。
+
+### 有 distill.yaml 但没有 Teacher 训练入口不能称为可复现
+
+- 现象：蒸馏配置引用 `checkpoints/teacher.pt`，仓库却没有生成该文件的正式配置，
+  新开发者必须猜测训练轮数、数据门槛和复制步骤。
+- 处理：新增 `configs/train_teacher.yaml`，输出直接落到 `runs/teacher/best.pt`；
+  `distill.yaml` 直接引用该路径。完整顺序写入 `docs/REPRODUCTION_GUIDE.md`。
+- 显存策略：Teacher+Student 同时前向的 batch 8 风险过高，正式 Teacher、蒸馏、
+  剪枝微调和 QAT 使用 micro-batch 1、8 步梯度累积。最后不足 8 步的分组按实际
+  micro-batch 数归一化，`global_step` 只在 optimizer 更新后增加。
+- 防复发：复现指南中的每个输入 checkpoint 必须能由前一条版本化命令直接产生，
+  不允许依赖未记录的手工复制、重命名或个人目录。

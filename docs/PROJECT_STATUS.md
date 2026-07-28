@@ -1,6 +1,6 @@
 # 项目状态
 
-更新时间：2026-07-27
+更新时间：2026-07-28
 
 ## 当前结论
 
@@ -10,11 +10,12 @@
 
 | Gate | 状态 | 证据或缺口 |
 |---|---|---|
-| M0 工程烟雾测试 | 已完成 | 66 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
+| M0 工程烟雾测试 | 已完成 | 71 项 CPU 测试、可恢复/QAT/剪枝产物、静态 ONNX/Release Gate |
 | M1 公开验证域 | 已完成 | 官方 SIDD 两个 MAT 校验、1,280 块导入及真实 noisy baseline |
-| M1 训练数据 | 进行中 | 6 对 smoke 已完成；160 场景×2 帧、官方主备镜像均已核验，320 对 Range 获取正断点执行 |
-| P0 Student FP32 | 训练器就绪 | 数据充分性门禁及真实 RAW smoke 通过；正式 P0 等待 ≥3,200 个训练 patch、≥200 个独立训练源配对和 CUDA |
-| P1/P2/P3 物理剪枝 | 产物链路已实现 | 双后端逐元素对照、目标 YAML 重建与来源哈希通过；仍需 P0 权重/敏感度 |
+| M1 训练数据 | 已完成 | 320 对 RAW 全量审计；5,120 条 patch/10,240 NPZ 逐文件审计，正式数据门槛通过 |
+| 本地开发机 | 已建档 | i5-11300H、8 线程、15.79 GiB、PyTorch CPU；本地仅承担数据/测试/smoke |
+| P0 Student FP32 | 等待 CUDA | 已升级 `[2,2,6,8]` 和 feature+attention 蒸馏；真实 patch 前向通过，尚无正式权重 |
+| P1/P2/P3 物理剪枝 | 结构感知链路已实现 | 14.953936%、逐 stage 保留率、双后端和来源哈希通过；仍需 P0 权重/逐域敏感度 |
 | QAT | 训练/导出链路已接入 | scale 严格恢复与标准 Q/DQ ONNX 已测；最终规则仍须目标 DDK 生成 |
 | ONNX | CI 实际导出通过 | 原子产物、ORT 对照、raw16-v1 清单和算子审计已测；仍需真实 P0 权重 |
 | OM | 阻塞于外部环境 | 缺目标 DDK、转换器版本、固件和可访问测试设备 |
@@ -25,6 +26,6 @@
 
 1. 获得产品 Sensor 清单、RAW dump 权限、黑白电平/CFA/LSC 元数据和融合 mask。
 2. 锁定麒麟 9000 目标机型、系统版本、HiAI CANN DDK 与 NPU 算子清单。
-3. 导入公开 RAW 训练集；有条件时补充目标 Sensor 数据并冻结 Golden Set。
-4. 训练 Teacher/P0，并在每个 Sensor×模式×ISO 桶建立独立基线。
-5. 用真实权重执行 P1/P2/P3、QAT、OM 和热态实机 Gate。
+3. 在 CUDA 训练机启动公开 RAW Teacher/P0，并按 checkpoint/恢复协议持续记录实验。
+4. 获得产品数据后补充目标 Sensor 数据并冻结 Golden Set，建立逐域独立基线。
+5. 用收敛权重执行 P1/P2/P3、Torch-Pruning、QAT、OM 和热态实机 Gate。

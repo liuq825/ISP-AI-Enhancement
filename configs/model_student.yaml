@@ -1,10 +1,11 @@
-# 未剪枝学生基线：部署候选从此结构训练或蒸馏，再进行结构化剪枝和 QAT。
+# 未剪枝 Student P0：enc3 增加到 6 个 block，提升中尺度纹理与噪声建模容量。
+# 块数仍由 YAML 配置驱动，并非写死在训练/导出逻辑中。
 model:
   name: nafnet_raw
   input_channels: 16
   output_channels: 4
   width: 32
-  encoder_blocks: [2, 2, 4, 8]
+  encoder_blocks: [2, 2, 6, 8]
   middle_blocks: 4
   decoder_blocks: [2, 2, 2, 2]
   expansion_spec: baseline

@@ -84,11 +84,24 @@ frame 010/020，共 320 对，规模与官方 SIDD Medium 相同但帧选择由�
 `resources/sidd_medium_receipt.yaml`。该 YAML 可进入 Git，数十 GB MAT 本体仍只保留
 在本地；集合不完整、配置 SHA 漂移或任一文件被改写时均拒绝出具最终收据。
 
+本次实际完成 160 场景、320 对、640 个 MAT，共 `21,618,970,008` 字节；主来源
+8 对、备用来源 312 对，最终无 `.partial`。逐配对审计收据 SHA256 为
+`cd1b74d6cb54a618d5b7dd792af94e27a2495f25d353e5d7e3b62c20b89c4aa2`，
+完整过程见 `docs/SIDD_MEDIUM_ACQUISITION.md`。
+
 训练导入使用 `--patch-size 256 --patches-per-pair 16`。每个 noisy/GT 源配对只加载
 和 CFA 打包一次，再按 `patch_seed` 生成 16 个不重复 packed RAW 坐标，避免训练时
 每取一个小 crop 都重新解压约 50 MB 的全分辨率 NPZ。Manifest 同时记录
 `source_pair_id`、坐标、patch 大小/seed 和两份源 SHA256。数据门禁分别统计 patch
 记录与唯一源配对；重复派生更多 patch 不能伪装成更多独立拍摄。
+
+本次实际导入 5,120 条 Manifest 记录、10,240 个 `4×256×256 float32` NPZ。
+train/val/test 分别为 `3,296/96/1,728` 条 patch 和 `206/6/108` 个独立源配对；
+训练集覆盖五款相机和 low/medium/high/extreme 四个 ISO 桶。逐 NPZ 审计同时验证
+唯一 `raw` 字段、dtype、有限值、归一化范围、input/target shape 和正式 P0 数据
+门槛。解压数组内容摘要为
+`d9dba6d6ac422d8cc0cf20f9b69f9bd21e019f4c5b5925d543b360d47dae3876`，
+导入回执见 `resources/sidd_medium_import_receipt.yaml`；数据本体仍不进入 Git。
 
 ### SIDD RAW 验证块
 

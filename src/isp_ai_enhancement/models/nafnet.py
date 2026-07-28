@@ -191,25 +191,32 @@ class ExpansionSpec:
         }
 
 
-def reference_pruned_spec() -> ExpansionSpec:
-    """返回接近 15% 物理参数压缩率且全部 16 对齐的参考规格。
+def structure_aware_pruned_spec() -> ExpansionSpec:
+    """返回 `[2,2,6,8]` Student 的结构感知约 15% 参考规格。
 
-    原方案把四个 Middle Block 统一设为 400，会超过目标压缩率。本实现使用
-    ``[416, 416, 432, 432]``，使全局物理参数压缩率保持约 15.135%；量产训练
-    仍应根据真实数据的梯度敏感度重新分配，而不是把该参考值当作最终最优结构。
+    分配规则不是给每个 block 统一乘 0.85：高分辨率 ``enc1/enc2/dec3/dec4`` 完整
+    保留；``enc3/enc4`` 的 stage 首尾块比内部块更宽，以保护降采样前后和 skip
+    接口；Middle 与深层 Decoder 承担更多压缩。所有隐藏宽度保持 16 对齐，当前物理
+    参数剪枝率约 14.954%。真实 P1/P2/P3 仍须结合已训练权重和逐域敏感度复核。
     """
 
     return ExpansionSpec(
         enc1=(32, 32),
         enc2=(64, 64),
-        enc3=(112, 112, 112, 112),
-        enc4=(224, 224, 224, 224, 224, 224, 224, 224),
-        middle=(416, 416, 432, 432),
-        dec1=(224, 224),
-        dec2=(112, 112),
+        enc3=(128, 112, 112, 112, 112, 128),
+        enc4=(256, 224, 208, 208, 208, 208, 224, 256),
+        middle=(448, 400, 400, 432),
+        dec1=(224, 240),
+        dec2=(112, 128),
         dec3=(64, 64),
         dec4=(32, 32),
     )
+
+
+def reference_pruned_spec() -> ExpansionSpec:
+    """兼容旧调用名，返回当前结构感知 15% 参考规格。"""
+
+    return structure_aware_pruned_spec()
 
 
 class NAFNetRaw(nn.Module):
@@ -220,7 +227,7 @@ class NAFNetRaw(nn.Module):
         input_channels: int = 16,
         output_channels: int = 4,
         width: int = 32,
-        encoder_blocks: Sequence[int] = (2, 2, 4, 8),
+        encoder_blocks: Sequence[int] = (2, 2, 6, 8),
         middle_blocks: int = 4,
         decoder_blocks: Sequence[int] = (2, 2, 2, 2),
         expansion_spec: ExpansionSpec | None = None,

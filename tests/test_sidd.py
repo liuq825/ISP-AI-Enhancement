@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import yaml
 from scipy.io import savemat
 
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
@@ -15,6 +16,7 @@ from isp_ai_enhancement.data.sidd import (
     import_sidd_validation_blocks,
     load_sidd_nlf,
     load_sidd_scene_order,
+    write_sidd_import_audit_receipt,
 )
 
 
@@ -151,6 +153,71 @@ def test_import_sidd_deterministically_extracts_patches_with_source_identity(
     )
     assert repeated_manifest == first_manifest
     assert first_npz.stat().st_mtime_ns == original_mtime
+
+
+def test_audit_sidd_import_checks_arrays_and_data_requirements(tmp_path: Path) -> None:
+    """导入审计应逐数组复核格式，并固化 split、源配对和内容摘要。"""
+
+    source = tmp_path / "source"
+    # 默认稳定哈希下 scene 002/010 分别进入 train/val，可构造最小充分性门禁。
+    _create_scene(source, "0052_002_S6_01600_01000_5500_N", mosaic_size=32)
+    _create_scene(source, "0080_010_S6_01600_01000_5500_N", mosaic_size=32)
+    manifest = import_sidd_dataset(
+        source,
+        tmp_path / "converted",
+        patch_size=16,
+        patches_per_pair=1,
+        patch_seed=123,
+    )
+    training_config = tmp_path / "training.yaml"
+    training_config.write_text(
+        yaml.safe_dump(
+            {
+                "data_requirements": {
+                    "min_train_records": 1,
+                    "min_val_records": 1,
+                    "min_train_source_pairs": 1,
+                    "min_val_source_pairs": 1,
+                    "min_train_scene_groups": 1,
+                    "min_val_scene_groups": 1,
+                    "required_train_sensors": ["sidd_S6"],
+                    "required_train_iso_buckets": ["high"],
+                    "required_train_modes": ["single"],
+                }
+            },
+            allow_unicode=True,
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    receipt_path = write_sidd_import_audit_receipt(
+        manifest,
+        training_config,
+        tmp_path / "receipt.yaml",
+    )
+    receipt = yaml.safe_load(receipt_path.read_text(encoding="utf-8"))
+
+    assert receipt["dataset"]["record_count"] == 2
+    assert receipt["dataset"]["referenced_npz_count"] == 4
+    assert receipt["dataset"]["source_pair_count"] == 2
+    assert receipt["dataset"]["split_records"] == {"train": 1, "val": 1}
+    assert receipt["dataset"]["split_source_pairs"] == {"train": 1, "val": 1}
+    assert receipt["dataset"]["array_shapes"] == {"4x16x16": 4}
+    assert len(receipt["dataset"]["array_content_sha256"]) == 64
+    assert receipt["verification"]["data_requirements_passed"] is True
+
+    # 即使 raw 数值没变，额外字段也必须被拒绝，避免训练与审计读取语义分叉。
+    first_record = read_manifest(manifest)[0]
+    first_input = manifest.parent / first_record.input_path
+    with np.load(first_input, allow_pickle=False) as archive:
+        first_raw = np.asarray(archive["raw"])
+    np.savez_compressed(first_input, raw=first_raw, unexpected=np.zeros(1))
+    with pytest.raises(ValueError, match="字段必须且只能包含 raw"):
+        write_sidd_import_audit_receipt(
+            manifest,
+            training_config,
+            tmp_path / "rejected-receipt.yaml",
+        )
 
 
 def test_nlf_rejects_wrong_header(tmp_path: Path) -> None:

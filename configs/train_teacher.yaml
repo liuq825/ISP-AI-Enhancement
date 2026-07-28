@@ -1,39 +1,37 @@
-# P0 公开 RAW 基线配置；已通过 SIDD Medium 数据门槛。
-# 当前本地机只有 CPU，本配置必须在具备 CUDA 的训练机执行，不代表目标 Sensor 放行。
+# 宽 Teacher 正式训练配置；必须在 CUDA 训练机执行，本地 CPU 仅运行 smoke。
+# micro-batch=1 配合 8 步梯度累积，降低 57M 参数模型的峰值显存并保持有效 batch=8。
 seed: 20260726
 device: cuda
-model_config: configs/model_student.yaml
+model_config: configs/model_teacher.yaml
 context_config: configs/context.yaml
 manifest: data/sidd_training/manifest.jsonl
-output_dir: runs/student_public_p0
+output_dir: runs/teacher
 data_policy:
   purpose: commercial_grade
   catalog: resources/datasets.yaml
 data_requirements:
-  # 每个源配对固定抽取 16 个训练 patch；记录数和独立源配对数必须分别达标。
-  # 当前稳定物理场景切分得到 206 train 源对，即 3,296 个固定 patch。
   min_train_records: 3200
   min_val_records: 64
   min_train_source_pairs: 200
-  # 默认物理场景哈希下 scene_id=010 约有 6 个源配对。
   min_val_source_pairs: 4
   min_train_scene_groups: 6
   min_val_scene_groups: 1
   required_train_sensors: [sidd_GP, sidd_IP, sidd_S6, sidd_N6, sidd_G4]
   required_train_iso_buckets: [low, medium, high, extreme]
   required_train_modes: [single]
-epochs: 100
-batch_size: 8
-num_workers: 8
+epochs: 150
+batch_size: 1
+gradient_accumulation_steps: 8
+num_workers: 2
 crop_size: 256
-learning_rate: 0.0002
+learning_rate: 0.0001
 weight_decay: 0.0
 amp: true
 log_every: 20
 save_every_epochs: 1
 scheduler:
   type: cosine
-  t_max: 100
+  t_max: 150
   eta_min: 0.000001
 loss:
   charbonnier: 1.0

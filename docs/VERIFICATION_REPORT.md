@@ -1,6 +1,6 @@
 # M0 验证报告
 
-日期：2026-07-26
+初始日期：2026-07-26；最近更新：2026-07-28
 
 ## 环境
 
@@ -14,11 +14,11 @@
 
 | 检查 | 结果 |
 |---|---|
-| Ruff lint/format | 通过 |
+| Ruff lint | 通过 |
 | Pytest | 16 passed |
-| Student P0 参数 | 14,348,516 |
-| 参考 P3 参数 | 12,176,868 |
-| 参考物理剪枝率 | 15.135% |
+| 当前 Student P0 参数 | 14,586,340 |
+| 当前结构感知 P3 参数 | 12,405,108 |
+| 当前物理剪枝率 | 14.953936% |
 | 程序化 RAW manifest | 通过文件、ID、split 和泄漏检查 |
 | 小模型单 epoch 训练 | 通过；仅为代码烟雾测试 |
 | 512×512 静态 ONNX | ONNX Checker 通过 |
@@ -30,12 +30,15 @@
 
 | 检查 | 结果 |
 |---|---|
-| Pytest | 66 passed |
+| Pytest | 71 passed |
 | 中文说明自动门禁 | 覆盖 `src/` 与 `tests/` 的模块、类和函数 |
 | Torch-Pruning 发行包 | 1.6.1 |
-| DepGraph 参考剪枝 | 40 个剪枝组、260 个组内联动操作，删除 1,536 个逻辑门控通道 |
-| 参考物理参数剪枝率 | 15.135%（14,348,516 → 12,176,868） |
+| Student 拓扑升级 | `encoder_blocks=[2,2,6,8]`，模型构建仍由 YAML 驱动 |
+| DepGraph 结构感知剪枝 | 34 个剪枝组、221 个联动操作，删除 1,504 个逻辑门控通道 |
+| 结构感知物理剪枝率 | 14.953936%（14,586,340 → 12,405,108），逐 stage 保留率进入 manifest |
 | 剪枝后前向 | `1×16×16×16 -> 1×4×16×16` 通过 |
+| Feature + Attention 蒸馏 | 投影特征、归一化空间 attention、Teacher 梯度隔离及语义状态恢复通过 |
+| 蒸馏训练闭环 | 输出/feature/attention 三项均进入 history，distiller 状态进入 checkpoint |
 | SIDD 验证块导入 | 场景顺序、逐相机 CFA、配对清单与注册表嵌入测试通过 |
 | SIDD 官方文件 | 两个 MAT 长度/SHA256/变量/shape/dtype 通过；1,280 条清单验证通过 |
 | SIDD noisy baseline | 37.1865 dB / 0.730949 packed RAW SSIM；逐 Sensor/ISO 已记录 |
@@ -48,10 +51,15 @@
 | SIDD 镜像切换 | 两份官方 800-URL 清单与来源哈希；20/120 秒连接/读取超时、备用源提取及离线收据复用通过 |
 | SIDD 成员布局 | 实例号位于 basename 或精确角色父目录的两种官方格式通过；错场景目录拒绝 |
 | SIDD 最终审计 | 集合/逐配对收据、实际主备来源及全部 MAT SHA256/CRC32 重算；篡改拒绝通过 |
-| SIDD patch 导入 | 固定 seed、不重复坐标、source_pair_id 与 4×256×256 产物链路通过 |
+| SIDD Medium 实际获取 | 160 场景、320 对、640 MAT、21,618,970,008 字节；主源 8 对/备用源 312 对，0 partial |
+| SIDD patch 导入 | 实际 5,120 条；train/val/test=3,296/96/1,728，源配对=206/6/108 |
+| SIDD NPZ 全量审计 | 10,240 文件、6,155,310,343 压缩字节逐个解压；格式、范围、配对 shape 和内容摘要通过 |
+| P0 数据预检 | 五相机、四 ISO 桶、single 模式及样本/源配对/场景下限全部通过 |
+| 真实 patch 前向 | `[2,2,6,8]` Student：`16×256×256 -> 4×256×256`，14,586,340 参数，输出有限 |
 | 数据裁剪复现 | 训练随机裁剪；验证中心裁剪且不消耗全局 RNG |
 | 统一评测 | 逐样本 mask PSNR/packed RAW SSIM、Sensor/ISO 分桶与哈希报告通过 |
 | 训练恢复 | 从 epoch 1 恢复的 epoch 2 与连续训练权重逐元素完全一致 |
+| 梯度累积 | 完整组和末尾不足组按实际 micro-batch 数归一化，global step 仅计 optimizer 更新 |
 | QAT 训练 | FP32 初始权重转换、首批观察器初始化、eval 冻结与量化 buffer 保存通过 |
 | QAT checkpoint/ONNX | per-channel scale 严格重建；实际 Q/DQ、Checker 与 ORT 对照通过 |
 | 剪枝 checkpoint | 双后端权重一致，目标 YAML 严格重建与来源 manifest 通过 |

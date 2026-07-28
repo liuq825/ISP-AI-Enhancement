@@ -1,7 +1,8 @@
 """训练、验证、蒸馏、检查点保存和数据门禁的一体化执行引擎。
 
 训练入口先验证清单、许可用途和传感器上下文，再创建 DataLoader。模型预测
-四通道残差并与原始 packed RAW 相加；可选教师模型提供输出和中间特征蒸馏。
+四通道残差并与原始 packed RAW 相加；可选教师模型提供输出、特征与空间 attention
+三路蒸馏。
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ from isp_ai_enhancement.data.context import ContextBuilder, load_context_config
 from isp_ai_enhancement.data.dataset import RawPairDataset
 from isp_ai_enhancement.data.governance import enforce_data_policy
 from isp_ai_enhancement.data.manifest import read_manifest, validate_manifest
-from isp_ai_enhancement.distillation import FeatureDistiller
+from isp_ai_enhancement.distillation import FeatureAttentionDistiller
 from isp_ai_enhancement.export import load_checkpoint_state
 from isp_ai_enhancement.losses import LossWeights, RawRestorationLoss
 from isp_ai_enhancement.metrics import psnr_per_sample
@@ -334,8 +335,27 @@ def train_from_config(path: str | Path) -> Path:
             exclude_modules=tuple(exclude_modules),
         )
     teacher: nn.Module | None = None
-    distiller: FeatureDistiller | None = None
+    distiller: FeatureAttentionDistiller | None = None
     teacher_feature_weight = 0.0
+    teacher_attention_weight = 0.0
+    loss_values = dict(config.get("loss", {}))
+    teacher_output_weight = float(loss_values.get("teacher_output", 0.0))
+    teacher_feature_weight = float(loss_values.get("teacher_feature", 0.0))
+    teacher_attention_weight = float(loss_values.get("teacher_attention", 0.0))
+    if min(
+        teacher_output_weight,
+        teacher_feature_weight,
+        teacher_attention_weight,
+    ) < 0:
+        raise ValueError("teacher distillation loss weights must be non-negative")
+    teacher_loss_requested = any(
+        value > 0
+        for value in (
+            teacher_output_weight,
+            teacher_feature_weight,
+            teacher_attention_weight,
+        )
+    )
     # 教师配置和权重必须成对出现，避免误以为已经启用知识蒸馏。
     if config.get("teacher_config") or config.get("teacher_checkpoint"):
         if not config.get("teacher_config") or not config.get("teacher_checkpoint"):
@@ -350,14 +370,28 @@ def train_from_config(path: str | Path) -> Path:
         teacher.load_state_dict(load_checkpoint_state(teacher_checkpoint), strict=True)
         teacher.eval()
         teacher.requires_grad_(False)
-        loss_settings = dict(config.get("loss", {}))
-        feature_keys = tuple(loss_settings.get("feature_keys", ("enc2", "enc4", "middle", "dec2")))
-        distiller = FeatureDistiller(
+        feature_keys = tuple(
+            loss_values.get(
+                "feature_keys",
+                ("enc2", "enc3", "enc4", "middle", "dec2"),
+            )
+        )
+        attention_keys = tuple(
+            loss_values.get(
+                "attention_keys",
+                ("enc3", "enc4", "middle", "dec1", "dec2"),
+            )
+        )
+        distiller = FeatureAttentionDistiller(
             student_width=model.width,
             teacher_width=teacher.width,
-            keys=feature_keys,
+            feature_keys=feature_keys,
+            attention_keys=attention_keys,
         ).to(device)
-        teacher_feature_weight = float(loss_settings.get("teacher_feature", 0.10))
+    elif teacher_loss_requested:
+        raise ValueError(
+            "teacher distillation weights require teacher_config and teacher_checkpoint"
+        )
     optimized_parameters = list(model.parameters())
     if distiller is not None:
         optimized_parameters.extend(distiller.parameters())
@@ -366,20 +400,28 @@ def train_from_config(path: str | Path) -> Path:
         lr=float(config.get("learning_rate", 2e-4)),
         weight_decay=float(config.get("weight_decay", 0.0)),
     )
-    loss_values = dict(config.get("loss", {}))
     criterion = RawRestorationLoss(
         LossWeights(
             charbonnier=float(loss_values.get("charbonnier", 1.0)),
             gradient=float(loss_values.get("gradient", 0.1)),
             color=float(loss_values.get("color", 0.05)),
-            teacher_output=float(loss_values.get("teacher_output", 0.0)),
+            teacher_output=teacher_output_weight,
         )
     )
     epochs = int(config.get("epochs", 1))
     log_every = int(config.get("log_every", 20))
     save_every_epochs = int(config.get("save_every_epochs", 1))
-    if epochs <= 0 or log_every <= 0 or save_every_epochs <= 0:
-        raise ValueError("epochs, log_every, and save_every_epochs must be positive")
+    gradient_accumulation_steps = int(config.get("gradient_accumulation_steps", 1))
+    if (
+        epochs <= 0
+        or log_every <= 0
+        or save_every_epochs <= 0
+        or gradient_accumulation_steps <= 0
+    ):
+        raise ValueError(
+            "epochs, log_every, save_every_epochs, and "
+            "gradient_accumulation_steps must be positive"
+        )
     scheduler = _build_scheduler(optimizer, config, epochs)
     scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
     history_path = output_dir / "history.jsonl"
@@ -426,7 +468,9 @@ def train_from_config(path: str | Path) -> Path:
             )
         for epoch in range(start_epoch, epochs + 1):
             model.train()
-            for batch in train_loader:
+            optimizer.zero_grad(set_to_none=True)
+            batch_count = len(train_loader)
+            for batch_index, batch in enumerate(train_loader, start=1):
                 if (
                     qat_observer_warmup_steps is not None
                     and global_step >= qat_observer_warmup_steps
@@ -437,7 +481,6 @@ def train_from_config(path: str | Path) -> Path:
                 target = batch["target"].to(device)
                 # 第 16 通道是输入契约定义的有效像素掩码，只参与损失加权。
                 valid_mask = inputs[:, 15:16]
-                optimizer.zero_grad(set_to_none=True)
                 with torch.autocast(
                     device_type=device.type,
                     dtype=torch.float16,
@@ -461,15 +504,38 @@ def train_from_config(path: str | Path) -> Path:
                         teacher_enhanced=teacher_enhanced,
                     )
                     if distiller is not None and teacher_features is not None:
-                        feature_loss = distiller(student_features, teacher_features)
+                        distillation_terms = distiller(
+                            student_features,
+                            teacher_features,
+                        )
+                        feature_loss = distillation_terms["feature"]
+                        attention_loss = distillation_terms["attention"]
                         terms["teacher_feature"] = feature_loss
-                        loss = loss + teacher_feature_weight * feature_loss
-                scaler.scale(loss).backward()
+                        terms["teacher_attention"] = attention_loss
+                        loss = (
+                            loss
+                            + teacher_feature_weight * feature_loss
+                            + teacher_attention_weight * attention_loss
+                        )
+                # 最后一组不足完整累积步数时按实际 micro-batch 数归一化，避免该组
+                # 梯度被额外缩小；global_step 只统计真实 optimizer 更新。
+                group_start = (
+                    (batch_index - 1) // gradient_accumulation_steps
+                ) * gradient_accumulation_steps + 1
+                group_end = min(
+                    group_start + gradient_accumulation_steps - 1,
+                    batch_count,
+                )
+                group_size = group_end - group_start + 1
+                scaler.scale(loss / group_size).backward()
+                if batch_index != group_end:
+                    continue
                 # 裁剪前必须把 AMP 梯度还原到真实尺度，否则阈值 1.0 没有物理意义。
                 scaler.unscale_(optimizer)
                 torch.nn.utils.clip_grad_norm_(optimized_parameters, max_norm=1.0)
                 scaler.step(optimizer)
                 scaler.update()
+                optimizer.zero_grad(set_to_none=True)
                 global_step += 1
                 if global_step % log_every == 0:
                     record = {
@@ -478,6 +544,7 @@ def train_from_config(path: str | Path) -> Path:
                         "loss": float(loss.detach().item()),
                         "learning_rate": float(optimizer.param_groups[0]["lr"]),
                         "grad_scale": float(scaler.get_scale()),
+                        "gradient_accumulation_steps": gradient_accumulation_steps,
                         **{
                             f"loss_{name}": float(value.detach().item())
                             for name, value in terms.items()

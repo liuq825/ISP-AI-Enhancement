@@ -23,7 +23,7 @@ def build_model(config: Mapping[str, Any]) -> NAFNetRaw:
         input_channels=int(model_config.get("input_channels", 16)),
         output_channels=int(model_config.get("output_channels", 4)),
         width=int(model_config.get("width", 32)),
-        encoder_blocks=tuple(model_config.get("encoder_blocks", (2, 2, 4, 8))),
+        encoder_blocks=tuple(model_config.get("encoder_blocks", (2, 2, 6, 8))),
         middle_blocks=int(model_config.get("middle_blocks", 4)),
         decoder_blocks=tuple(model_config.get("decoder_blocks", (2, 2, 2, 2))),
         expansion_spec=expansion,

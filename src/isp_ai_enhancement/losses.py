@@ -1,4 +1,4 @@
-"""RAW 域监督训练损失：稳健像素、空间梯度、色比和 Teacher 输出蒸馏。"""
+"""RAW 域真值损失与 Teacher 输出辅助蒸馏；feature/attention 在独立模块计算。"""
 
 from __future__ import annotations
 

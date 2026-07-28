@@ -10,16 +10,22 @@ from __future__ import annotations
 import csv
 import hashlib
 import re
+from collections import Counter, defaultdict
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
+from typing import Any
+from zipfile import BadZipFile
 
 import numpy as np
 import torch
+import yaml
 
 from isp_ai_enhancement.config import load_yaml
 
 from .context import canonical_pack_bayer
-from .manifest import ManifestRecord, write_manifest
+from .governance import validate_data_requirements
+from .manifest import ManifestRecord, read_manifest, validate_manifest, write_manifest
 
 SIDD_CFA_PATTERNS: dict[str, str] = {
     "GP": "BGGR",
@@ -541,6 +547,267 @@ def import_sidd_dataset(
     manifest_path = output / "manifest.jsonl"
     write_manifest(records, manifest_path)
     return manifest_path
+
+
+def _load_audited_raw(path: Path) -> np.ndarray:
+    """读取一个导入后的 NPZ，并执行训练输入所需的严格数值约束。
+
+    审计不接受额外字段，因为对象数组或旁路元数据会扩大反序列化攻击面，也可能
+    让训练与审计读取到不同内容。这里不做裁剪或容错修正；任何异常都表示导入产物
+    已损坏、被改写或不再符合 ``4×H×W float32`` RAW 契约。
+    """
+
+    try:
+        with np.load(path, allow_pickle=False) as archive:
+            if set(archive.files) != {"raw"}:
+                raise ValueError("NPZ 字段必须且只能包含 raw")
+            raw = np.asarray(archive["raw"])
+    except (BadZipFile, OSError, ValueError) as error:
+        raise ValueError(f"{path}: 无法审计导入后的 RAW：{error}") from error
+    if raw.dtype != np.float32:
+        raise ValueError(f"{path}: RAW dtype 必须为 float32，实际为 {raw.dtype}")
+    if raw.ndim != 3 or raw.shape[0] != 4 or min(raw.shape[1:]) <= 0:
+        raise ValueError(f"{path}: RAW 必须为 4×H×W，实际为 {raw.shape}")
+    if not np.isfinite(raw).all():
+        raise ValueError(f"{path}: RAW 含 NaN 或无穷值")
+    if float(raw.min()) < -1e-6 or float(raw.max()) > 1.0 + 1e-6:
+        raise ValueError(f"{path}: RAW 数值必须位于 [0, 1]")
+    return raw
+
+
+def _portable_audit_path(path: Path) -> str:
+    """优先把当前工作区内的路径写成 POSIX 相对路径，避免回执绑定 Windows 盘符。"""
+
+    try:
+        return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def write_sidd_import_audit_receipt(
+    manifest_path: str | Path,
+    training_config: str | Path,
+    destination: str | Path,
+    *,
+    acquisition_receipt: str | Path | None = None,
+    nlf_csv: str | Path | None = None,
+) -> Path:
+    """全量复核 packed RAW 导入产物并写出可提交 Git 的确定性摘要回执。
+
+    文件级 SHA256 会受 NPZ 压缩器和 ZIP 时间戳影响，因此最终
+    ``array_content_sha256`` 按“相对路径、dtype、shape、解压数组字节”顺序累计。
+    只要训练真正读取的数值未变化，即使重新压缩或跨平台复制，内容摘要仍保持一致。
+    同时复核 Manifest 防泄漏规则、源配对身份、patch 序号以及正式训练配置声明的
+    数据充分性门槛，防止仅凭文件数量误判数据已经可用于 P0。
+    """
+
+    manifest = Path(manifest_path)
+    config_path = Path(training_config)
+    target = Path(destination)
+    records = read_manifest(manifest)
+    manifest_errors = validate_manifest(records, root=manifest.parent)
+    if manifest_errors:
+        formatted = "\n".join(f"- {error}" for error in manifest_errors)
+        raise ValueError(f"SIDD 导入 Manifest 审计失败：\n{formatted}")
+
+    config = load_yaml(config_path)
+    if "data_requirements" not in config:
+        raise ValueError(f"{config_path}: 正式导入审计必须声明 data_requirements")
+    requirement_errors = validate_data_requirements(
+        records, config.get("data_requirements")
+    )
+    if requirement_errors:
+        formatted = "\n".join(f"- {error}" for error in requirement_errors)
+        raise ValueError(f"SIDD 导入数据充分性审计失败：\n{formatted}")
+
+    root = manifest.parent.resolve()
+    referenced_paths: set[str] = set()
+    split_records: Counter[str] = Counter()
+    split_source_pairs: dict[str, set[str]] = defaultdict(set)
+    split_scene_groups: dict[str, set[tuple[str, str]]] = defaultdict(set)
+    split_sensors: dict[str, set[str]] = defaultdict(set)
+    split_iso_buckets: dict[str, set[str]] = defaultdict(set)
+    split_modes: dict[str, set[str]] = defaultdict(set)
+    source_pair_patches: dict[str, set[int]] = defaultdict(set)
+    source_pair_hashes: dict[str, tuple[str, str]] = {}
+    patch_sizes: set[int] = set()
+    patch_seeds: set[int] = set()
+    shape_counts: Counter[str] = Counter()
+    compressed_bytes = 0
+    array_bytes = 0
+    content_digest = hashlib.sha256()
+
+    for record in sorted(records, key=lambda item: item.sample_id):
+        if record.dataset_id != "sidd":
+            raise ValueError(
+                f"{record.sample_id}: audit-sidd-import 只接受 dataset_id=sidd"
+            )
+        source_pair_id = str(record.metadata.get("source_pair_id", "")).strip()
+        if not source_pair_id:
+            raise ValueError(f"{record.sample_id}: 缺少 metadata.source_pair_id")
+        source_input_sha256 = str(
+            record.metadata.get("source_input_sha256", "")
+        ).lower()
+        source_target_sha256 = str(
+            record.metadata.get("source_target_sha256", "")
+        ).lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", source_input_sha256) or not re.fullmatch(
+            r"[0-9a-f]{64}", source_target_sha256
+        ):
+            raise ValueError(f"{record.sample_id}: 源 RAW SHA256 非法或缺失")
+        source_hashes = (source_input_sha256, source_target_sha256)
+        previous_hashes = source_pair_hashes.setdefault(source_pair_id, source_hashes)
+        if previous_hashes != source_hashes:
+            raise ValueError(f"{source_pair_id}: 派生 patch 的源 RAW SHA256 不一致")
+
+        try:
+            patch_index = int(record.metadata["patch_index"])
+            patch_size = int(record.metadata["patch_size"])
+            patch_seed = int(record.metadata["patch_seed"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"{record.sample_id}: patch 元数据非法或缺失") from error
+        if patch_index <= 0 or patch_size <= 0:
+            raise ValueError(f"{record.sample_id}: patch_index/patch_size 必须为正整数")
+        if patch_index in source_pair_patches[source_pair_id]:
+            raise ValueError(f"{source_pair_id}: patch_index={patch_index} 重复")
+        source_pair_patches[source_pair_id].add(patch_index)
+        patch_sizes.add(patch_size)
+        patch_seeds.add(patch_seed)
+
+        split_records[record.split] += 1
+        split_source_pairs[record.split].add(source_pair_id)
+        split_scene_groups[record.split].add((record.session_id, record.scene_id))
+        split_sensors[record.split].add(record.sensor_id)
+        split_iso_buckets[record.split].add(record.iso_bucket)
+        split_modes[record.split].add(record.mode)
+
+        pair_shapes: list[tuple[int, ...]] = []
+        for role, raw_path in (
+            ("input", record.input_path),
+            ("target", record.target_path),
+        ):
+            candidate = Path(raw_path)
+            candidate = candidate if candidate.is_absolute() else manifest.parent / candidate
+            resolved = candidate.resolve()
+            try:
+                relative = resolved.relative_to(root).as_posix()
+            except ValueError as error:
+                raise ValueError(
+                    f"{record.sample_id}: {role} 文件必须位于 Manifest 目录内"
+                ) from error
+            if relative in referenced_paths:
+                raise ValueError(f"{record.sample_id}: 重复引用文件 {relative}")
+            referenced_paths.add(relative)
+
+            raw = _load_audited_raw(resolved)
+            shape = tuple(int(value) for value in raw.shape)
+            if shape[-2:] != (patch_size, patch_size):
+                raise ValueError(
+                    f"{record.sample_id}: {role} shape={shape} "
+                    f"与 patch_size={patch_size} 不一致"
+                )
+            pair_shapes.append(shape)
+            shape_counts["x".join(str(value) for value in shape)] += 1
+            compressed_bytes += resolved.stat().st_size
+            array_bytes += raw.nbytes
+
+            # 摘要显式加入角色路径、类型和形状，避免简单拼接数组字节产生边界歧义。
+            content_digest.update(relative.encode("utf-8"))
+            content_digest.update(b"\0")
+            content_digest.update(str(raw.dtype).encode("ascii"))
+            content_digest.update(b"\0")
+            content_digest.update(",".join(str(value) for value in shape).encode("ascii"))
+            content_digest.update(b"\0")
+            content_digest.update(raw.tobytes(order="C"))
+        if pair_shapes[0] != pair_shapes[1]:
+            raise ValueError(
+                f"{record.sample_id}: input/target shape 不一致 "
+                f"{pair_shapes[0]} != {pair_shapes[1]}"
+            )
+
+    patch_counts = {len(indices) for indices in source_pair_patches.values()}
+    for source_pair_id, indices in source_pair_patches.items():
+        expected = set(range(1, len(indices) + 1))
+        if indices != expected:
+            raise ValueError(f"{source_pair_id}: patch_index 必须从 1 连续编号")
+
+    source_digest = hashlib.sha256()
+    for source_pair_id, (input_sha256, target_sha256) in sorted(
+        source_pair_hashes.items()
+    ):
+        source_digest.update(
+            f"{source_pair_id}\t{input_sha256}\t{target_sha256}\n".encode()
+        )
+
+    def counts(values: dict[str, set[Any]]) -> dict[str, int]:
+        """把 split→集合转换为按 split 排序的稳定计数映射。"""
+
+        return {split: len(items) for split, items in sorted(values.items())}
+
+    source_evidence: dict[str, object] = {}
+    for field_name, value in (
+        ("acquisition_receipt", acquisition_receipt),
+        ("nlf_csv", nlf_csv),
+    ):
+        if value is None:
+            continue
+        evidence_path = Path(value)
+        if not evidence_path.is_file():
+            raise ValueError(f"{evidence_path}: 来源证据文件不存在")
+        source_evidence[field_name] = _portable_audit_path(evidence_path)
+        source_evidence[f"{field_name}_sha256"] = _sha256(evidence_path)
+
+    receipt = {
+        "receipt_version": 1,
+        "checked_on": date.today().isoformat(),
+        "dataset_id": "sidd",
+        "source_evidence": source_evidence,
+        "import": {
+            "manifest": _portable_audit_path(manifest),
+            "manifest_sha256": _sha256(manifest),
+            "training_config": _portable_audit_path(config_path),
+            "training_config_sha256": _sha256(config_path),
+            "patch_sizes": sorted(patch_sizes),
+            "patch_seeds": sorted(patch_seeds),
+            "patches_per_source_pair": sorted(patch_counts),
+        },
+        "dataset": {
+            "record_count": len(records),
+            "referenced_npz_count": len(referenced_paths),
+            "compressed_npz_bytes": compressed_bytes,
+            "uncompressed_array_bytes": array_bytes,
+            "array_shapes": dict(sorted(shape_counts.items())),
+            "array_content_sha256": content_digest.hexdigest(),
+            "source_pair_count": len(source_pair_hashes),
+            "source_pair_identity_sha256": source_digest.hexdigest(),
+            "split_records": dict(sorted(split_records.items())),
+            "split_source_pairs": counts(split_source_pairs),
+            "split_scene_groups": counts(split_scene_groups),
+            "train_sensors": sorted(split_sensors["train"]),
+            "train_iso_buckets": sorted(split_iso_buckets["train"]),
+            "train_modes": sorted(split_modes["train"]),
+        },
+        "verification": {
+            "manifest_passed": True,
+            "data_requirements_passed": True,
+            "arrays_single_raw_float32_finite_normalized": True,
+            "input_target_shapes_match": True,
+        },
+        "limitations": [
+            "回执证明公开 SIDD packed RAW 导入完整性，不代表模型已经训练收敛",
+            "公开数据充分性门槛通过不替代目标 Sensor、目标 DDK 与麒麟 9000 真机证据",
+        ],
+    }
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(f"{target.name}.tmp")
+    temporary.write_text(
+        "# SIDD Medium packed RAW 导入审计回执；NPZ 数据本体不进入 Git。\n"
+        + yaml.safe_dump(receipt, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+        newline="\n",
+    )
+    temporary.replace(target)
+    return target
 
 
 def import_sidd_validation_blocks(

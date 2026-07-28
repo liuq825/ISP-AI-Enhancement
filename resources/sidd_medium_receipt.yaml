@@ -1,0 +1,4508 @@
+# SIDD Medium 规模 RAW 的逐配对审计收据；数据本体不进入 Git。
+receipt_version: 1
+checked_on: '2026-07-27'
+dataset_id: sidd
+source_evidence:
+  source_page: https://abdokamel.github.io/sidd/dataset.html
+  source_page_sha256: 58ec0b448178dc1707dcef8ae18f16504f78c79bfacbbe4df92784d2d8132c11
+  mirror_list: https://abdokamel.github.io/sidd/files/SIDD_URLs_Mirror_2.txt
+  mirror_list_sha256: 1e5d7b020f113c900e2e6bc6cd5d092a5304962b0bb0b6149049e982ae264e7b
+  fallback_mirror_list: https://abdokamel.github.io/sidd/files/SIDD_URLs.txt
+  fallback_mirror_list_sha256: 839db586a28ca8dd914f2fbbe006142611239cd230df2124c5e6cd7668193dc9
+acquisition:
+  config: resources/sidd_medium_range.yaml
+  config_sha256: a578361b5d1ef3d04b531fa4d5c0b8ac5ebca00adec6d314221bb1dcbcf0ae43
+  local_collection_receipt: datasets/SIDD_Medium_Range/subset.receipt.json
+  local_collection_receipt_sha256: cd32b05b01c58283f9a9c97a6ed50bd9b97263fc777c6208d90c387e443b0e99
+  scene_count: 160
+  pair_count: 320
+  raw_mat_count: 640
+  raw_mat_bytes: 21618970008
+  compressed_member_bytes: 21506777029
+  source_usage_pairs:
+    primary: 8
+    fallback: 312
+pairs:
+- scene: 0001_001_S6_00100_00060_3200_L
+  frame_index: 10
+  source: primary
+  receipt_sha256: f50bf8657c964562fe7984b0af759746772c3cabf6278db980fe5e8b80339fc2
+  noisy:
+    bytes: 21542113
+    compressed_bytes: 21201069
+    crc32: c50be69f
+    sha256: b205f88ac8726852f610d684a99e7c9c3245544868878fa39d47080c1377b156
+  ground_truth:
+    bytes: 56743221
+    compressed_bytes: 56719966
+    crc32: a503b49d
+    sha256: 02f9591b3e1cacee8174bc61e7dcda1b88052caa1b815d3ed4c9a43e5a7eed4a
+- scene: 0001_001_S6_00100_00060_3200_L
+  frame_index: 20
+  source: primary
+  receipt_sha256: 99cdf73f18da9ceb1bc15ff63745d39886303bfa76159d5cbea7d6a2040f44d7
+  noisy:
+    bytes: 21489316
+    compressed_bytes: 21149467
+    crc32: 9ecbf8f7
+    sha256: 55adb1e5e6b3ff8813be1e61c2f002b9204ab3a51023f0e134b19dd1c596ddaa
+  ground_truth:
+    bytes: 56736110
+    compressed_bytes: 56712903
+    crc32: b1892be3
+    sha256: 8bdc14a2a358fe7caf5207bac017b14698942330ffba26d4186245a6deca3e27
+- scene: 0002_001_S6_00100_00020_3200_N
+  frame_index: 10
+  source: primary
+  receipt_sha256: 6b20251a2e1da2a7bc84a577f383356f618f9efbc4e6b9dfbae1e649835a1948
+  noisy:
+    bytes: 26255093
+    compressed_bytes: 25801663
+    crc32: 8f98902a
+    sha256: fc15ed4b53499c0ee9acff0b5e5c93dd59949a2715add95da7503bc0c01c103a
+  ground_truth:
+    bytes: 56880232
+    compressed_bytes: 56856984
+    crc32: b32ada2a
+    sha256: 417c4a499e5122260222002ecbee23d3ba5dd08ad0a54ab4caf04e1293740b6a
+- scene: 0002_001_S6_00100_00020_3200_N
+  frame_index: 20
+  source: primary
+  receipt_sha256: 735c35fd84f05921d20b3d5ce955e034fdcf88a413920c31988424cee3ee77a8
+  noisy:
+    bytes: 26268619
+    compressed_bytes: 25814242
+    crc32: 11b8f88a
+    sha256: 6232b55f3f45aea7a8a33e2c8074da7f250b18c2d1575a6337a30aa4fd0a7147
+  ground_truth:
+    bytes: 56892460
+    compressed_bytes: 56869286
+    crc32: 9543e84a
+    sha256: facb51b55415e79efe3a64723c5de135d22983a40fe350bb430861bf1c2d524f
+- scene: 0003_001_S6_00100_00060_3200_H
+  frame_index: 10
+  source: primary
+  receipt_sha256: a387030f6baa78a05980a5102c593b9977e404c8a19837df4916aecb6e5ab875
+  noisy:
+    bytes: 30646309
+    compressed_bytes: 30132333
+    crc32: b6421748
+    sha256: 3382fa9b32af21546ca669cd38f709919f2d8233be66e5cdeb8fe15c754b207d
+  ground_truth:
+    bytes: 56858694
+    compressed_bytes: 56835478
+    crc32: fed652b6
+    sha256: 4dfe3fe3352b3d78918fa83f788b7adf0550927b776d983d015147191b62e505
+- scene: 0003_001_S6_00100_00060_3200_H
+  frame_index: 20
+  source: primary
+  receipt_sha256: baa4d0ed1f1f6019c2557aed3d43ac5df7ad1a8766e7c7a445e666a02b88414c
+  noisy:
+    bytes: 30454298
+    compressed_bytes: 29956270
+    crc32: 6a4895d2
+    sha256: 279b272e0c50af25cfa8617844aa15931cbd84e4ad1defcc8dc97f4be9e099e3
+  ground_truth:
+    bytes: 56852409
+    compressed_bytes: 56829168
+    crc32: 67a0ca0d
+    sha256: bdde34b355d5a3e80aae236d3681efa2bd9607006400adc36c293d6e99b0eb9e
+- scene: 0004_001_S6_00100_00060_4400_L
+  frame_index: 10
+  source: primary
+  receipt_sha256: 37e6d6fa058e8c5919ed31dd17583021c9f9b93d04fd751cf01023a4439c96e6
+  noisy:
+    bytes: 23557324
+    compressed_bytes: 23184141
+    crc32: a3c2b067
+    sha256: 121390d8674372b5e24ecbbfadac54a4550cb3f011f5858c3060919510c5d3f1
+  ground_truth:
+    bytes: 56728352
+    compressed_bytes: 56705129
+    crc32: 509ebc96
+    sha256: 9fded3c4b35c579043a4e20d166328f785f46698c75cb1cb6d5f24701371b055
+- scene: 0004_001_S6_00100_00060_4400_L
+  frame_index: 20
+  source: primary
+  receipt_sha256: 5ff4d04abbedc160065a5591670fc3cb0bd4a917f42faec13f457d8caa69048a
+  noisy:
+    bytes: 23562213
+    compressed_bytes: 23188769
+    crc32: 7f8f9f23
+    sha256: 854b6e01964cda6c644440dbbfdc12b095bde05a91b2a0bf162d58ef87c2b618
+  ground_truth:
+    bytes: 56732352
+    compressed_bytes: 56709165
+    crc32: bc52e456
+    sha256: 1851b838490dc3d9cde976aa518c9175d426a1ba38653cb746b8a53860e9c37f
+- scene: 0005_001_S6_00100_00060_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2da157735f4ca8e307dde0e843115edbad72e9a88b582fdb7d3a95896c4e9264
+  noisy:
+    bytes: 29108023
+    compressed_bytes: 28563897
+    crc32: 1787a35e
+    sha256: 410f49f801865b1fff3cd69f2737117279d9d53c6e5500f1e7b0f00aa57c2165
+  ground_truth:
+    bytes: 56575725
+    compressed_bytes: 56552402
+    crc32: 04c848fe
+    sha256: c916eed7a8af69e2287f2d1c4ce124b6ee919d30b28e1eda180bb5994ddbe67e
+- scene: 0005_001_S6_00100_00060_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d25ee2a5d8318d1f441abb3d484fc573ca965458bca83371f2bacbd7d2a91f68
+  noisy:
+    bytes: 28778291
+    compressed_bytes: 28245887
+    crc32: 7f60b8b6
+    sha256: 1cada678cc45c58f338b63d98ec09343d42b34a8d7e3795a2053f16525325aee
+  ground_truth:
+    bytes: 56576122
+    compressed_bytes: 56552885
+    crc32: 2d84b922
+    sha256: ba4dea506a63838b3fd96c48aa4386cfc64225b773dc2c7d931527fdb932c14a
+- scene: 0006_001_S6_00100_00060_4400_H
+  frame_index: 10
+  source: fallback
+  receipt_sha256: df37c5e25561c48e231e54b0ca09452e1468713571c1cc0169887cad7aa3a963
+  noisy:
+    bytes: 26028258
+    compressed_bytes: 25638401
+    crc32: 48d0dfaf
+    sha256: 3ef7fee69b236659b847c524a36f458fe4f9ef9180750cc78018afb37b21a7b9
+  ground_truth:
+    bytes: 48525420
+    compressed_bytes: 48498994
+    crc32: 960b64f3
+    sha256: 97c9808286c8ae0b42610b37d808668e1e7851bbe44d017593f46f22acf8dc85
+- scene: 0006_001_S6_00100_00060_4400_H
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 287b34b36d37f032ff5c6c66072a43fe5097757887e9bae5c4390982c6d34a11
+  noisy:
+    bytes: 26046564
+    compressed_bytes: 25649709
+    crc32: 6367557f
+    sha256: 9ff5c794508c2b177a9bd7c8fc80121cb10fcf0fc5bf03d8ffa99fd955470884
+  ground_truth:
+    bytes: 48569597
+    compressed_bytes: 48543298
+    crc32: e6f064c7
+    sha256: 9899d0f854539309bea367d9ad77667210809c6d9d3bac6d1e14bdaea4ff22db
+- scene: 0007_001_S6_00100_00100_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: a3073c8034825857f72c6fd1640b02ffdc89cae92b747ae81e8b23a5a869941d
+  noisy:
+    bytes: 21575147
+    compressed_bytes: 21223731
+    crc32: 61ec2899
+    sha256: 1a89ebe00f73be5547b3aed07f55ba1e2569594acda2afd13cfbbaf816c5b8e9
+  ground_truth:
+    bytes: 56788539
+    compressed_bytes: 56765426
+    crc32: 40134a4f
+    sha256: bbbcd658eb7fe3ac59ce4990bd1b1c2fe07cbd63bbd880f3e34ce66dd63ea651
+- scene: 0007_001_S6_00100_00100_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8e84c153786c0e6f4e2a9d615883bb31df0950efd5944077049d6ff7d4c92811
+  noisy:
+    bytes: 21178517
+    compressed_bytes: 20817412
+    crc32: d8602924
+    sha256: eaf2d69f988bb841e3ad31ddf660ec05cda1d9afd0e47569e0ed58049a27b60a
+  ground_truth:
+    bytes: 56792617
+    compressed_bytes: 56769450
+    crc32: 49f33785
+    sha256: 377fa89bd763729c59891785946963b9aef8bf33182e3481a4c938a6a5bab010
+- scene: 0008_001_S6_00100_00100_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 421c0ef1ea00d2bcc327ea4d5cef008d0d181e9299b9e63db1b04f6d4fc04bc2
+  noisy:
+    bytes: 28590145
+    compressed_bytes: 28010160
+    crc32: 8347ed41
+    sha256: a447542ed25856b1dab50d65eb23267b44fc855279c951648d70f615b0877222
+  ground_truth:
+    bytes: 56610821
+    compressed_bytes: 56587654
+    crc32: 228d3b52
+    sha256: efe6fa4ea821ee88cb673338bf46195672a1011c09fcef8c34bc6fcd1ed1e9c3
+- scene: 0008_001_S6_00100_00100_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b51cf26c9458151db1689236c65cec60967c6cfd714e53ef3f02678b002a0c6d
+  noisy:
+    bytes: 28485820
+    compressed_bytes: 27910145
+    crc32: 0f2e9afa
+    sha256: f9036829839a79043fa37adf7b094417d351ded43c3aeccdabcbc9cc3e69c533
+  ground_truth:
+    bytes: 56605152
+    compressed_bytes: 56582010
+    crc32: f1c55437
+    sha256: 6dadc2b3cd11e386f95bf923cb9487f1f3dc968685d684d806e4abe183a993ac
+- scene: 0010_001_S6_00800_00350_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 1f6d7d032568b08edcd0fbd62a26e8770da0fec65d41c559534353f74b287cf8
+  noisy:
+    bytes: 30697391
+    compressed_bytes: 30293251
+    crc32: 535e4511
+    sha256: 7c78ad269ef1c83dfdc927fd086ef493393d99387b0526b0079ed925cb794ebc
+  ground_truth:
+    bytes: 56704712
+    compressed_bytes: 56681527
+    crc32: 120ed845
+    sha256: a99c7809f9826acbe1ac3b872887aed9b9dc31eb8f9daa1e2baa4dff14b00829
+- scene: 0010_001_S6_00800_00350_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 40b2f2aa401966378345df4394bf3f86a3c4a793fc0c21ce706e460386aa4f82
+  noisy:
+    bytes: 30501596
+    compressed_bytes: 30116388
+    crc32: 483db241
+    sha256: 003065647d0230805c37cbc2893fbf804a7ee7bdd44701f2aa19f7b9d0ae143c
+  ground_truth:
+    bytes: 56759011
+    compressed_bytes: 56735809
+    crc32: 19ba29aa
+    sha256: c0c3638fe8877e713bff37cb47a1248426c38f947b6e67dc14d95d2337384ed9
+- scene: 0011_001_S6_00800_00500_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 3923cd9e9405ce55d0364f487ef04d1ae5979dab9797324abf61093664766fe8
+  noisy:
+    bytes: 25990214
+    compressed_bytes: 25629177
+    crc32: b4dc0b91
+    sha256: 14b10d5f3a5f1e5c3a84cc90fc0e967d6a5ebeff16f969700d01241d5c8b4b4e
+  ground_truth:
+    bytes: 56637859
+    compressed_bytes: 56614585
+    crc32: 53f6d1d4
+    sha256: f8d6886657a529240a2c6ad46c93bc35ea11908ad79fc94263c801b32af380ec
+- scene: 0011_001_S6_00800_00500_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 82a13ab929545ebab03390afe0eb8de9da9e3dd2159c89f9c1b2d1e4bd5c60da
+  noisy:
+    bytes: 25925643
+    compressed_bytes: 25559684
+    crc32: 9e7d4640
+    sha256: b3b5e9f2f6605f02ccd477a6f9065c95f6aff9bcdcf7be4e9471ea090c4cb458
+  ground_truth:
+    bytes: 56647625
+    compressed_bytes: 56624499
+    crc32: bcc20339
+    sha256: 7f62c84314d2c8e73b900d82721407beb4ce0840845950b13d4b40d22a5bb8cd
+- scene: 0012_001_S6_00800_00500_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 837f9af96147fb5b94403d35b5895d82df7840e542647be79733519d27216598
+  noisy:
+    bytes: 30866017
+    compressed_bytes: 30461371
+    crc32: ac3c45a1
+    sha256: bb9af4c7186522896cf73e29500c39eef5df1c3a25e9a91de2bfff69ae1a2a57
+  ground_truth:
+    bytes: 56709960
+    compressed_bytes: 56686755
+    crc32: d812edb7
+    sha256: 8228d838e7094358d09febe98b0b58a57137006e6d63a525b0592c55574a0b3b
+- scene: 0012_001_S6_00800_00500_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 71f1aeeabd72079901666e7311125cf189d5ef78a78b0879d50419339d504b32
+  noisy:
+    bytes: 31145152
+    compressed_bytes: 30770054
+    crc32: 5a7aa690
+    sha256: 3feaa37fb1c3e380b6455c9bac4e9c2be25cad2a499443cb1d01c39a82342ecf
+  ground_truth:
+    bytes: 56708337
+    compressed_bytes: 56685216
+    crc32: 80aa6897
+    sha256: f6ba8542803b16176aa965d9e0e8c7c13dd346a166076a207ff04e35d12b44a5
+- scene: 0013_001_S6_03200_01250_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 6c14d68b2d8e6326410149e4a7982de217d409b683a130bfedc4879645febb64
+  noisy:
+    bytes: 24478127
+    compressed_bytes: 24148784
+    crc32: e263eef6
+    sha256: d59334671730455c57cc5a47b07ac1a65b99a67a3b10d4ddc9cf2e5a77888559
+  ground_truth:
+    bytes: 56584149
+    compressed_bytes: 56560725
+    crc32: 5a850f80
+    sha256: d855a4aeb97381d2cd01d82f2e0a2f774bd3b36284e15724eb6f319f09d1a031
+- scene: 0013_001_S6_03200_01250_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2d67e71ecf73e74ef0c023f327b085478361b9243f2d18c66c3a216ae85d4730
+  noisy:
+    bytes: 24161524
+    compressed_bytes: 23841661
+    crc32: a9d607f6
+    sha256: 551b26867ccd958cc91a0420ab3806ef5bdae8b1e01b0845e3df625592c5632f
+  ground_truth:
+    bytes: 56605890
+    compressed_bytes: 56582465
+    crc32: 9a987750
+    sha256: 05b2a802000845ab59e263fe7c0dcc296e27c59403b022ce21e9ec4e344fcf35
+- scene: 0014_001_S6_03200_01250_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b5d96a9f7403d1799488ef3579e19970d38863a73e0ca5ddbe13fd004d885202
+  noisy:
+    bytes: 30788078
+    compressed_bytes: 30526353
+    crc32: 793016fc
+    sha256: bdc8b9c074ed7fbb873991fdf817686af4dc75e2c6caff6601dccb520b9db725
+  ground_truth:
+    bytes: 56572564
+    compressed_bytes: 56549173
+    crc32: f23b0b46
+    sha256: cac0149921a6adeb31989d7c9cbbc1f9e288cf62dad248daed54c64a268faf6e
+- scene: 0014_001_S6_03200_01250_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3c7c9d58e8ffe026457ff1525259f97ebbc452f57d3a3facf09200cadcd17a94
+  noisy:
+    bytes: 30607780
+    compressed_bytes: 30351007
+    crc32: d3514d85
+    sha256: b46145f36d072e24f80926ced4ff69ed22741b8d67e00c9d012d198a5a8af969
+  ground_truth:
+    bytes: 56584541
+    compressed_bytes: 56561266
+    crc32: 283b5d7e
+    sha256: 94b9621a1f70de97be08d56a1ddda9c99b33f9889439037b2823841786f15724
+- scene: 0015_001_S6_03200_01600_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5f1a3cb0a125328d0a4d4f4f5c8255b5d9bccdc97b99c53483f28abea16d75c3
+  noisy:
+    bytes: 25284208
+    compressed_bytes: 24957910
+    crc32: 2b2d89d9
+    sha256: ab01d7140d52a99a1a7cea817df2f535284e47fb1e0f557258a214b897bcdd27
+  ground_truth:
+    bytes: 56614240
+    compressed_bytes: 56590747
+    crc32: 7aafc0d1
+    sha256: d2834a60e1de21f58f0ea1211158dc00ebc95cc0f6a554f1357f173242bf6732
+- scene: 0015_001_S6_03200_01600_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 7048b1051d32e6dc222fe5168448ead81c73ab8a6634784e02525b104b6a7e02
+  noisy:
+    bytes: 25120526
+    compressed_bytes: 24800442
+    crc32: 9caa7377
+    sha256: 89b89d8f826abedee3adfdbbaca2e86d9cb381545cbaf733524946ae4ed56270
+  ground_truth:
+    bytes: 56680938
+    compressed_bytes: 56657384
+    crc32: 9610047a
+    sha256: c3c824f4848c167cbcd1099bb688f7235473c45c7385aac5076d3a5e119d6e6d
+- scene: 0016_001_S6_03200_01600_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 4587bac6562762372ee0c5f1e15ff5ec473f719d4c2906d14f592bab4f1c655f
+  noisy:
+    bytes: 30575081
+    compressed_bytes: 30315169
+    crc32: bf37e856
+    sha256: 62ce7fd3b951c92156d417d169da689313a52b3ef18f25e2e9720daa174de28d
+  ground_truth:
+    bytes: 56672040
+    compressed_bytes: 56648788
+    crc32: 134e5266
+    sha256: d24a9faa583e57bbc5cc6ecf3ecad638b1086f6bdbc2a7b8507278ab49c47a2a
+- scene: 0016_001_S6_03200_01600_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e7f348439202e13795225a20e34d085807f8d92484ee9a4ff6dee0d067eed65a
+  noisy:
+    bytes: 30519121
+    compressed_bytes: 30264621
+    crc32: 40727e83
+    sha256: a271a5c155b50a14af890c623df4d9c7254fa61a8b009cdcca1920e97b59ab3a
+  ground_truth:
+    bytes: 56675186
+    compressed_bytes: 56651956
+    crc32: 6516f51a
+    sha256: a2c33f8ce6f97964d6bec489ea331b0165bdd36c10333ea233b54c7c4bd22922
+- scene: 0017_001_GP_00100_00060_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: dfa9afc30ab2550dcd1067f75c9e19e5f9dc95c12f29d44b863b95e2756c6307
+  noisy:
+    bytes: 19363634
+    compressed_bytes: 18964333
+    crc32: 39fb1e59
+    sha256: 0549c3fbfc143528ed0de84b1ffe03bdbce03885edf04c74dfc3fb4bf5ac4f70
+  ground_truth:
+    bytes: 43957398
+    compressed_bytes: 43937913
+    crc32: 9ac4ab6c
+    sha256: 2cb17fe3baa46b5b173b68622384c9a70619e164928b93f9b6457c867171e3c3
+- scene: 0017_001_GP_00100_00060_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3b9cba108718f556d4a4b94736314b52041f4f530366e784036299ab2133a524
+  noisy:
+    bytes: 19315148
+    compressed_bytes: 18913515
+    crc32: 63d5db12
+    sha256: 8105a58030d70fb794748498e33c507f38e0d5320c091521f77ca68869c39103
+  ground_truth:
+    bytes: 43961537
+    compressed_bytes: 43942075
+    crc32: 7330e1de
+    sha256: d14d44629ef738867b4d5cfbb159e1df4b5839654420783b946283d9410a811d
+- scene: 0018_001_GP_00100_00160_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 84d1f2268edf92f356836b8e6379559180d5d4f55f78fed42387684cc964292a
+  noisy:
+    bytes: 11594923
+    compressed_bytes: 11270770
+    crc32: 700fe671
+    sha256: 4080896a3b6aff9686031f848edd0395148aa22668eccd709a3e457ede06a35c
+  ground_truth:
+    bytes: 44073358
+    compressed_bytes: 44053925
+    crc32: ba3242c4
+    sha256: 053637a09dabaa772eaefc6c919437bb465bb3cc0991460115439558fede6403
+- scene: 0018_001_GP_00100_00160_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e424be017df5a6a5fa80c0c6c351d6f7df42a613686eef29a0c4bb7e9cf6f160
+  noisy:
+    bytes: 12149025
+    compressed_bytes: 11798557
+    crc32: 979f9439
+    sha256: 4eebf6e595db55c927322aa58e71b6dda3c411e27dd09a690626260e111ab52f
+  ground_truth:
+    bytes: 44085441
+    compressed_bytes: 44066029
+    crc32: 09101730
+    sha256: 251fee0e54f8ff19766ef268c98604bec56f6401b2d232f9dedc51a3575d5b9d
+- scene: 0019_001_GP_00800_00640_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b05d83613d83af471f9dd25d804c94896d7b78eb84742ff71a8f42806afb396d
+  noisy:
+    bytes: 15706254
+    compressed_bytes: 15443296
+    crc32: 297dbb50
+    sha256: a989e10be1b26f47f3541b8390647bbe013fd36be1efeb3c4f67213276fa642d
+  ground_truth:
+    bytes: 44065877
+    compressed_bytes: 44046447
+    crc32: 6fbb4f11
+    sha256: 8f776f46faba3d4fb6097c62dcc07cd6bcc100c67b9308988ce873779c7b04d3
+- scene: 0019_001_GP_00800_00640_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b02786458cad2d4994d105fa8b773022b5609fbc07347df159df45568fe9aec6
+  noisy:
+    bytes: 15861651
+    compressed_bytes: 15594941
+    crc32: 90b59699
+    sha256: 374fad2e879327463181e906cee2a6c820ed0f02efc8fa2e7a96438ebc324a2c
+  ground_truth:
+    bytes: 44079459
+    compressed_bytes: 44060014
+    crc32: d7f3f8cb
+    sha256: 486d3d1a34597268967270cda3f78fdc21f10c1db15424740941a9d56a7d2e60
+- scene: 0020_001_GP_00800_00350_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5516cb574362b10307414ff72ef95fee9fcee3a4d32748371d4298c09b82c8a4
+  noisy:
+    bytes: 21997685
+    compressed_bytes: 21683757
+    crc32: f8cb6253
+    sha256: 7ee8deff961ffee22c529d9f0b48225f08ca9b09be13afec08fdafebce9ee626
+  ground_truth:
+    bytes: 44049475
+    compressed_bytes: 44030066
+    crc32: bc03f40a
+    sha256: cb54fb92a0583e15a9a00964bd4576b11b83e33c4d047dae5055ce921876f4d0
+- scene: 0020_001_GP_00800_00350_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: bab64bef91fdca0913584b53744675e421f50090974b3686356677eb942ff284
+  noisy:
+    bytes: 22104851
+    compressed_bytes: 21790806
+    crc32: 3a1aaefd
+    sha256: 54705683c5138303ac642559d4e29f683844566f515388360d15c6537bc2a5d2
+  ground_truth:
+    bytes: 44055979
+    compressed_bytes: 44036528
+    crc32: c94e531e
+    sha256: 862571abea39377a7b341118eb23d9b2f8351c6a89fe4f9a5ca636f051ff1935
+- scene: 0022_001_N6_00100_00060_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: ef96fb7a3b6a2367bb2902d07b67a743c65d32251ec1e06ed509571573379c2b
+  noisy:
+    bytes: 20733409
+    compressed_bytes: 20314101
+    crc32: 1e30c893
+    sha256: 36e8505b07aed9bf704e2b268e2bbd2fcbd18e034d62b3c3bfec5d8aa569cf87
+  ground_truth:
+    bytes: 46638087
+    compressed_bytes: 46619455
+    crc32: f7a65369
+    sha256: e9e9f667f058dd06371869b0264eb21d96c6ce55d07c79d6c5b5c1798ff972ca
+- scene: 0022_001_N6_00100_00060_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3e4ae711658e28a421107b7e6c41bc60f327d10554c277d9b91c9aac6e7535ec
+  noisy:
+    bytes: 21008534
+    compressed_bytes: 20585372
+    crc32: e492744d
+    sha256: 02e9afc6a8e3941019639608213b3d4f0234e67c43f260159f3515092aacf1ad
+  ground_truth:
+    bytes: 46647980
+    compressed_bytes: 46629409
+    crc32: df94d0ed
+    sha256: d70b47787dea0a7618c4bb10cb831ae94d673b18d1dc6564367e4df0637ab6e1
+- scene: 0023_001_N6_00800_00350_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d5d0b43a1078a2e42de379fc6a183eabe20241d635f1894f24e9f7e613e83cbe
+  noisy:
+    bytes: 22601371
+    compressed_bytes: 22234058
+    crc32: a68fc1e7
+    sha256: 661e40ded7a045f61b09bb8b45daaac8ca17e0063213925637a45a2a8167ce41
+  ground_truth:
+    bytes: 46635895
+    compressed_bytes: 46617286
+    crc32: 69e253cd
+    sha256: b0bba4e8d5cb273b16e665096a8a9ceecf88b8a52fabd91d896bbc38064702de
+- scene: 0023_001_N6_00800_00350_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 08f36e3607df87c7eae15c377dbfe75d5a88ecbc90b0bae698bc79154285df4d
+  noisy:
+    bytes: 22559954
+    compressed_bytes: 22189945
+    crc32: 2832b304
+    sha256: 825ae76b92b347927631ba53bba4218e0b69aa6bebeebb8116c83637a7d316db
+  ground_truth:
+    bytes: 46633764
+    compressed_bytes: 46615183
+    crc32: e3aa6afc
+    sha256: b7e3a9985849f55ba077547d47f85f5c59e78905138dbee9dec08b6673ade7bf
+- scene: 0025_001_G4_00100_00060_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c8138eb7caf6715f00a4b1d804822bbe9958585b9ec5c0c75a2361baa0b9eb84
+  noisy:
+    bytes: 19360934
+    compressed_bytes: 18901048
+    crc32: 9463e56c
+    sha256: 32158ec1451fedc752661cfe3873dc00b3c976f6a2cf778554f43730b6bba23b
+  ground_truth:
+    bytes: 56498620
+    compressed_bytes: 56475425
+    crc32: 14b83947
+    sha256: 200b83281cee435bc43182756992f9330a315ba562a12c2df1e5f0ba26446c28
+- scene: 0025_001_G4_00100_00060_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 950b5cf3f7c1f9ae8b8080c6aa0c844f06e223e8ea875d2e175f842c4ea0ba82
+  noisy:
+    bytes: 19707755
+    compressed_bytes: 19236023
+    crc32: 4b491aa0
+    sha256: 6ea3c5c08541df5fce8b0c1ebf3dd9ae98a9484efbba24824f84da6d6b78971e
+  ground_truth:
+    bytes: 56502041
+    compressed_bytes: 56478687
+    crc32: 7febbd35
+    sha256: 8f3592380f2134c2daf634291a0517612a0871e9a85bba941d17890062caccb7
+- scene: 0027_001_G4_00800_00350_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: de41456dfdd85f3a4713689e4d0b6b891bb680c44be6e4d12ac2a8e02827edf8
+  noisy:
+    bytes: 20555528
+    compressed_bytes: 20161738
+    crc32: 4d87fa1d
+    sha256: 4471d628ec8c8fa7031df16089f852e8616633143d60ec1c0a0fed86224305e0
+  ground_truth:
+    bytes: 56544749
+    compressed_bytes: 56521462
+    crc32: e57dc527
+    sha256: 8459f7b952f929a91ce096b34ed15b6c6e4142e5a23159cf0f135fc3cb87a8b9
+- scene: 0027_001_G4_00800_00350_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b704cae5e76d624e32e183bdd006dbfb24e48a393559bded6cf1c177b60cc674
+  noisy:
+    bytes: 20413295
+    compressed_bytes: 20027581
+    crc32: 041b19e0
+    sha256: 03bf6a821bb4a349c59f53168763bde83492056c074d4c2032c0ec4e99e8b478
+  ground_truth:
+    bytes: 56564830
+    compressed_bytes: 56541515
+    crc32: 74bf3c7d
+    sha256: ffe335214e933853ec720aa6d3292e9165601d7d029eabc096991327a55b7a10
+- scene: 0028_001_IP_00100_00160_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2c46ba892c968dadfaf4541132309cceac6dfc56664f9d8a013b64be446c3eb3
+  noisy:
+    bytes: 15916848
+    compressed_bytes: 15505260
+    crc32: 54fa522d
+    sha256: 4c6c8d5b9ffeee7fa034a500f9218a0e29aeb0b258106c8092e056299c173bf7
+  ground_truth:
+    bytes: 43558867
+    compressed_bytes: 43539158
+    crc32: cfe12244
+    sha256: 2fb17d3dd3a7795033ef49b8a3abc7c0d30328578719ca9135eda349f6c273dc
+- scene: 0028_001_IP_00100_00160_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 39603209d32822b567cfec2e96465158eac329eb43c8b79c471e83adbc1598aa
+  noisy:
+    bytes: 15475961
+    compressed_bytes: 15078928
+    crc32: 5d4b088b
+    sha256: 0b15779311bc3f029ad83f77d7bb710c7b50eae55b3dbccfd2b99b4dba98dbd7
+  ground_truth:
+    bytes: 43550109
+    compressed_bytes: 43530289
+    crc32: 8139436e
+    sha256: 20f50e7e0b0b6d332a1aa6ba3233add18e3336f68feb7d8af8695b70cd8c1be9
+- scene: 0029_001_IP_00800_01000_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 6e538ac7a4f6e1aede907ad3296ba24090de6d8892e4b5f7e5911f0729f5a872
+  noisy:
+    bytes: 18039664
+    compressed_bytes: 17598092
+    crc32: 5304789b
+    sha256: 1d66643a80ea7a22bff3c9ce26692f1479ccbc6379ef518fb9358ac3896139a9
+  ground_truth:
+    bytes: 43325643
+    compressed_bytes: 43305877
+    crc32: '49040065'
+    sha256: 0d83bbced6a510ecc1223ac41b229a11ab78448b171f74d09662192d3d6473ee
+- scene: 0029_001_IP_00800_01000_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 411a0136825e6b3476c30a46fd4b43cf43d6035d425a390b41347c0f2da94f14
+  noisy:
+    bytes: 18086059
+    compressed_bytes: 17642922
+    crc32: 1a6bc650
+    sha256: 9ad4fe60fd751291806818e6447d2b56981c4ff0ae127060dc2ed05d12d936d4
+  ground_truth:
+    bytes: 43324844
+    compressed_bytes: 43305030
+    crc32: f96a3cce
+    sha256: 9a68e152b873218341d11f1d987eeac114109f3a791c1417843d44261914219f
+- scene: 0030_001_IP_01600_02000_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 25cec72d03320e0629627984a4d8ca3ddbd4ef8a89030c5c5956bc8abe09469d
+  noisy:
+    bytes: 23402841
+    compressed_bytes: 23048192
+    crc32: cb09055e
+    sha256: 0bcf89598e2ae6f6f44871c88e1e86ad480bdc8820b482ba7d64a5a96476cdc2
+  ground_truth:
+    bytes: 43566401
+    compressed_bytes: 43546664
+    crc32: 6e990aad
+    sha256: 5b5a7b379491e8b4afd3aebf7010057bfa39c9c2a32187bbbe26f9b6534bbdd4
+- scene: 0030_001_IP_01600_02000_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3f22ba8c8dd9d564fd3eb093ad5bff0a5bbd3700b9346b9bb9f925fc25e4120c
+  noisy:
+    bytes: 23492985
+    compressed_bytes: 23136145
+    crc32: ee661a7d
+    sha256: 9880a0aacba7200201dffe798a766d1378ed510ae82b0d227535bf14bca69753
+  ground_truth:
+    bytes: 43548070
+    compressed_bytes: 43528300
+    crc32: 3cea1e99
+    sha256: b509e93e5dcf2b30e997b0906843c58baafbcc6d1f89b20421d577f7b6672f19
+- scene: 0032_001_IP_00800_01000_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 45bd305b2f5bd4be56d36e2ebf44975c5924faaf6fab5f75e337e32fb4583149
+  noisy:
+    bytes: 18795757
+    compressed_bytes: 18375124
+    crc32: 5b9b2266
+    sha256: a6141cff8b9289e45feb73f3c3687aa845e8e5b4bfdcd0130e43accbfb6b295e
+  ground_truth:
+    bytes: 43618009
+    compressed_bytes: 43598328
+    crc32: 870dccb5
+    sha256: febde2be47afb687d501875fd7225ab644139d8741611fb3cbe18b14f9ca42bd
+- scene: 0032_001_IP_00800_01000_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2cbc234f1256ca672b8aa28da390ce88796350985068ec56436f9c66f25b4e86
+  noisy:
+    bytes: 18858097
+    compressed_bytes: 18438172
+    crc32: 734c7273
+    sha256: e238dac86943cbf5cca74206afdecd7fca14ba6078b1952972ed75ef666b71c1
+  ground_truth:
+    bytes: 43636061
+    compressed_bytes: 43616413
+    crc32: b98c8dac
+    sha256: 0962cfca582f07ecc1fdc5cbf49e778a9a748fb924935b285c4f775409c0e287
+- scene: 0033_001_IP_00100_00160_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 46faea48ef6f1d3389917566ad29eee7d2e44ca421573f883b316343a57a9a38
+  noisy:
+    bytes: 16276657
+    compressed_bytes: 15848672
+    crc32: 8f7f2bd0
+    sha256: af46b636eba0d03708c9e87288d81a33fb78df7da4a6426fbbf6ad4445ab3a81
+  ground_truth:
+    bytes: 43728859
+    compressed_bytes: 43709337
+    crc32: d0afc9f3
+    sha256: 804709fd5e86e6e796403af2e8962e817b5e77bdf4ae8d01d0d19ebfed24eecd
+- scene: 0033_001_IP_00100_00160_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: cb3fbf52519a0fcca88ba07d84ea732a1ec9d550ba28d73892956c0d4a4563d9
+  noisy:
+    bytes: 16237420
+    compressed_bytes: 15810561
+    crc32: 9de92351
+    sha256: 589231757f3e082f72d6f93999f00a6685e5f3cfb6bbffbf40147f1dd43a04cf
+  ground_truth:
+    bytes: 43740698
+    compressed_bytes: 43721018
+    crc32: b6b210b5
+    sha256: ec88123f39c591a4fba5b06317ae1ed78295124255cfab25c7e37cf3cdb3b64a
+- scene: 0034_002_GP_00100_00160_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: ce02c9fd57b76f6d59a2fcbdae70340c3465df9972fe989ee4fffdc095439d35
+  noisy:
+    bytes: 20284829
+    compressed_bytes: 19956743
+    crc32: 468018f1
+    sha256: 8b171aa3c8bf3423c1ff6d5a87f3d8fc1fc9083e8b66bd7028577a57c382cf9b
+  ground_truth:
+    bytes: 44402071
+    compressed_bytes: 44382709
+    crc32: f10e794d
+    sha256: be58bbb8f14bde0acff067430a023a2f830adf9b5248710fefce7d2fe0cd0f7d
+- scene: 0034_002_GP_00100_00160_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: dab028e0bf3e021fb9c35592e450b8e86de150a326f66124d310433a26120409
+  noisy:
+    bytes: 20155677
+    compressed_bytes: 19827462
+    crc32: f332087c
+    sha256: 2fbaf75a68212373eaa217f9f581b899240e92917bc2938fd5dd9eb29267e3ee
+  ground_truth:
+    bytes: 44403929
+    compressed_bytes: 44384646
+    crc32: 1097d0a4
+    sha256: 6f20e996d6138db8c5e5adcad7fee5809b597600d3983ab805cf8525a01e3ac4
+- scene: 0035_002_GP_00800_00350_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d67bb0b172b9d52880051160862e3e1845ef92269f026ab473922bb3dce5394b
+  noisy:
+    bytes: 21754997
+    compressed_bytes: 21478317
+    crc32: 69287df2
+    sha256: 460e4bf619d67996d884c6886a5680fe5493b86eb5862622fa5a51fea51b06ea
+  ground_truth:
+    bytes: 44219338
+    compressed_bytes: 44199900
+    crc32: c300d050
+    sha256: 4d0e941bb2a16fa2f34a658d6ffd3d532a3c439cfc4346bc01d56a869e8b1abd
+- scene: 0035_002_GP_00800_00350_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ab28f7481c9db85d024761def273a404e107b593bc198dc8d8e038d4fe6bee4a
+  noisy:
+    bytes: 21821678
+    compressed_bytes: 21542234
+    crc32: fc25fd27
+    sha256: c6b77c507fafe129fd30cda79ab2bbec5cb18355e162050e9bc26efe8367f2f6
+  ground_truth:
+    bytes: 44216190
+    compressed_bytes: 44196803
+    crc32: 00d6af05
+    sha256: 303a0a6fe5e16a8192768e47f612831204f5bf9930db6a6ec42ab8fdaf03a29a
+- scene: 0036_002_GP_06400_03200_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 940043f8679dcb6e68590b7c22aec614adff8ef266f154fa8c77474070385b6b
+  noisy:
+    bytes: 20758383
+    compressed_bytes: 20539174
+    crc32: 71f1201d
+    sha256: 7ebaf7f4d1ea3480532096e2c62ffc7d3c1082bb10b1328a4cb3b6b7714a538f
+  ground_truth:
+    bytes: 44283290
+    compressed_bytes: 44263851
+    crc32: 1e2f8d6e
+    sha256: 76fc9861ff861d4f2aab822534182e738f5b32fc49d983cc33397164ab0a0270
+- scene: 0036_002_GP_06400_03200_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 276f127ef510f01a333862c76f9bd9b1949dc42cd1dcdcd04dad76f021ba5a9e
+  noisy:
+    bytes: 20743748
+    compressed_bytes: 20523835
+    crc32: 7c00967c
+    sha256: 69d5da9ee858bfcd89ed459bc9a4bc582f0ec780ba87b76c24dc3a906fd3e2ad
+  ground_truth:
+    bytes: 44292823
+    compressed_bytes: 44273470
+    crc32: 30a3fb4c
+    sha256: 0ac5f38c5520622dbc6ee6b5a52154e00c0742d9afae94261b55ffc6ebc5fb6a
+- scene: 0038_002_GP_00800_00640_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d6f5820047a4bf7f50d93c0920bd75958275ea87b1f5f08e45bbb273ee1d9dde
+  noisy:
+    bytes: 14794407
+    compressed_bytes: 14578183
+    crc32: bc95383d
+    sha256: 37695c4db10822af973ace805c557959383beabc70697d3aeab040cbde3a846d
+  ground_truth:
+    bytes: 44427100
+    compressed_bytes: 44407776
+    crc32: 137fbadb
+    sha256: 1a4dee84ee0043fc29a9c988f543a40ddc12461bdc4548286f4d0d90772d4c0f
+- scene: 0038_002_GP_00800_00640_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9dd6ee6140208f2de7c8a93818eea21f0e115581d0ffb637d4fefb07c60d4336
+  noisy:
+    bytes: 15526006
+    compressed_bytes: 15263023
+    crc32: e8c1716c
+    sha256: bc3fd3bead0324081d7f8f259a6ded35bb013bd72291547c6bdf15b63d92fd2c
+  ground_truth:
+    bytes: 44425381
+    compressed_bytes: 44406001
+    crc32: 736ccf07
+    sha256: 1ff56851cf14482f3827f643e5fd98777ebc00a8e787b687fc758254b18fd82e
+- scene: 0039_002_IP_00100_00180_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0ad2914d07176ead8e81e4a3801779487d6ff8171934cd87d4b24e5d53ebb639
+  noisy:
+    bytes: 18181355
+    compressed_bytes: 17758109
+    crc32: e75ac7d1
+    sha256: b88bdb2d1b772d3d3e74790bb3edcd45857441c41eb5af072cf187516cac814c
+  ground_truth:
+    bytes: 44022254
+    compressed_bytes: 44002741
+    crc32: 7468fd16
+    sha256: 32ee829c6ac4e8a1615a0b8472035172292aec3fd28e234dbcc11023b09d8d4f
+- scene: 0039_002_IP_00100_00180_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 7cde98efd24c35dc0cff0690f10cff117c390c933fcb77109090a6c797db0ae0
+  noisy:
+    bytes: 18260094
+    compressed_bytes: 17835344
+    crc32: 986319cb
+    sha256: effb9f746b8f8864308565ebb531644fbc4169e702d176cabf05e6e29a9dc6bd
+  ground_truth:
+    bytes: 44028422
+    compressed_bytes: 44008904
+    crc32: 8a6661d4
+    sha256: c783c20c6b11be705b00c1d41ce7b97510cc416233c248d1db0db6aaaaa143f8
+- scene: 0040_002_IP_00800_02000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 6aa7e1f067b2750b50569d3eda9212e54d1b0723be3ba185aa84037391c62b9b
+  noisy:
+    bytes: 12122353
+    compressed_bytes: 11809049
+    crc32: '79482754'
+    sha256: 5ddf3352406b2f019cb759b384e248bbf8de89194dc9852d5b29a3d7f87339eb
+  ground_truth:
+    bytes: 43850775
+    compressed_bytes: 43830965
+    crc32: 952d0bc0
+    sha256: a56e77f5cf66fdd0bd04e38a413e9abbd307ffcc2b88b87263131bf01f56db5a
+- scene: 0040_002_IP_00800_02000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 7671cb390b5c69abc04ad8a4ae609216f3341fcaad872c6ba827fdf721789ad3
+  noisy:
+    bytes: 12225178
+    compressed_bytes: 11905435
+    crc32: ceedf6cc
+    sha256: 7d852620a38b8618d354f8572694542b2a530784ef6d7764c736db17be2e30af
+  ground_truth:
+    bytes: 43866192
+    compressed_bytes: 43846418
+    crc32: 620e0db1
+    sha256: a1ef1b4ee61b520433b6bd0ace8ae1b7798cd44248316f3e36722c8f8b6c481a
+- scene: 0042_002_IP_01600_03100_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 30c81427952ca73755b4ade574820c6bf7df45a7061a5fde7a1bcd32aebc6335
+  noisy:
+    bytes: 16007153
+    compressed_bytes: 15615668
+    crc32: 4162b81d
+    sha256: 53ec97d4e02026818bdfe5e36a2954eafa31c322e16f80b2ff58999397683456
+  ground_truth:
+    bytes: 43958305
+    compressed_bytes: 43938677
+    crc32: f1b63e03
+    sha256: f7795076b637179692144e78fe34dbbb33ec3f5c791ca655a6e23aca287555ec
+- scene: 0042_002_IP_01600_03100_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 7d74c7b15f5219f2a0d915fc79bf352a8390a5ed635f265840488d21621e92cc
+  noisy:
+    bytes: 16224357
+    compressed_bytes: 15815435
+    crc32: 5c9b142f
+    sha256: d7e97d2b609ec8698f7d4f41c0bba9ae50f3ae5d6a4da131e85621abc3a0e3cb
+  ground_truth:
+    bytes: 43971060
+    compressed_bytes: 43951458
+    crc32: bfe13b7e
+    sha256: d07d586d038ae00fe33b6f875da13b4f760e0c7212d546cba90f9bdb8014184a
+- scene: 0043_002_IP_00800_01520_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 35bcd4c0111e8fd6412d07610e070382fe870f9847ee7735578dcee3c308989d
+  noisy:
+    bytes: 18715656
+    compressed_bytes: 18319255
+    crc32: c4f37d68
+    sha256: fd6080a95203f65c7291aa77bf074b7f747af364944e3e9d65258666f0a70302
+  ground_truth:
+    bytes: 44024996
+    compressed_bytes: 44005389
+    crc32: 7f7b26f6
+    sha256: 11db7e8eec5f00c3cc7b48de9ff7bc41718a3ea18933aae51db47693868a0f8f
+- scene: 0043_002_IP_00800_01520_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 288c2cf101fb186985fd884cdbbf70e45c1f894824ee7cb6ff6b51542969135d
+  noisy:
+    bytes: 19026954
+    compressed_bytes: 18632485
+    crc32: 579971bb
+    sha256: ecea5930fbb8842b14deaedf931f5898045f955ab85861728a35ce9b67303a0b
+  ground_truth:
+    bytes: 44042324
+    compressed_bytes: 44022779
+    crc32: 2269a028
+    sha256: e6f96062c74c79a88a946250bc20bc88660445af3b9c90676a50f7d77da35a4f
+- scene: 0044_002_IP_00100_00180_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0f2ac317cb5bd21b04ddc436c97b9bb10cea0af4664cce1e098f2e0420fc97a4
+  noisy:
+    bytes: 24719868
+    compressed_bytes: 24423949
+    crc32: d603de05
+    sha256: f788404e8077586078eb315523b51e0f5b168c1e3e0945c537e6d31cb47424aa
+  ground_truth:
+    bytes: 43650437
+    compressed_bytes: 43630856
+    crc32: c63210b1
+    sha256: d36feeb87fc734bca52788bcf5a60ae2e5b62f0dbec27867feddd06ad9f6849a
+- scene: 0044_002_IP_00100_00180_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9af0f753b0bdeb0fa8b2c561257244d5f51810f802fa4ee05d48cea06f80adf8
+  noisy:
+    bytes: 24738759
+    compressed_bytes: 24442631
+    crc32: 96cb15f9
+    sha256: 467f55fadda584fc2e2bbce78734e0953675f5bf75f7c78953a75a4c8ac11f4b
+  ground_truth:
+    bytes: 43654195
+    compressed_bytes: 43634597
+    crc32: 4be9e4d6
+    sha256: 074e9c3a7134dff1fd0af98a7c152d06ff2b72d50dd687df82d810ee75e814e0
+- scene: 0045_002_G4_00100_00060_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 26bc13b3e926d1470b53ede4c0e9ebd983f314d26c87467fb7c66ab65159633f
+  noisy:
+    bytes: 19513373
+    compressed_bytes: 19097471
+    crc32: 565cc4d9
+    sha256: 07dd0e83bd67189405bd82535d5ffe10f6f522d3a6d30ca97a149b5a39e79103
+  ground_truth:
+    bytes: 57034851
+    compressed_bytes: 57011532
+    crc32: b03d5585
+    sha256: a0caf4a01cf642b5456be4448e37c4ee9f18156a8f5b4cef769b8f708192ff71
+- scene: 0045_002_G4_00100_00060_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2bbc5b917b8235ec13714736b8ea9dc9bee192cf388cc03b35df5e5669468404
+  noisy:
+    bytes: 18851967
+    compressed_bytes: 18477186
+    crc32: 682e77ae
+    sha256: 8fb14793990344c66903b1507dd491105a6579b1a04b298a6a43c927a53c5853
+  ground_truth:
+    bytes: 57044009
+    compressed_bytes: 57020754
+    crc32: a46ef57f
+    sha256: 095e953db13783cb405229743545ef3bc33154f561e5769b97ff94145bbeb16d
+- scene: 0047_002_G4_00800_00640_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 23bbbcb1b5a52b6ba82c0fd39811dd20b91960f7d990ff4e8c40822a4eb029e7
+  noisy:
+    bytes: 17363796
+    compressed_bytes: 17076642
+    crc32: 9e10d09a
+    sha256: fb78307510b27bd1f6ac56abed5b97fed90f5f324f8e51c3948760fedf709dfa
+  ground_truth:
+    bytes: 56813690
+    compressed_bytes: 56790410
+    crc32: 8acc18b8
+    sha256: fb64801375a4f1d30060d8015cb81e41b922f6e492fde1febcc4842d26d1c86b
+- scene: 0047_002_G4_00800_00640_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c2d45224c1e876e464d75425e7912deb6a6b48e2f5c468ab16af411fb997f337
+  noisy:
+    bytes: 18070821
+    compressed_bytes: 17784141
+    crc32: '98414141'
+    sha256: 760fbb4c9d9f46fdfed582cf61d368b24a249db627919408ce50a21d2d324245
+  ground_truth:
+    bytes: 56804617
+    compressed_bytes: 56781269
+    crc32: 6ecf3819
+    sha256: 33c3c43cd4e29f2eb7c2abd2b63d4d5040b96261cf4684ac35de6d1c2956920a
+- scene: 0048_002_N6_00100_00100_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5ff7f59e960e1d169d96b7cd1b22a31c0e86355703e4c412c663daaa147106c6
+  noisy:
+    bytes: 15247707
+    compressed_bytes: 14950016
+    crc32: 5a35cfe0
+    sha256: 3ea40e6831788fd87a24bb2baf39122820cdf6e19beb1b3de33a8cfb64daec11
+  ground_truth:
+    bytes: 47195060
+    compressed_bytes: 47176546
+    crc32: e827c785
+    sha256: 99eed303b6269e463c17783d028358387cfde1c1af65f0980bc5cb5bc9253f64
+- scene: 0048_002_N6_00100_00100_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e4e517120e6c6e80896bbea6a5d7da5454ec50616dbe34fbb48537b341ef0291
+  noisy:
+    bytes: 14932300
+    compressed_bytes: 14664045
+    crc32: 523a480a
+    sha256: a52a0bc3adb8cfd777fc59ce689ea94482d8a17a6286208115779d5d037e9d98
+  ground_truth:
+    bytes: 47193848
+    compressed_bytes: 47175282
+    crc32: 0b3f2ef6
+    sha256: 26eeac261099a95ed60b3edad89a4e15ec71f5c48d5b1c68d26676bcf474a633
+- scene: 0050_002_N6_03200_03200_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 67811810c61b1a30e92b25d2aec12177f1dfd37585903e3101766c47d7195d21
+  noisy:
+    bytes: 12054229
+    compressed_bytes: 11842722
+    crc32: cefaf25f
+    sha256: 8dd7f8f8960172be5df32b76e01beb7d6bbf65661ebcd0a66df4a7e2a5ef37d8
+  ground_truth:
+    bytes: 46828981
+    compressed_bytes: 46810439
+    crc32: 1911e3ce
+    sha256: 6cd298916297067613010d351f76462c57c44ae262e1b09a12f44e853c242239
+- scene: 0050_002_N6_03200_03200_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4ca57ffff73f0d8ed53a6e6d5d3d9a130ac1318f345670bef395eefb415a51d4
+  noisy:
+    bytes: 11979156
+    compressed_bytes: 11763630
+    crc32: 992c71b4
+    sha256: cc541f8b760afa955a1791d67ffb41a4a3bc6a1c5dc2a6f8241ac88aa8322a54
+  ground_truth:
+    bytes: 46813083
+    compressed_bytes: 46794425
+    crc32: 2c8b9e50
+    sha256: a94296a071bb2a2560c12cb23b37a0876a0653f33b7eca8b18f84dacb6e1b338
+- scene: 0051_002_S6_00100_00060_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 3702073f2e53b1af848f1c3aa39cf22da3e7d3050068c7d15b51a5cc60caba40
+  noisy:
+    bytes: 30327565
+    compressed_bytes: 29911733
+    crc32: efdebb7b
+    sha256: 2e1969da0b20f7d545ffcd41beb7f1cdd506adb8c0795198021c3926d4c011b8
+  ground_truth:
+    bytes: 56204849
+    compressed_bytes: 56181858
+    crc32: '10738494'
+    sha256: 510bb309aab159b1aa216aac3b6e0a887e41e7a6ee1eb3944b36f689e57dc9a4
+- scene: 0051_002_S6_00100_00060_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8b44b655ae069ed0110adb00db99f84dc7c7a570f623c464cac7273ee1940aac
+  noisy:
+    bytes: 30219336
+    compressed_bytes: 29810107
+    crc32: e23e3e23
+    sha256: acf0b6e8d060b202ee4a82582ff4299e52a9bcdaee4ffdf7e327542305ab6101
+  ground_truth:
+    bytes: 56189629
+    compressed_bytes: 56166680
+    crc32: 7f68df59
+    sha256: cae3412773ebc32126d2c7b6ec37835e5899af0cd672870cbc55d10bd21c371f
+- scene: 0052_002_S6_01600_01000_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7a0186b403218bd3da1042ca5aed09b7daa9f4ac35c74d68146ab5fc6f1429d5
+  noisy:
+    bytes: 30978589
+    compressed_bytes: 30705600
+    crc32: 16c4229b
+    sha256: bd4e65d667e9099eaad4e084d6288d0a20c642eb4df146c3edc78a8ab4c11de5
+  ground_truth:
+    bytes: 57090238
+    compressed_bytes: 57067235
+    crc32: 0b5e8eac
+    sha256: 458e8208c41b585a377bf7ed69ca7e8d8b338b273bc7835a5192f626299783e6
+- scene: 0052_002_S6_01600_01000_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: fc813f6adf96ce977a47930a37273db9d7c2c3ef1e7330ac0caa796fa1c2291a
+  noisy:
+    bytes: 30970724
+    compressed_bytes: 30695706
+    crc32: 9eff49fc
+    sha256: a53997ac98096862c1b49810582d57188d444811a907806c79eefad435fcf1a7
+  ground_truth:
+    bytes: 57104926
+    compressed_bytes: 57082006
+    crc32: 8acf5505
+    sha256: 16ecf515ac7923a2266e39cb7bf2c1bf50f674255f6d5caf25ae5046665f41b3
+- scene: 0054_003_N6_00100_00160_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 916b8bbf74e72bf2fd6985295337e5c9323d9f77cc225560d69e103223f83ca4
+  noisy:
+    bytes: 18836122
+    compressed_bytes: 18507043
+    crc32: 8bcbd2cc
+    sha256: df2a6e44611a60f3ef7cfb52918ffa7d4e45e614f53dababdeb2d65b69f575ab
+  ground_truth:
+    bytes: 47161300
+    compressed_bytes: 47142768
+    crc32: b94f8358
+    sha256: 42fa8363c44074d74ac68b76f18358f5d9b1fabfcc393acacc169b1ce5ee8448
+- scene: 0054_003_N6_00100_00160_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2aaa28925361f50f40b124a03c3b8724ef70d7c2d78b3d56b0fd9283c1222769
+  noisy:
+    bytes: 18673132
+    compressed_bytes: 18351024
+    crc32: 5cf3ff32
+    sha256: b6975c7ebefebfed73eb8de293eb00663550721a0feecddad0a665351c03502d
+  ground_truth:
+    bytes: 47170530
+    compressed_bytes: 47152038
+    crc32: e2e54ff0
+    sha256: ead992238118be877e5859009a9a7b849daa913195d0fca7dd18cf95581bd61d
+- scene: 0055_003_N6_00800_01000_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b8570b1c79441b551ca52252cb37a3690343a1a623849a64305b861d1c74c6df
+  noisy:
+    bytes: 20282216
+    compressed_bytes: 19974525
+    crc32: cc41913b
+    sha256: efb2785f08f3b30ea4ab09a3f5e3e62bcc33f124b6410d907d56e8272427ecc5
+  ground_truth:
+    bytes: 47154548
+    compressed_bytes: 47135931
+    crc32: 60bcc4eb
+    sha256: dff2afceb44983fb4d4d101ad088f91d6fd3379bab73f7d00f16aabaf1420c9d
+- scene: 0055_003_N6_00800_01000_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 7e7dca34803650f8d6766116bdaa452f2aa9029b9c9be35bd19a92ae8bf8c157
+  noisy:
+    bytes: 20266277
+    compressed_bytes: 19956892
+    crc32: cc077117
+    sha256: b12d19c9aa6e346538145d635b83ee0c517c4ccaf1c8e0faa04763411dafa401
+  ground_truth:
+    bytes: 47140281
+    compressed_bytes: 47121668
+    crc32: 64a95542
+    sha256: c6b305ac4fa4f2d0d9f3d47b4b6e7b1605282436014b4788e9d82753901131c3
+- scene: 0057_003_G4_00100_00125_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0bc70e71ed23849454d99dc663da388523ade80e6f2cfc12532f85046bc65169
+  noisy:
+    bytes: 17233699
+    compressed_bytes: 16860984
+    crc32: 5a48760f
+    sha256: e88c4fa531f89172e4b84cb0c7356478a24b06f339f4228c588a589e46b19155
+  ground_truth:
+    bytes: 56897581
+    compressed_bytes: 56874347
+    crc32: f672e2c1
+    sha256: 5376abe63f00e3180dde6317232306bd43aa255c4f926f80f0c3b8a1481a54af
+- scene: 0057_003_G4_00100_00125_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: a5a6f64d895fcbbc9857f2e86c6c0411cea505d741b674f08df37adc30456ef6
+  noisy:
+    bytes: 16917047
+    compressed_bytes: 16562264
+    crc32: be1e02d8
+    sha256: 1dc63492dd2c45e4a4a5786bc63c7a4eb4bbfb7a599062b1cc492bdf478bba3c
+  ground_truth:
+    bytes: 56908999
+    compressed_bytes: 56885712
+    crc32: c0a5e5fe
+    sha256: cafa80fd45bc45ba4c53c47d7f8436d0f6e7c2507ca45a7afb3d2840e8b69370
+- scene: 0059_003_G4_00800_01000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: dfa08f601d88d68939a2012a9e878cbb6bf3237cf3ac4957bd3419fb2b5aa03f
+  noisy:
+    bytes: 17027908
+    compressed_bytes: 16727890
+    crc32: e960ccdc
+    sha256: 0f76fdb4de07f8a6b1cd30d160cca54e76050c9228fccd99472040521b9b731d
+  ground_truth:
+    bytes: 56588034
+    compressed_bytes: 56564632
+    crc32: 5e9cf405
+    sha256: 3cfb9bc2a305257688d8d8c2365ddc0df26dc73be8a733e73887d2052c09ac39
+- scene: 0059_003_G4_00800_01000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c7b40ccc509c8d14a9849d71f9c367dc4c754096e5b03ffc9f092514bcb3fcc6
+  noisy:
+    bytes: 16730781
+    compressed_bytes: 16445225
+    crc32: 89faf9ff
+    sha256: 9850ec474297389ee1aee14ae0b8796b4cbe903f58a3641410e3e9e2568d51c2
+  ground_truth:
+    bytes: 56609994
+    compressed_bytes: 56586599
+    crc32: ed38a996
+    sha256: dd1dcce48b41d168a5c6fb5bb31cafe1d28ab24769b2f45f70a43e52de45f336
+- scene: 0060_003_S6_00100_00100_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c3a809653eeef72664a5bc26541ebe0bb323b65eb7666cf11649d2eb52bebe81
+  noisy:
+    bytes: 21451926
+    compressed_bytes: 21146834
+    crc32: c7160db7
+    sha256: 46d2ea05bb10cad3a7f1842f1dc754fc93ec5ee55b181553f84f8664a460e8f6
+  ground_truth:
+    bytes: 57193453
+    compressed_bytes: 57170304
+    crc32: 49b737f1
+    sha256: dba6c34de1899b947d6dd4875fdd35500791115ef9dbe024c03a1183c5b08a2a
+- scene: 0060_003_S6_00100_00100_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 91229d4f57e63c9ebd61890d9d71672be0ce23f13744055320d4f6e8bf963e33
+  noisy:
+    bytes: 21315992
+    compressed_bytes: 21014872
+    crc32: e1a037ee
+    sha256: c39bc41970e4d00f1ea107787c03b8a62600ede2a7aaacc8d6241797959276c0
+  ground_truth:
+    bytes: 57205993
+    compressed_bytes: 57182929
+    crc32: 72c7b299
+    sha256: 335187273f52c586d961aec0a2f5db5f5c78dcca20f37e02c5f5dfcebed3bc5a
+- scene: 0062_003_S6_03200_02500_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: fcd643027370217363f70ac79ca45393d9a3b1a1988bb37b780099f05a86aca9
+  noisy:
+    bytes: 23036101
+    compressed_bytes: 22740419
+    crc32: 5cb768f3
+    sha256: 19f217fa4df6f5017aecbf78104f22f83e4b7cb150c2404830f019fc7b306df3
+  ground_truth:
+    bytes: 56752211
+    compressed_bytes: 56728705
+    crc32: '26085959'
+    sha256: d0c1130cb430e64823555fc2ea5253bc0dcdf921384d0a7dbe27580197b29485
+- scene: 0062_003_S6_03200_02500_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 1a3612673f5882390d507c6cbfbad0a9b86c1e66feb3f19f32411eb736b910e9
+  noisy:
+    bytes: 23478105
+    compressed_bytes: 23201015
+    crc32: 302dbe9a
+    sha256: 29dc4f381408587845aa4c5b5f20d36116abe517faad44ab21fbe1bdce4a96b5
+  ground_truth:
+    bytes: 56766593
+    compressed_bytes: 56743305
+    crc32: e54de27c
+    sha256: 0659fd667d3cb527a356db0a89298fd42f06282456d07daabf739a1457bddadd
+- scene: 0063_003_GP_00100_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: cfef27e32c04d31dc7d9432f647e46baa456c39b1a6e91be5a90ce678c248ad5
+  noisy:
+    bytes: 17876626
+    compressed_bytes: 17538667
+    crc32: 1f3d7e20
+    sha256: 4c3d5c5b7e76e2044b9f0d97006f6999e27b34305db7b84590b62ddb96354c96
+  ground_truth:
+    bytes: 44344779
+    compressed_bytes: 44325357
+    crc32: 6acda88d
+    sha256: 695448b376f828d367621f843964ca36a4669339927aa8a5a3a0996f1035cd87
+- scene: 0063_003_GP_00100_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3e887c532af43120c273239562463cdb1c7b6ead2702968b8d4e4cd4057e5ef1
+  noisy:
+    bytes: 17860751
+    compressed_bytes: 17524451
+    crc32: f4f3e3a1
+    sha256: 0ab6e88b2d38135e2fff4364fcb367267551e5d5af81ba4d548c7f908a0cb2aa
+  ground_truth:
+    bytes: 44349172
+    compressed_bytes: 44329782
+    crc32: a6e820ea
+    sha256: b6a0594257bfd1fbd516110183057f1ea2e5ef80706a5b1f7771da83b574d861
+- scene: 0064_003_GP_01600_01600_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0bf7ffb8a0551a96753cc97afba5c7cd872cb908d855070c6b74982125ffd8c3
+  noisy:
+    bytes: 19897341
+    compressed_bytes: 19621619
+    crc32: ffaca045
+    sha256: 0a77636378cedcc0cf3ffecc03a3d1b01bd935b19bf324901779b7442cd3d431
+  ground_truth:
+    bytes: 44347074
+    compressed_bytes: 44327671
+    crc32: e6cc831f
+    sha256: 657b264f9bc0a33e2511599f6db5b286e042fa763ba380edf4fdfdbc6d670d89
+- scene: 0064_003_GP_01600_01600_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: fca56eeba194a948a475367e09702fb3ccc1370fadfc5e968fee6f2c6a436354
+  noisy:
+    bytes: 19724246
+    compressed_bytes: 19464598
+    crc32: 3c46bd94
+    sha256: b630a19dea6ae5afe3b7fb49e0694b3ca0450de1628720caca6ccb2e78699c5a
+  ground_truth:
+    bytes: 44348018
+    compressed_bytes: 44328610
+    crc32: e66cd6dd
+    sha256: 1ffcf724ab0894bf4c7353b39acc16dbec618218b16fcf231afd55409ad11984
+- scene: 0065_003_GP_10000_08460_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2f17a59d574943f75fa0fccc5583d8227679955c99605443a3ed5c6adf9957aa
+  noisy:
+    bytes: 18546189
+    compressed_bytes: 18304239
+    crc32: c768543a
+    sha256: 9faba07f68e572ea91954f085b104a972e51b0e3300493f6aeb726482ff12257
+  ground_truth:
+    bytes: 44147455
+    compressed_bytes: 44128001
+    crc32: e2b22e90
+    sha256: 48084551d89af220efed0c6abef05636e797d86a361bc48f2a29ca7d2c381449
+- scene: 0065_003_GP_10000_08460_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: aeb500ca8ea7f0bd2e238c2bd1c8a23389533e12906c0fa094c3c341a50ae9a8
+  noisy:
+    bytes: 18457207
+    compressed_bytes: 18223002
+    crc32: b1eb6e29
+    sha256: 6068d7d8ab1ba8c24949bae7300e55cf7d9b8f7186e31a50677f5cda0a87b601
+  ground_truth:
+    bytes: 44145521
+    compressed_bytes: 44125880
+    crc32: 8e98ae9c
+    sha256: 4d2572ec1597966eff537ab618ecd2be94959a2a1cb37b9f59adc8fbfa65626a
+- scene: 0066_003_GP_00100_00200_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e68348f28e2359c7d6048f6b0b323c0c499e5dd31f51da07d5c6c4906e891c61
+  noisy:
+    bytes: 9829688
+    compressed_bytes: 9536270
+    crc32: a3a394d0
+    sha256: d1e13c4d83516eae7750704f7f5853bd06343520d1fcde6ae6d82f4ef959479d
+  ground_truth:
+    bytes: 44291683
+    compressed_bytes: 44272379
+    crc32: 6d099e88
+    sha256: 14bde55b4ca732782c5dd14ac0a7d4ee7a476123baefbc665976d1843240cbab
+- scene: 0066_003_GP_00100_00200_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: bfa2aafdda806e9e3fe367d78da9494018701623fde49eb0097f6445bbf65ab8
+  noisy:
+    bytes: 9779029
+    compressed_bytes: 9489303
+    crc32: d3297b5b
+    sha256: c83458bae8880025830b7ab92dbb59fd4fa6b0290223008b272ee6b5b9587976
+  ground_truth:
+    bytes: 44312333
+    compressed_bytes: 44293012
+    crc32: '62934770'
+    sha256: 9cbfd21713fbcba5b07cb80cca920505772ff9d12390a6e6247c0e5fddbbc633
+- scene: 0068_003_IP_00200_00400_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 96f7f564ff14067ca6cd3823ee5026e4c896ecc72bda159be8f4051e245d8a83
+  noisy:
+    bytes: 21216311
+    compressed_bytes: 20863604
+    crc32: b100b79e
+    sha256: d4d49b7dc40a1b2f560dc0ec4c3cc32dd4848fb44a781912eb7fd4ce856d886e
+  ground_truth:
+    bytes: 43894468
+    compressed_bytes: 43874787
+    crc32: 4e363b40
+    sha256: 02c60022cdb61200f1909bec8127fcdfeeb62c797cf117affccf4bde501f852c
+- scene: 0068_003_IP_00200_00400_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: dfb871fa0525636731d85e5a7c013a80ed1bc6ee2ccfd52f4e8a9430498e4da4
+  noisy:
+    bytes: 21276406
+    compressed_bytes: 20919450
+    crc32: f6220dbe
+    sha256: 6a20dfabfc4cda0709e666798560a210b469a78b79337295200214ce88e93f62
+  ground_truth:
+    bytes: 43907829
+    compressed_bytes: 43888170
+    crc32: 91ed44be
+    sha256: 2024bf304d9f2d44916f80b1f1ccefc360cc23f1662603fc80b7bd60ac191192
+- scene: 0069_003_IP_01000_02000_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: bf417ca2c263c2823fee7e67af65c3b01dff7ee7ab463d2c6111945d739e22f3
+  noisy:
+    bytes: 15060659
+    compressed_bytes: 14684844
+    crc32: 84a24d95
+    sha256: 551f4aff018cf1d165a10f3d62e31d218a5083083ddf782eb98bbceac6d155b2
+  ground_truth:
+    bytes: 43867220
+    compressed_bytes: 43847539
+    crc32: a880824d
+    sha256: 2687855ba50b313c219a8a3c25c60d405a101d662dc11948847b52b87aa43840
+- scene: 0069_003_IP_01000_02000_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2804fd2be8acf011e9ec05369085c4c1fb30fb8b5c4a22a2028a07d514e70386
+  noisy:
+    bytes: 15448366
+    compressed_bytes: 15048278
+    crc32: '83454384'
+    sha256: b01d62f46a78deaca11df3cfd1036162614ad38877565d4e3adb5f6cc8836fc4
+  ground_truth:
+    bytes: 43894972
+    compressed_bytes: 43875366
+    crc32: 418caae9
+    sha256: 14ccce6d5a06cb22254005108b6701972b43efbcccc9df9590438ec1b0b3807d
+- scene: 0070_003_IP_02000_04000_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 91b2fe2ea886e355f269331d2a04dd16b5f7bd1406b34a032e6bfb8ad051290c
+  noisy:
+    bytes: 12772225
+    compressed_bytes: 12433530
+    crc32: adbe558a
+    sha256: 4bb55be0bebf7e14e038d4d19c65761f26e0229f0632466d4f3810d197320282
+  ground_truth:
+    bytes: 43750798
+    compressed_bytes: 43731072
+    crc32: 37fb97ef
+    sha256: d3f4144f92f7acae9922cc50da4fdb5d4b10a26bf1550c9c2e858e4f06a45678
+- scene: 0070_003_IP_02000_04000_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b5ef870d85d56e6f529f968afbda1d81d5ef4431ab323b213156f8ce4b120554
+  noisy:
+    bytes: 12910417
+    compressed_bytes: 12567080
+    crc32: dd4a63a2
+    sha256: e0315befef57bbccc52f5be444cdd2f9dbe3079be8f3b18aa1e6c206aa24e586
+  ground_truth:
+    bytes: 43759268
+    compressed_bytes: 43739642
+    crc32: 1522b093
+    sha256: d424993415aab9e648cfe2aed85b6d4ec2d374317f7f7a570c455384cc94cdc3
+- scene: 0072_003_IP_01000_02000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: aac0ed52fe4cfd1a2aa4ccd6ccde81eea6744679c23b42d8a17f7478d178760c
+  noisy:
+    bytes: 11068517
+    compressed_bytes: 10792111
+    crc32: 32783b08
+    sha256: f26ecb6d665ceae5dbbb97c909b00ea995438818bf9c2dce146a1c4ddf6a6e0c
+  ground_truth:
+    bytes: 43605249
+    compressed_bytes: 43585472
+    crc32: a1d09d56
+    sha256: 38d30ece35883bdbcd6d8fce3ea50dd65155390d93b189804993546a6c3391eb
+- scene: 0072_003_IP_01000_02000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9786ed606f22d5900f3e6280ba70f8c73810c6f41527959874c09cb3d84089b2
+  noisy:
+    bytes: 11128067
+    compressed_bytes: 10847068
+    crc32: f29edb72
+    sha256: 09d7b25dda193e4fc9c89f945ca9ff8f1ce9330aa1ee45318d58cc272b2029ae
+  ground_truth:
+    bytes: 43599713
+    compressed_bytes: 43579964
+    crc32: cab6fa6a
+    sha256: 4761fad79d7887fdde3c5e157206772bd61406aa85ed01a96235f8a265d16c6c
+- scene: 0073_003_IP_00200_01000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7350b85b5f03c00ec2d646f667fe01549b2bb6cfe9fbe5f97a91d32c9a2ecbbc
+  noisy:
+    bytes: 13332119
+    compressed_bytes: 12983537
+    crc32: 77e73c06
+    sha256: c02f0bbab9aa00184e97a34de249c1d4505dec5ec8841fbcb1a5e496cba115c9
+  ground_truth:
+    bytes: 43754150
+    compressed_bytes: 43734409
+    crc32: 60212a4d
+    sha256: 3ba26a9f11e560210bf77da105f81d08cbb2d3d0ad658c2004981eeb5c1be679
+- scene: 0073_003_IP_00200_01000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 654c2a26fbf192cdbf454cb9d53945a2872baf999eb3badc32f2c3775fbdc59b
+  noisy:
+    bytes: 12990186
+    compressed_bytes: 12661254
+    crc32: d5e3c90a
+    sha256: 23cde64766c0ff2dae3701530950334773a0ea59e079aadd9235c933edb3a527
+  ground_truth:
+    bytes: 43752175
+    compressed_bytes: 43732434
+    crc32: 48bb843b
+    sha256: 846a6f569615e8a3af9eec97af93283b17bc998e6c5d110729cdc505b55dcba0
+- scene: 0075_004_N6_00800_00080_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b0942059d0ca9cc546eb732366211aee781bdb3373cf71858cd561469171e4fb
+  noisy:
+    bytes: 16090514
+    compressed_bytes: 15860553
+    crc32: d18110f6
+    sha256: bfcbb4908f85c88afc6f9a73f324f90ffa1df2e9704868664f848f759341becd
+  ground_truth:
+    bytes: 47375633
+    compressed_bytes: 47357257
+    crc32: 7fb2ea58
+    sha256: 48426575b1fe6fa23dc76e84eae27ac4377e2124e321aa178839f851155ad424
+- scene: 0075_004_N6_00800_00080_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 70f5ee7923344caad8185717ee2af50a05e86150b838c6d23ef75e8d0ef735b8
+  noisy:
+    bytes: 15766423
+    compressed_bytes: 15550485
+    crc32: cf719303
+    sha256: 97d692bee28d0a7ddaee0c8a2d6a95c54cdcff769771d500534ab4b6fd0f659b
+  ground_truth:
+    bytes: 47378989
+    compressed_bytes: 47360603
+    crc32: 15bfd77c
+    sha256: 0ec4de1b03d2c2b3df02ae0d8a22f2328768bcd28732ee49856b17ca99cd12f7
+- scene: 0076_004_N6_03200_00320_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: db5ecd3be416c6e9476e12ac1fb77627d04339e8468ae5a110cc09616ba64d1d
+  noisy:
+    bytes: 12296080
+    compressed_bytes: 12100131
+    crc32: 11fb5946
+    sha256: c98dc7d02fbb37add427956ad723c3fcba177038c22a742939123b42257c133d
+  ground_truth:
+    bytes: 46757553
+    compressed_bytes: 46739012
+    crc32: a454669f
+    sha256: c2396e9f2c823109af7ab0c6443de7391a28b342c5d337612a14ed1f01dd324a
+- scene: 0076_004_N6_03200_00320_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d35970343a7bd7c4ebcc61f954d8e21486fac2f573aa69c73834e10d46a7cd74
+  noisy:
+    bytes: 12170987
+    compressed_bytes: 11973110
+    crc32: ea76edcb
+    sha256: 2de79ce7d5f7c82aff84c6e6454bbbca086d3497c1271810d31db42150f32eaa
+  ground_truth:
+    bytes: 46756147
+    compressed_bytes: 46737517
+    crc32: 920c3315
+    sha256: 771b5920c673355d037d8e6769a4d90d4afa564e63319e3dc7f6e36b5a9261ef
+- scene: 0077_004_G4_00100_00025_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7acdcf459a5a887de39909d6105c5ece7750271636eb7750c09ae9c97adaa8af
+  noisy:
+    bytes: 21324773
+    compressed_bytes: 20951891
+    crc32: 4899a454
+    sha256: 528e5642412f655c6b28f36e8efcb15b3fdac6e706394900faf58a519262679b
+  ground_truth:
+    bytes: 57172289
+    compressed_bytes: 57149317
+    crc32: 11398bbf
+    sha256: f282faca634b4e9fd914725daa41a8498e07d9e68bb7dcee55c320567b2aa679
+- scene: 0077_004_G4_00100_00025_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 658f1c213447e04ab153304bf831a23d75c7bf8aa54dd51b76e8a53d7064cec2
+  noisy:
+    bytes: 20674522
+    compressed_bytes: 20322190
+    crc32: '15713222'
+    sha256: 23ba8732c2c65b164eef2eb78883c49c8101f7840dfac7d37d78b85648540151
+  ground_truth:
+    bytes: 57175767
+    compressed_bytes: 57152789
+    crc32: 370f4800
+    sha256: 566c1aea55101395a63b4033e0a12d55eb8894262ffaa74c3a1aadd4463a8c50
+- scene: 0078_004_G4_00200_00050_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f9e517c8d32d276a23e5ab92e95e7173553b30b3457fce798ab962940d162525
+  noisy:
+    bytes: 21469255
+    compressed_bytes: 21107411
+    crc32: d194ad44
+    sha256: 08bdaf24ee47b80fe9755823123d74b4b527c008fc93d7f963641663b7e0fabf
+  ground_truth:
+    bytes: 57145811
+    compressed_bytes: 57122748
+    crc32: bfe63570
+    sha256: 5089cae23ece3140e64b1b8dbc341f91b09c1b702389b09533725abc9ab79ccc
+- scene: 0078_004_G4_00200_00050_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e577ab2c3db1d46a9e8f3733471b970ffd8873327ee112e2f8f2e0b14ab4a5bf
+  noisy:
+    bytes: 21754084
+    compressed_bytes: 21382854
+    crc32: 8104fff2
+    sha256: 323953e7c0bd226b69bd3a385bb2551569259617803588bd1b9fe662a01fd2f3
+  ground_truth:
+    bytes: 57152488
+    compressed_bytes: 57129388
+    crc32: 35d2b33b
+    sha256: f8b0d9843048327a5d5ae617dec6d2556222b7cb544d4384e1ee02de59f33552
+- scene: 0080_004_S6_00200_00050_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 82799b261026d65d22afe553adbcdc12da8603dd3623c5ab114685fe843c01ec
+  noisy:
+    bytes: 21644619
+    compressed_bytes: 21391501
+    crc32: '66018540'
+    sha256: f5661b1fc0dabd73e4852aaf28962414c6fe081d7fc171fe2f446388a8629dfc
+  ground_truth:
+    bytes: 57421212
+    compressed_bytes: 57398128
+    crc32: c183a12b
+    sha256: 4963663495b6fc346c94d0bc4476148f248d8a72a8802c45f5ee5fe605b8f449
+- scene: 0080_004_S6_00200_00050_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: a735a1c4a5b0fc85fd6f96cb94999b453fb02ba8745bd9324eab86576cd13e94
+  noisy:
+    bytes: 21403461
+    compressed_bytes: 21142899
+    crc32: 0d2bd21d
+    sha256: 844299e6cac4de55fc12dc96ab7f5c959ac607d3f9b7dd05d247c3ab00a13024
+  ground_truth:
+    bytes: 57430539
+    compressed_bytes: 57407473
+    crc32: 91fdc83d
+    sha256: d744c925021ea6d3019f2c36b1eec6774dae2bb7242c731b00dcad44cd12da48
+- scene: 0081_004_S6_00800_00160_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 37730e6d82d1189d0797eef19851b5d229f14ba451e494c3fa81ec8c517e92b4
+  noisy:
+    bytes: 23395856
+    compressed_bytes: 23165209
+    crc32: b387d8fd
+    sha256: 32f82f8b2a73b60abeef731b2d440376fe9e2791912c4bf88882a900131e237b
+  ground_truth:
+    bytes: 57178265
+    compressed_bytes: 57155211
+    crc32: 9c63b72a
+    sha256: ee45d42357081944a6e820168056d0210a27dac4f92bc5f1d5350a1c8aa833a9
+- scene: 0081_004_S6_00800_00160_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 5e3a7de3043f0936f77a29a7f67ba509ee0663670791e0ed7c3fe06bf046e46f
+  noisy:
+    bytes: 23437971
+    compressed_bytes: 23215567
+    crc32: fc5babf1
+    sha256: f600aad01c1239939cc5234f0ddd8a68cecfb8a08db5ce825efa64f09b01db1a
+  ground_truth:
+    bytes: 57179321
+    compressed_bytes: 57156319
+    crc32: 808b032c
+    sha256: c6993453f4ddda9e6f8fe9ce0cdf5b0db5e4dcdb7977842b5fe2824d73c8cad3
+- scene: 0083_004_GP_00050_00020_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d39ee2471ebd7dc059c0645c13ae818b053645334f4e249c7697592a73b26534
+  noisy:
+    bytes: 16398090
+    compressed_bytes: 16105176
+    crc32: fb1b78a9
+    sha256: 2a202c65ce0f79044418a2c9f65eef71d78215af7c0017f3ccf7441e534d817a
+  ground_truth:
+    bytes: 44382825
+    compressed_bytes: 44363576
+    crc32: 23c2adf8
+    sha256: c6b4c8985009167f31c28054671766361057eba7616ddb9aa53500791aecdbb8
+- scene: 0083_004_GP_00050_00020_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9f38f69269618da6603a5920284db4dbe67a6b73ca2fd20d033bc7f596cadf3f
+  noisy:
+    bytes: 16247174
+    compressed_bytes: 15955175
+    crc32: 41db1674
+    sha256: 78f67e79783e45ad90dd2e59f2f3f6b1b2f76a561dedbd55f0390b3ec626d941
+  ground_truth:
+    bytes: 44387436
+    compressed_bytes: 44368170
+    crc32: 79200c18
+    sha256: 781c1213a8d4965a7670ff0fddbda3e53c0b2125c3862c86d8b0b196f2ee63cf
+- scene: 0084_004_GP_00200_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c2b66e00c7585edaae87ccec0b29f15d012e44b487139bba40ca9b08c79efaf6
+  noisy:
+    bytes: 15943793
+    compressed_bytes: 15679305
+    crc32: a3f7c88a
+    sha256: 4f28a058acf0705e6a213437345cf2b6817bb9738d1bf9ba3a7e7514be88f66b
+  ground_truth:
+    bytes: 44479583
+    compressed_bytes: 44460287
+    crc32: 3aa93790
+    sha256: f0ac2b65ce378a52ea682a93abda5109b6583c48157a45ee36ced9f9214f5cdb
+- scene: 0084_004_GP_00200_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 5a0412fc79758998e13db47d913ad3ed7927491fc4502b5320308bb6bb10d5df
+  noisy:
+    bytes: 17026862
+    compressed_bytes: 16743493
+    crc32: 52c6d967
+    sha256: ebbb9bd83c62b12b94c207f6cf006db201ac86cd2c09f7298a1bce23c17d19ba
+  ground_truth:
+    bytes: 44487863
+    compressed_bytes: 44468573
+    crc32: 71bc5631
+    sha256: 795e4c966dba21bf82241878647022bcac1be60fe4731a08246df40faaf76fc7
+- scene: 0086_004_GP_00100_00100_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0591ce46a1a22b1d50192d82bdaae4913f02a06a3310641bad249e5b1519a1ea
+  noisy:
+    bytes: 9208597
+    compressed_bytes: 8990234
+    crc32: 09129d8c
+    sha256: 664cc4a0f17831cad67fde1087121ad6dbf1394597fa205dff44dd0c9ab52943
+  ground_truth:
+    bytes: 44189505
+    compressed_bytes: 44170113
+    crc32: 2e1c3040
+    sha256: a5f2f0cdd008a9c6960acd9f7461510e3483cd79840a8b9c6aa30af9129dde36
+- scene: 0086_004_GP_00100_00100_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e34786f088502c813a54cb4eb6f54ed3ae5655e3ef6b4ce4904965c816ea49a0
+  noisy:
+    bytes: 9211206
+    compressed_bytes: 8992377
+    crc32: 05810c58
+    sha256: 33283ddab8a2dbe24c0cbf588368457fd730b179a940b84585a8b6e8347a5e5b
+  ground_truth:
+    bytes: 44248826
+    compressed_bytes: 44229504
+    crc32: a084e126
+    sha256: 6aab21bb145ce047b7f0ad99f45ad5b449351e8c987c6027c19b00f8dfcba7d5
+- scene: 0087_004_GP_00800_00640_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b983ec0f04e755273a72f2d34f288400d757d9b3ad2435269ba23ed3ba4a5522
+  noisy:
+    bytes: 11516019
+    compressed_bytes: 11339921
+    crc32: 77c25fd2
+    sha256: e172980ae896293c725042012877fe562797991f75d1c2c868e160c80eb1ebcf
+  ground_truth:
+    bytes: 43470781
+    compressed_bytes: 43451220
+    crc32: bc98ed79
+    sha256: 9f80cc6809fbcbdb344cb07e7414662a816d0eaf93e808f48baad59e20caf5f0
+- scene: 0087_004_GP_00800_00640_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 35b99f752064fa6b010048dfdab177d770d77f93e133a133e237de9a2f65386b
+  noisy:
+    bytes: 10995380
+    compressed_bytes: 10800780
+    crc32: 3fd0baec
+    sha256: 9b68b32a5db42701b0d107b1efa782e7a16e81608124c022b975f025b41a0e78
+  ground_truth:
+    bytes: 43487829
+    compressed_bytes: 43468198
+    crc32: b286d5e9
+    sha256: 0474cb75c023eb56fa0448bd86851f99053739139d6ec4ee4afce629e91bb794
+- scene: 0088_004_IP_00100_00050_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b0c33003143a8dcd50d8de5591cbfe9c69d7915fae935fe15ad7b00a2886cd41
+  noisy:
+    bytes: 21408888
+    compressed_bytes: 21086902
+    crc32: ef54e1cc
+    sha256: 154e0901d5c1b813dae41c55a66e0085b01e5a9e5d3405f78d9f60e3add9b1c1
+  ground_truth:
+    bytes: 43677896
+    compressed_bytes: 43658359
+    crc32: 7efb766a
+    sha256: 07f621e765999b058e94d7cfc63d56631eec1587bf2dc65a2b7dda167dc15af1
+- scene: 0088_004_IP_00100_00050_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9445d53526423b7f482f20612b924b11d4b9c557f3f30669aa6145f8c2eeb14e
+  noisy:
+    bytes: 21389069
+    compressed_bytes: 21066031
+    crc32: de480e35
+    sha256: 03bc596c19c5eb871bb7ad9fb15532672e06531ba475fcc51d5f0550f66128ab
+  ground_truth:
+    bytes: 43669242
+    compressed_bytes: 43649691
+    crc32: 55f4a1d5
+    sha256: 76e33bd2932ba56537ab76378893a33378c04eab952eb4be35ae755eef15f3f1
+- scene: 0089_004_IP_00500_00250_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 68d900801a91939f8cce26e93c782c04da520652abc323b73844519a8380519a
+  noisy:
+    bytes: 18085950
+    compressed_bytes: 17710547
+    crc32: bbaa7f50
+    sha256: 1d24f25281c7da1dc6501a1f2d654b9ea799c3b077686c98f88c94fee38a57bc
+  ground_truth:
+    bytes: 43959370
+    compressed_bytes: 43939801
+    crc32: d5ca988b
+    sha256: a73269207915f96e1ae0ae473a78b0f5e9110d7c2f6fca071fca1c7f8ad68686
+- scene: 0089_004_IP_00500_00250_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: accfc0e019206730bd62413150f8635ae0f0e11d2f50f938f3040e3006afbe95
+  noisy:
+    bytes: 18283478
+    compressed_bytes: 17917743
+    crc32: d9d06e3f
+    sha256: 15c60c2a3c54a77f28ee95cc6b070c5b9b364fdcfc1c6ceaa168bac5b117ed80
+  ground_truth:
+    bytes: 43951424
+    compressed_bytes: 43931911
+    crc32: e1b4434a
+    sha256: 1732f5a429e5d65f2593c21609a9514c7757e5e26947de226551bde8a11882dc
+- scene: 0090_004_IP_01600_00750_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 938bcb41e9e6515c77ee829ac95356d9fc10444806e8d8dbfef90519952d00d3
+  noisy:
+    bytes: 14027405
+    compressed_bytes: 13715826
+    crc32: 4850ef3f
+    sha256: 1175a274768896ed60ad8fdb60d35e04fc20952e348183ad7d03e736b8d859fc
+  ground_truth:
+    bytes: 44019791
+    compressed_bytes: 44000099
+    crc32: 4174fe14
+    sha256: b534d09e92f864fb43b200fc27110b221b298f73b6dcad510aef9994d1396af8
+- scene: 0090_004_IP_01600_00750_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4563240a75f469de3e874a223f9ce8fef2654dde200effe8c122df99849b9f8e
+  noisy:
+    bytes: 14132122
+    compressed_bytes: 13817740
+    crc32: b757b763
+    sha256: daac7434596c92f1f9c853b4bc40577cb773a5a4d8ea8a6792d1f182c54ac03a
+  ground_truth:
+    bytes: 44006192
+    compressed_bytes: 43986447
+    crc32: 2b771669
+    sha256: a34c06deaa265ef5812f5e7df65cde9e4cdee26f10af7436c3ea87bc5c4d7e42
+- scene: 0091_004_IP_00320_00080_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 1dcb5bd88a7908d5d6d66cf8ebd3137f71cfae95077b0a98a13d4cb9baf94882
+  noisy:
+    bytes: 15005139
+    compressed_bytes: 14685794
+    crc32: 9f90d364
+    sha256: f49ce97bde0f4911f869d0c5402f2eb87e3eb2036b0528cb3b4392f756b38e1c
+  ground_truth:
+    bytes: 44011317
+    compressed_bytes: 43991751
+    crc32: b77d5c38
+    sha256: 437ffec489a0a0399a1e5a7d2844a22509bfb4a6e776b48e7dac0d0435ba64ab
+- scene: 0091_004_IP_00320_00080_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 5b9bcfb6d0c25ff7945eac306ef779c2a220be43ebc31a1564bed05ce37d25a4
+  noisy:
+    bytes: 14878013
+    compressed_bytes: 14562635
+    crc32: 701c9ec6
+    sha256: 6fea3cc6df17b1905dabce71b9e673600d6be2e3016f16b506441179f06627ad
+  ground_truth:
+    bytes: 44003347
+    compressed_bytes: 43983655
+    crc32: 0000deed
+    sha256: 1ab2e89844e9d7bf736b6d16eaf093f74ab51c43bdc1a87a7d46672a64d1e4a1
+- scene: 0092_004_IP_00640_00125_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f0175277774da09c4af590b3b23abe66b5333b1fe848bce1c1d6036fb47799d6
+  noisy:
+    bytes: 13748828
+    compressed_bytes: 13453156
+    crc32: 8bb2dff5
+    sha256: 3ec3866157786e7bb1e8a737ccc6536a52a6dc87a93812343d667c567100b781
+  ground_truth:
+    bytes: 43983224
+    compressed_bytes: 43963488
+    crc32: 885ee937
+    sha256: 8af0cca74cf0f2e1fb45235dd27f6f923567823287b020df520f4700aeaa7442
+- scene: 0092_004_IP_00640_00125_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2da44fabde1524d1ed9eced93fff29fceffc353d88d2d66db03783d127c4b197
+  noisy:
+    bytes: 13470208
+    compressed_bytes: 13173575
+    crc32: fe2c7527
+    sha256: 39737ba4a14beb5267e97a368f936f5dcf114daee1e9d3876b1ac3fd34d4abc7
+  ground_truth:
+    bytes: 43968492
+    compressed_bytes: 43948882
+    crc32: da5d933c
+    sha256: 720b919ba638181a709bc6a57be5134acd46e1b87746c87808aa6b40d6808075
+- scene: 0094_005_N6_00100_00050_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2d6423302d757c03ce8fbc89dbdfd12aaf745479c65b508dc50e59cab1d5cf8d
+  noisy:
+    bytes: 15263540
+    compressed_bytes: 14942781
+    crc32: 83d5611e
+    sha256: 8c26fb3f3662a6b75adb12b0ca070357165a3278637ebe187595d75e503a3082
+  ground_truth:
+    bytes: 46950516
+    compressed_bytes: 46932009
+    crc32: 13eb1fe1
+    sha256: 91c9aa6e1e9a290135de3abc884b945e735dde0ef99d2477b7b51c6f025c30a3
+- scene: 0094_005_N6_00100_00050_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 47cadcc3e5cd6e2d5bbf04deef21370718157a98d15391c362b7b223bc4e910a
+  noisy:
+    bytes: 15173336
+    compressed_bytes: 14856798
+    crc32: db8a3a0a
+    sha256: 8a97640effba144edb2d464484caff7de078cb2d7a808887d5713a25feafa748
+  ground_truth:
+    bytes: 46949175
+    compressed_bytes: 46930701
+    crc32: 4c8e98cf
+    sha256: dab7ce2bbca287d5ad01d98afc6f7597704a80d1fdcf4b970b7b157cfcf03db5
+- scene: 0096_005_N6_01600_01000_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b9363cf94056e3e875a40c69ee55500100f1f455b1a6e7dfe9b865c348fc1dc8
+  noisy:
+    bytes: 14543903
+    compressed_bytes: 14333908
+    crc32: 7f487fdf
+    sha256: f1febe5083cabd189cfafc62e56c95e8ecf7b2231d6c8395f7ac3f51822c755c
+  ground_truth:
+    bytes: 46817081
+    compressed_bytes: 46798470
+    crc32: bb3d8512
+    sha256: b7e090f111b7c24446eb22d6a2969f529ec90407689e80c4dcc5e07b1e9256ed
+- scene: 0096_005_N6_01600_01000_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b2cfa1e6b751cff5def33b586937906c5e29a8233693a9f6e9710ba19ce3411e
+  noisy:
+    bytes: 14724543
+    compressed_bytes: 14504987
+    crc32: f2385e20
+    sha256: 753b97ee39b86c4ae58ecbbd0d21d9a9197e2851eb9e7715f778ed4a767c5ca5
+  ground_truth:
+    bytes: 46823467
+    compressed_bytes: 46804795
+    crc32: 89019fad
+    sha256: 18f7aa4238a594739bfd28e430bcec90e998da0d794f249eeafba59f1ccd84c4
+- scene: 0097_005_N6_03200_02000_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 06e7d6e2e8a4ab9dff17e6e093a6b55ad59369bb20e352fc837a2773c4b232df
+  noisy:
+    bytes: 12307203
+    compressed_bytes: 12088557
+    crc32: 27ad7cc8
+    sha256: 5543148474ec7c89a8146aabb515c5563b3533a273fc140a71671a8652093a16
+  ground_truth:
+    bytes: 46738529
+    compressed_bytes: 46719883
+    crc32: 76d6b7d2
+    sha256: 0f8e10623794def7ad30bef44768435f609ee00c5eb0f345070f7300d42b6ed5
+- scene: 0097_005_N6_03200_02000_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d92e5aa1d7e4e35c618942b1d3563595779136320c301de5b272e62ceed8e863
+  noisy:
+    bytes: 12215210
+    compressed_bytes: 11990429
+    crc32: 75bb4979
+    sha256: 5af8c4a63ccab065e24fb3cb4a27dadcfd4c0cf06cd173789896b65ce3e60882
+  ground_truth:
+    bytes: 46710464
+    compressed_bytes: 46691670
+    crc32: a1f1612d
+    sha256: 6dcd90f846df8205e03f0e8caf96e54af63abea24c97c6da37e8aedeeb8c06b8
+- scene: 0098_005_G4_00100_00050_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7337e25960f16362c89c8fe188839523a3621011f1f25233c7896cc66839c2d7
+  noisy:
+    bytes: 26267598
+    compressed_bytes: 25789753
+    crc32: 0461a3af
+    sha256: 2608e173d357a757f8e04cd299c9c838a6bb79694dbeccbd54930d3092f859f8
+  ground_truth:
+    bytes: 56601879
+    compressed_bytes: 56578623
+    crc32: 75c79720
+    sha256: f28598acd0b8d7c64592c29a0da79328c0657ae320ee01bed83ca4e27dc5aee4
+- scene: 0098_005_G4_00100_00050_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 13e47b6c3f21bf49fac2f7757c6968ddf58d4a7b678f317a49d2678987a874b8
+  noisy:
+    bytes: 26230506
+    compressed_bytes: 25755135
+    crc32: 734d34d8
+    sha256: 3463974e2620fdf21bbee320a9bb1f607d836e6abbd72d414ad42283e88a8f01
+  ground_truth:
+    bytes: 56602454
+    compressed_bytes: 56579117
+    crc32: 10855a48
+    sha256: 635be148ec90bbb1c9c6e4db5bd6dad748b933e327861507002b991eaa5b06e9
+- scene: 0099_005_G4_00400_00200_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 872fa85dc48041643640eb37b93976d733699817feba48c2c372c7b7d965f579
+  noisy:
+    bytes: 27081349
+    compressed_bytes: 26652916
+    crc32: 6413afc7
+    sha256: 5a23be530b2f0839fdd57d7fb612b5bffbf6b5c91a1aee2a667f8ba4673b8255
+  ground_truth:
+    bytes: 56606400
+    compressed_bytes: 56583090
+    crc32: 905fa530
+    sha256: 85be3f25584f4fa62be25b00bff7b764181e5aa2eaee6c67663e0e07199e11c4
+- scene: 0099_005_G4_00400_00200_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 0b18e7aab4cae077add684cf1030fb077964fd2531f264a0cf1c5b4a742f6ce7
+  noisy:
+    bytes: 27315721
+    compressed_bytes: 26876104
+    crc32: ec976945
+    sha256: e84a89420da30094c5f04929df23a6f43be89d7d6fb1b0cbf4bcb8dc92b2e59c
+  ground_truth:
+    bytes: 56608775
+    compressed_bytes: 56585414
+    crc32: 83bcf0ae
+    sha256: 733e7214a32a708547788e8ce755924b3b81567465df4c66dc92164cef4b5a81
+- scene: 0101_005_S6_00100_00050_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e1453258ff4a5413ed0562ecfc963471156aa1afe8db4940e814c303bec0c4d5
+  noisy:
+    bytes: 26229380
+    compressed_bytes: 25802772
+    crc32: 3b4e8d3b
+    sha256: 418470b445bf975f5af42500a7839aa1862b09789bdc37b233c32778e4ccf026
+  ground_truth:
+    bytes: 57004721
+    compressed_bytes: 56981526
+    crc32: a3b72221
+    sha256: 54af8e75fe8496043dc6c373f7d345593de0916c7956e32db35f4374037b4f9c
+- scene: 0101_005_S6_00100_00050_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2cbf77ce47b6fd8033f7f65cc17876af28e88969014c81f4af06d23fa9174593
+  noisy:
+    bytes: 26156233
+    compressed_bytes: 25725903
+    crc32: 2c7fb4b8
+    sha256: 75b9d862382960ce89cd575d4621ce28fbb21e393f84b2b12b729c5b20f801fc
+  ground_truth:
+    bytes: 57009081
+    compressed_bytes: 56985918
+    crc32: 382f72c8
+    sha256: aa6046ceb05db30ffa3d14c89166c64048a8458a50b7e7f3e0a006887e186280
+- scene: 0102_005_S6_00400_00200_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 6826c4ebf19c61a11ea1c2e90a588b7cdcb6b4b343a0489c0c29920d9886ed15
+  noisy:
+    bytes: 27306759
+    compressed_bytes: 26844580
+    crc32: 09011988
+    sha256: 73cbc4bd72a3a025cd70bf87f19365565e50ec98abf9cee0d02ee4b9dcf41a54
+  ground_truth:
+    bytes: 57047592
+    compressed_bytes: 57024489
+    crc32: fff24894
+    sha256: 41eb1d090a61d2313eb8e98c7e46cc8bdf5a0df0e8741583ac1dd01520665708
+- scene: 0102_005_S6_00400_00200_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 394a90d63fa29b1d9cb0c00653dd0c573606539f736a5f5561dfd42ad9710477
+  noisy:
+    bytes: 27111975
+    compressed_bytes: 26651926
+    crc32: 2f087fb8
+    sha256: ef0f408b3e96baba4fd27d8446de9e289a61e6a17982855ad47dd0531fb80502
+  ground_truth:
+    bytes: 57050675
+    compressed_bytes: 57027629
+    crc32: 3fde9535
+    sha256: 878c8325ea6737736eea934353a545ed2e4ace8e17bc0bf27c002796a986b2e3
+- scene: 0104_005_S6_03200_01600_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 111a8085a2663fa54166d95551457752ad657f45696368ec2cc5f3297442e995
+  noisy:
+    bytes: 26783578
+    compressed_bytes: 26450604
+    crc32: 451f4764
+    sha256: 5a57fc653be30d64420ab1d6ff4e142a18556d4e61285e1584d313db22f15ffd
+  ground_truth:
+    bytes: 56732988
+    compressed_bytes: 56709550
+    crc32: abcb186d
+    sha256: 1be418fced231370ebbf41d10596d34df0d54d2d042232328f21cd78deac8151
+- scene: 0104_005_S6_03200_01600_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8bf7e28dbd352f079eca08f13d1f405d632413127ff650e9f05e7bf05da525b5
+  noisy:
+    bytes: 26279637
+    compressed_bytes: 25936244
+    crc32: 2899cf1d
+    sha256: 5c6172853d311b961e63b63e1ead103e2c972b3abf61eca6b5e6f6d9338ab1c3
+  ground_truth:
+    bytes: 56729924
+    compressed_bytes: 56706572
+    crc32: a9c7bc4a
+    sha256: 2c52bf868c89c6637d0c2a40fdfafcbe2b6b7495ba0950734b899704584a5acf
+- scene: 0105_005_GP_00100_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 45c0aaa32261d8225d508f538e8058965b2586ec1316ed336f0d67f0fbc9ed03
+  noisy:
+    bytes: 18950806
+    compressed_bytes: 18559352
+    crc32: 4db5cdb1
+    sha256: 417c6d045922fc7e05a309159fe0452330a12e7685b0632459baa31c7b1951c8
+  ground_truth:
+    bytes: 44049640
+    compressed_bytes: 44030136
+    crc32: 1befd255
+    sha256: 178a93dceacd346ae195838a5ad0e747b85d2a04e5e81bbbbac2e6a7ea7d7285
+- scene: 0105_005_GP_00100_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 35a108ec1993ee4afa50e6dee9d1e4a6c85aa603a6e0cf47b533427ad275af88
+  noisy:
+    bytes: 18934845
+    compressed_bytes: 18547016
+    crc32: 5e52afdc
+    sha256: 82aa6d447b5a223c7928bcc9f57757ff5deedcde26b8064853ce83f34bafbc54
+  ground_truth:
+    bytes: 44052616
+    compressed_bytes: 44033265
+    crc32: bef8d2ae
+    sha256: 08e9d6265371983d0470da66928b3a789d255fd8a65e0de098f215a16dca6459
+- scene: 0106_005_GP_00400_00400_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 1d72861a430278e09f2aeec771fcde13920b0b55b6d87dea33590251a3ad3b92
+  noisy:
+    bytes: 19504290
+    compressed_bytes: 19121673
+    crc32: 314b60fa
+    sha256: 8b863aa081280ecdd24133e17d5a6053fd149ad5809950495f51efbedb9ed462
+  ground_truth:
+    bytes: 44047034
+    compressed_bytes: 44027538
+    crc32: af677211
+    sha256: 075d8cdefb538c17353a10175b9ecbea2e66a482212a391b9a5fb010cb200882
+- scene: 0106_005_GP_00400_00400_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2f2297ac284a5f7fc339568d5d3b48b2245c98f5bdbde4bb8b238ddc3153060a
+  noisy:
+    bytes: 19542195
+    compressed_bytes: 19158962
+    crc32: b9ba4fe7
+    sha256: 76153141e10486cbb5da4091365dfda5f360a30f423e36bef7527e638e409f53
+  ground_truth:
+    bytes: 44047489
+    compressed_bytes: 44028032
+    crc32: af091689
+    sha256: 2ccd5b7b51ded13982913d65fe1c03739cb6c236575929d54ae6a053246503fb
+- scene: 0107_005_GP_01600_01600_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 355b6c76d33e091ecaef34051252e5f5c0fbf8840347d09fbbecbc379971d82c
+  noisy:
+    bytes: 20433546
+    compressed_bytes: 20099319
+    crc32: c1b5a86a
+    sha256: 236f84e483ed0f581e62059349632657639ea8ef7767d432418d9441f1eb471e
+  ground_truth:
+    bytes: 44055775
+    compressed_bytes: 44036293
+    crc32: 03e42a99
+    sha256: 4c306abd8ba00525d22bf5b817be5ad37dc702f5bc7162eaab7f3e9eb3ee8bbe
+- scene: 0107_005_GP_01600_01600_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: f90d067d4db70424aaa676fe85729ac5c26c8f094d4396b6974f9b39a6546b62
+  noisy:
+    bytes: 20364151
+    compressed_bytes: 20031212
+    crc32: 2518961a
+    sha256: d05f3377a58a779a7399054e49e849224e0aba5b58c24dd54501999c2aab87ea
+  ground_truth:
+    bytes: 44056269
+    compressed_bytes: 44036806
+    crc32: 211d6aac
+    sha256: 028d531600c2d14d1b5f1695fb30339ca97aa64ccec5097a6548faf2f2d8dbfe
+- scene: 0108_005_GP_06400_06400_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: ea482a2eb4c574cbce9f6ae0c8bf3f385c42d741619b66ae77f94f255b7f0c6c
+  noisy:
+    bytes: 19662920
+    compressed_bytes: 19377485
+    crc32: abbac96c
+    sha256: 5f12cd50b8b577c64b1719578a44b30990e1ba4530e80eeca4db77e933592744
+  ground_truth:
+    bytes: 44005945
+    compressed_bytes: 43986458
+    crc32: e721af37
+    sha256: 4acb8ed53d27edb53c8ffd841155835cbb641b32b3ae0db64c1e14acb19f132d
+- scene: 0108_005_GP_06400_06400_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 603274a0004c769c80f14ce8e3c3c1acbbc5185b820c54071e453ad0d2049d54
+  noisy:
+    bytes: 19396393
+    compressed_bytes: 19124857
+    crc32: 71102f49
+    sha256: 5dd8f0a59e8b878dbdefd505c597dc20a26b12134bbdacc1cc6228386c192c76
+  ground_truth:
+    bytes: 44010107
+    compressed_bytes: 43990592
+    crc32: 2081e936
+    sha256: e1c3fe9a400de2d502e8f8270d5845ab0906c21cdbf7c6cbb912c725bbec14f0
+- scene: 0110_005_IP_00100_00100_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 07bd1cddbe0fc5a3ba7b768f8008a9c82470f494047c5452cb6a9f82ed103393
+  noisy:
+    bytes: 19121386
+    compressed_bytes: 18681891
+    crc32: 6b3eb3bd
+    sha256: f34b8180cb577fd2c8e8dd9cc661fccd177f4798ed3dad4f60f9a14e91c2377d
+  ground_truth:
+    bytes: 43731925
+    compressed_bytes: 43712332
+    crc32: 7eb195e4
+    sha256: f3ec217c4af40411a1ca82ca2349fc0a13691c700cdef2bedd6fe3c17b279f8c
+- scene: 0110_005_IP_00100_00100_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2da0a820318d0ae56dcb5d5dac38c3fc20d8cb0c8f925cfbc7f69c8cc9e82277
+  noisy:
+    bytes: 19091460
+    compressed_bytes: 18652843
+    crc32: 3bf4835f
+    sha256: 679b313b3924da5e9d2b4208e0d185075d75f06520bdb003879bc5e0230c4642
+  ground_truth:
+    bytes: 43731913
+    compressed_bytes: 43712332
+    crc32: ec13f8d9
+    sha256: d0a6d6d14ce7a30b6a4976a2ce7a5c710ca361f5e1e58426a8f3d47f851df17a
+- scene: 0111_005_IP_00400_00400_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2654cf7b4bbc12a19b844e5e7e16f7d5ca23c080eb5dca221c59ef0cbcc968c5
+  noisy:
+    bytes: 17315268
+    compressed_bytes: 16861840
+    crc32: 0e1f7267
+    sha256: 144020ed75f5a06aade58318b4c44c3a2835c33f462ec131e4a55779199e310c
+  ground_truth:
+    bytes: 43664295
+    compressed_bytes: 43644658
+    crc32: 8908d690
+    sha256: f89e2d71640fa6892c57b233ff8ee3c065b5a9e6cf0f9e5cd2e1446aecb9f77b
+- scene: 0111_005_IP_00400_00400_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 5f3167c4a9b8664d9ac3432a15e164d4f9a1a048ce5336d7157e7939a11c3af5
+  noisy:
+    bytes: 17273659
+    compressed_bytes: 16829387
+    crc32: f345ad39
+    sha256: 7626a02b5aee60e85abdd08743ccce767ab18dd95068b99192c19828e68ecdbf
+  ground_truth:
+    bytes: 43664947
+    compressed_bytes: 43645304
+    crc32: 1a0364ec
+    sha256: 4a55a3fa38d5236ba8321a85791842254247c0e4165b57a6be093c1efb290559
+- scene: 0113_005_IP_01600_01520_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 96184543ac9e50524cdc9546bb4fcf8ad2f6b574d0a75d721d59ddd4685f975d
+  noisy:
+    bytes: 12617874
+    compressed_bytes: 12288128
+    crc32: deb296a0
+    sha256: db4c70f9fb677b4b20e8d400dd54d665c546997c447e0d45d3b683968e3fd292
+  ground_truth:
+    bytes: 43581623
+    compressed_bytes: 43562044
+    crc32: 2010488c
+    sha256: a4a0e4338cbaa0e801aea18ae10a7ee83e2ca89ccb61a5d6c2915f827ca44a2e
+- scene: 0113_005_IP_01600_01520_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ce3515302dc277536ad89e87566d32abc73800b6637fe7cbf769aaddda33f9af
+  noisy:
+    bytes: 12466868
+    compressed_bytes: 12147291
+    crc32: 3dbb41fe
+    sha256: fcb1e394d62887d9dbd6627b0bde96c251d4b91a7083172c4e3ee6ac2ad9dd78
+  ground_truth:
+    bytes: 43578033
+    compressed_bytes: 43558308
+    crc32: c1dc5eb4
+    sha256: 37f71abdf99a19d3fd9bcf7a4f4ccd0b0ca044d05ee9e2fcdfa8e37c7b9d22b4
+- scene: 0114_005_IP_00100_00200_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 920ba6c80f1d8440ce00eb218b591c1ef15bdc8218bd6b5305a42e6b2af3050b
+  noisy:
+    bytes: 23050061
+    compressed_bytes: 22713706
+    crc32: 3ae13050
+    sha256: 910162960ee2bc71f8742adcd47edff56418b8ea5c6c4c03cce9a5482b202bc4
+  ground_truth:
+    bytes: 43597764
+    compressed_bytes: 43578092
+    crc32: c0c0427c
+    sha256: d5a48eee764ce3362e393017df8c96a6212a3e14c7834c0c517691d18c0d763f
+- scene: 0114_005_IP_00100_00200_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6ddece39b21f12bbbe6a2d99ba5becb0e03b2fbf618f1c12074f2741d7210bfd
+  noisy:
+    bytes: 23014114
+    compressed_bytes: 22674222
+    crc32: 0091ca4a
+    sha256: 1c3141c39e4aafc2e70365dc9bfcabf2477b08e5432624789578fbfc249f3c91
+  ground_truth:
+    bytes: 43595949
+    compressed_bytes: 43576346
+    crc32: d785c4ef
+    sha256: baa071b61f414f95296778f13c87a95420082dc37c87b5c1aa88aed44aeac1d7
+- scene: 0115_005_IP_00400_00750_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 430e25318ff0427f1001b39de361e221063c6ca1ec88adf8823b1eaff75d9638
+  noisy:
+    bytes: 20308818
+    compressed_bytes: 19913454
+    crc32: de9c5c7c
+    sha256: 275978e9cfe76a5a8cf8b9afaecd01c4bbbc670864317f680c7326a9abf74d91
+  ground_truth:
+    bytes: 43765128
+    compressed_bytes: 43745684
+    crc32: 0f057580
+    sha256: c3a9a0976bf36a2929b220ef441b4552d26f3c61be34896840060dc7f98e736c
+- scene: 0115_005_IP_00400_00750_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8d247e4594c24b24af260e14c2e32c7af28c3cd491a435707d07470d45de568c
+  noisy:
+    bytes: 20291716
+    compressed_bytes: 19895349
+    crc32: 3846845c
+    sha256: b0e97e1214515995abd81a74fd9d09c519df383e0e70516bf53cbfe4d9739408
+  ground_truth:
+    bytes: 43763952
+    compressed_bytes: 43744487
+    crc32: 7bb824d4
+    sha256: 4f2fd26a0df31cdb1b911a2301730648b43bb6b83ea07765636a0b2c0bfc68d6
+- scene: 0116_005_IP_00800_01520_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 17bc91d8609b8ed836b63348592d1a09d397710739015729c5c9404a55523760
+  noisy:
+    bytes: 17652523
+    compressed_bytes: 17207318
+    crc32: 4f60c9db
+    sha256: d21bd27cb78a1ee0b58caed5b87b4d7f4dcf7a958b55ec9e2345e4463befab2d
+  ground_truth:
+    bytes: 43618673
+    compressed_bytes: 43598961
+    crc32: ef2d3c61
+    sha256: c2d9f476e90247925d6d1ace20c9220d445b75e061d36860bb328be62b3336d9
+- scene: 0116_005_IP_00800_01520_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b921e3f5371c1f7bc00cece5f9890e743fe5fbf3cfd395bc71aa60b6810f2d55
+  noisy:
+    bytes: 18013286
+    compressed_bytes: 17551901
+    crc32: 2416616b
+    sha256: 1d079ac992608142b4fec7c61ad4e393b56a5a9587ecdf73a22106a4f114a345
+  ground_truth:
+    bytes: 43618246
+    compressed_bytes: 43598572
+    crc32: c505f835
+    sha256: add40e90e093c83d9c6ae7b5d48c4e2dbd744f73d05904e162ef16a332e04676
+- scene: 0117_005_IP_01600_04160_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 8faf2efdb6e895e5f1256f7e4d956b29ea5b1a5931ce6bce80d7a77df904e870
+  noisy:
+    bytes: 14182539
+    compressed_bytes: 13818094
+    crc32: 5af2f4a4
+    sha256: 7ba1f8ad17662c36db9135ee6b86ab414b3f45340e27fbaf5499e79d0d803425
+  ground_truth:
+    bytes: 43683446
+    compressed_bytes: 43663859
+    crc32: 35f413ba
+    sha256: 85849baa9b643cc47cc672de81ef651fa7fea778ed22b9778fabe7a57dc09666
+- scene: 0117_005_IP_01600_04160_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ac52c5bc2c6b0c5aa919629e9bc79b87133ea42f7dbd7a139134139bd551a475
+  noisy:
+    bytes: 14222882
+    compressed_bytes: 13854587
+    crc32: 2dd2da2c
+    sha256: 00e70e3510286d67920e75921a1bb80bf47a3c9b7797e0642ad2758cb7b65544
+  ground_truth:
+    bytes: 43688418
+    compressed_bytes: 43668754
+    crc32: 4bfbca30
+    sha256: edb7ef045fba652615d3533831c9fefe785edd8ab111c995f0c4da0988c92186
+- scene: 0118_006_N6_00100_00025_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 23981a8e76184c09fa7c0b3d659250268db16953381e68048001957bd0f86414
+  noisy:
+    bytes: 16430530
+    compressed_bytes: 16121188
+    crc32: 08a2ba70
+    sha256: 23693cedc51ac3e987924bc7d594bca6623b765e464d04f474c6f073d22dcb55
+  ground_truth:
+    bytes: 47223802
+    compressed_bytes: 47205314
+    crc32: f9f64ccb
+    sha256: e950705398ca87699970355ba1ce592beb493ce0695211f76a0715ea54e4bbff
+- scene: 0118_006_N6_00100_00025_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c487e3d0cef0477c2c51ac1ed430bfc5b30db23df60e48e06422935719dde89e
+  noisy:
+    bytes: 15952655
+    compressed_bytes: 15668462
+    crc32: 4fa816bd
+    sha256: 93cee04e7f78b138800a4eba6d6def407d859edfa68657a19a3f15be51b755df
+  ground_truth:
+    bytes: 47225729
+    compressed_bytes: 47207223
+    crc32: f777a3a8
+    sha256: ceb07b767ceca3e40c60eb49e08a7de3596e8fa68dc358c090d541a1f09949c7
+- scene: 0120_006_N6_01600_00400_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 4d4e30c09f081a5aa65246468259b3d7803121d426d65c8401b1cdb318d449be
+  noisy:
+    bytes: 16075962
+    compressed_bytes: 15830937
+    crc32: e26b224b
+    sha256: 212f6ec9ba94ec4a438e3e806366b31502494d18cfaceffa260e15e5778d2308
+  ground_truth:
+    bytes: 47039778
+    compressed_bytes: 47021146
+    crc32: 35a05e64
+    sha256: 2b901729653c7913ee76109a723dca0d7595642ed01bc689dfc1a4b073916e45
+- scene: 0120_006_N6_01600_00400_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c2d2fa91569da8c12cb5f48e08748c8c79c2ebcd73d16dac95e345dd838a724d
+  noisy:
+    bytes: 16052215
+    compressed_bytes: 15815009
+    crc32: 4a8dad9f
+    sha256: 648498c389bc9f897e055cd812a49a5a46f587748d880ca2fc46ab09e45ae69c
+  ground_truth:
+    bytes: 47043173
+    compressed_bytes: 47024629
+    crc32: 7963b320
+    sha256: 8adaab13ed809c0bcb2c89467e30123d6850593957b7e94451187e68b8099462
+- scene: 0121_006_N6_03200_01000_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 9d5a9753bf550bb93462017d911fb2abee9a8591a9c8c3e6d5b67b08eef00e0e
+  noisy:
+    bytes: 12369502
+    compressed_bytes: 12142286
+    crc32: dae29f9c
+    sha256: 2da07831531891bb25d82032ae2b6075a6cf7c34ba6173d418de1008a6c5fcb5
+  ground_truth:
+    bytes: 46892676
+    compressed_bytes: 46873784
+    crc32: d750affe
+    sha256: d103850ae7749f8c402b470075016b4bc6ddd8ef190ae36fe51e63973ad2a4e1
+- scene: 0121_006_N6_03200_01000_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6f045a4d1c3ca995706ff909789ff79ebc6a46cdbc1fb338a836735b7950bbbe
+  noisy:
+    bytes: 12371356
+    compressed_bytes: 12143567
+    crc32: e3cbe60a
+    sha256: 6bb5e90d4a258faf857737c577193e913253c12f1121314d292ff1966c2f22c8
+  ground_truth:
+    bytes: 46894300
+    compressed_bytes: 46875682
+    crc32: f543a909
+    sha256: 6b8613859312d4799991e343402022ce8d8eb18b0759344f093e6825c992625b
+- scene: 0122_006_G4_00100_00050_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5a912a7f00326eddcbfcb07e0d40823274449d7b33ee86c485f238b64fa6c299
+  noisy:
+    bytes: 24207307
+    compressed_bytes: 23802803
+    crc32: 461f2c52
+    sha256: c0c75826ee6872b432f7dd87b4605fd7d5dcf123740af60dd3004a2f76311f03
+  ground_truth:
+    bytes: 57009040
+    compressed_bytes: 56985726
+    crc32: ee5a5d47
+    sha256: 0f8b3c76e6d357075cde4882006bf10a07537df859c084eaaa493510b79b2282
+- scene: 0122_006_G4_00100_00050_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: aebf985b39bb3efb7c1199b6c9f22232436ae9aadf617cffc1494530e4b832e3
+  noisy:
+    bytes: 24391699
+    compressed_bytes: 23952203
+    crc32: b8c41c8b
+    sha256: 2a1a57b631eaa02997725647e03a10b818725183ced41d38a20356524b01db85
+  ground_truth:
+    bytes: 57015680
+    compressed_bytes: 56992501
+    crc32: 0e470647
+    sha256: 4bbd7f7c0494ab17fff2eb101968ad67c41ab08d4ef066dbd0641130256ee5ec
+- scene: 0123_006_G4_00400_00160_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 577db30366348a0b8e53b29dcc37f5e1b02d1cef6496c5cad7537e651e7022fe
+  noisy:
+    bytes: 26024452
+    compressed_bytes: 25659321
+    crc32: 84a00a80
+    sha256: 419cc71e15ac80b4336b59231b335ea9b10c73fbeb78d8358873fc3a830c3bd5
+  ground_truth:
+    bytes: 57008861
+    compressed_bytes: 56985678
+    crc32: c748d970
+    sha256: 7a89e017859a0c528a9aca7c4ca53f109abafa0355234614279742ed09da8bd4
+- scene: 0123_006_G4_00400_00160_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6ab779382de6d0d4e3171e7d0950aa2853bff143fd88fb7ba09727880da423bd
+  noisy:
+    bytes: 26597400
+    compressed_bytes: 26206438
+    crc32: ac372e55
+    sha256: 32f34335d30553e991efe0babe24924c0c6f022d0314c69899039313737c0c57
+  ground_truth:
+    bytes: 57008303
+    compressed_bytes: 56985128
+    crc32: d6a1ab40
+    sha256: cbc1f8362bf3a68ce98fa8c5ad9e53aace9321270fd4f3e42d00b8400ba0d894
+- scene: 0125_006_S6_00100_00050_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: b875a65d113682999818c0238d9f02a374f0600279f650cc3926871f65ff7f63
+  noisy:
+    bytes: 23345388
+    compressed_bytes: 22953788
+    crc32: 2053d654
+    sha256: e947f33463881ded97ab0025f8438f5618f66ef86d0a13c7bba752ba1b85d15b
+  ground_truth:
+    bytes: 57378743
+    compressed_bytes: 57355750
+    crc32: 697d18e5
+    sha256: 2e23419507e5676f816f7bf40b3b1911a4cb25fd40d6ef79767981db7ccb2eeb
+- scene: 0125_006_S6_00100_00050_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b41a058f400f194d82a17ce54bc0751c8a32d55f41c71b9e773e9d38d6ab44fa
+  noisy:
+    bytes: 23389368
+    compressed_bytes: 23000615
+    crc32: 892dcfdb
+    sha256: f53ac0591bdd62922e847d5a3484a1e733497c6c210897e1dbdb7f1bee5173ee
+  ground_truth:
+    bytes: 57381577
+    compressed_bytes: 57358542
+    crc32: 95dfe67a
+    sha256: 7db020411874d188f670784d4388fb3497eb70c30eaee5c7f514e630f3c4298f
+- scene: 0126_006_S6_00400_00200_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e391c29c09d15061be834b4c51ccd701d24f67cff0e959c08aa07fb63ce15b75
+  noisy:
+    bytes: 25127668
+    compressed_bytes: 24777365
+    crc32: addd39c3
+    sha256: b3822f6218b1c2afd4001c360192ee1913b8a36200113ac43dfabf2e4a138b59
+  ground_truth:
+    bytes: 57249340
+    compressed_bytes: 57226298
+    crc32: 6edeecf7
+    sha256: 8e70ea6aa0c415f99fd73f23551850c6dd449dd3b642206eeb77ad11605567f6
+- scene: 0126_006_S6_00400_00200_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: e8951edba62c50a7c3fb998f86bbde446b577ae852a89a611546c2b879ebf112
+  noisy:
+    bytes: 25050990
+    compressed_bytes: 24693392
+    crc32: 0cde2ec4
+    sha256: f202a707060146d3da1b50b97cedd9c191fd206bb481c0aef2504b994c300b5f
+  ground_truth:
+    bytes: 57264553
+    compressed_bytes: 57241608
+    crc32: 976cf80f
+    sha256: 032d257e3a4a126bab8272e84668a6375abde901e50ff729fff69c6cd74255fa
+- scene: 0127_006_S6_01600_00800_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: cd3c54eab98d9e0ff5cead272f969a5e726b8cc9b8e21e9c6076d70a47709854
+  noisy:
+    bytes: 24997537
+    compressed_bytes: 24660380
+    crc32: 3fda952e
+    sha256: 6d03113b668627b9be94e763bf89a7d54bf8dd8bf49ba7a68eace4251d403a95
+  ground_truth:
+    bytes: 57063486
+    compressed_bytes: 57040219
+    crc32: 7284070f
+    sha256: 6cb0b24fcece1e9075eb5b11333f57d41924c38a39fdc4ef839fc4f134560ef7
+- scene: 0127_006_S6_01600_00800_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: fd6e332555cc22826c215c5feca8530c22d3e361e938d41429cbab6de32a77f7
+  noisy:
+    bytes: 24881417
+    compressed_bytes: 24543754
+    crc32: c987d483
+    sha256: 1fc040fc6e6361b907ee45c254d8708350659b606d08386ba53653538be1680e
+  ground_truth:
+    bytes: 57061442
+    compressed_bytes: 57038244
+    crc32: b916431d
+    sha256: 70a58a431ace58b1d28c69f4b438880528a170c169e70db116eb64e609c76020
+- scene: 0129_006_GP_00100_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7434cd8ff4b7f4f90403adb05eff25855f5635218333c80a7ab4987039c935bd
+  noisy:
+    bytes: 17623733
+    compressed_bytes: 17257433
+    crc32: ad959199
+    sha256: f66c0c102bf437ee2cf564d34699d20e3c94ec07438f0cc2b6ab426ca306bead
+  ground_truth:
+    bytes: 44375178
+    compressed_bytes: 44355917
+    crc32: c405773f
+    sha256: aedb4ed13d9f54c6d5d68c19432b2d446568974073b57a14148a0b7b1bb7480a
+- scene: 0129_006_GP_00100_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 08f4f7b316b41c93421dd52e38057ab1882d5077a372f80e4554e4bafc8784e4
+  noisy:
+    bytes: 17439294
+    compressed_bytes: 17077693
+    crc32: 7385e42e
+    sha256: 58ecbce752dd799c62e9873913b888135ccaf910910d6189e0f97ea691360655
+  ground_truth:
+    bytes: 44373032
+    compressed_bytes: 44353716
+    crc32: 8c8e13e3
+    sha256: 15d65151ee7733a975b459cf083b8fcf8bc29fa554077054ef66bf83ee4caa4f
+- scene: 0130_006_GP_00400_00400_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d8abbf06895260062d37c4bfe093246ff5d0e8acdf47fb70c9bdc63d8c24b492
+  noisy:
+    bytes: 18244138
+    compressed_bytes: 17893388
+    crc32: 35eccfbf
+    sha256: 742fbcb81e9e0667c55a5ec7a1b22f0823b59d591a6b8150287d24665fe36ce3
+  ground_truth:
+    bytes: 44380060
+    compressed_bytes: 44360707
+    crc32: b8c34b3b
+    sha256: 379cc7919cd88b1cbf6dfc283ff33a2c9b4c34cde0b0f4258ad065d65501bae7
+- scene: 0130_006_GP_00400_00400_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d228c59d09a7ddda8ad89cdc0acab08809e39902f024873b4343f2b1cca5536a
+  noisy:
+    bytes: 18214977
+    compressed_bytes: 17864376
+    crc32: 41d90d42
+    sha256: f1d05a22f11119954bb445a20428565cc84d8f739b3f201f98838590917cb065
+  ground_truth:
+    bytes: 44380642
+    compressed_bytes: 44361313
+    crc32: a8241d30
+    sha256: 422ac864231a0ccfe5005f23832d244e2b9763bb08710fed051044cd0b6ec4ff
+- scene: 0132_006_GP_00100_00200_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f1cf9d380de2fcfb093205bbdcb261d934d4155642851b4dfd4b9a999c7cca6f
+  noisy:
+    bytes: 10170903
+    compressed_bytes: 9868922
+    crc32: 43a0dc41
+    sha256: bc71ddb389ac5963293b454af7e611f87a6e83febd24c8ddb34e9774d32f743e
+  ground_truth:
+    bytes: 44287572
+    compressed_bytes: 44268151
+    crc32: 60415d63
+    sha256: 46b83aab7d0d71edeb229d4a7d19041540517dcebc0e21745bcaece7dc4cdf3b
+- scene: 0132_006_GP_00100_00200_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: cbbb3250c5e14e11a0d3f68c4b6bfeee3ba526a7769b9681e8c368cc975f75c7
+  noisy:
+    bytes: 9955639
+    compressed_bytes: 9658960
+    crc32: 2cc5e302
+    sha256: 37a58135dea12650915016d074c933f224ce7760ba72494425a8e39660236caf
+  ground_truth:
+    bytes: 44296449
+    compressed_bytes: 44277124
+    crc32: 4932de04
+    sha256: 1c70a6be048caf4b56e052f3f1106b3546203b6542cdcf078b14f756a5dfc29f
+- scene: 0133_006_GP_00800_01600_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5a6776e5d9b0c8899e95ca35c4ddd9690bc749aba9c62950b30db0852f7c91bb
+  noisy:
+    bytes: 11709216
+    compressed_bytes: 11521274
+    crc32: d81e9b68
+    sha256: 6114eeda8cb8abd1c767e6f60b93deeaf0932315706b5d63bd3dda7168a5aa8a
+  ground_truth:
+    bytes: 43999926
+    compressed_bytes: 43980388
+    crc32: e97b43d3
+    sha256: e23a7b6651a6cc09731b5a6cd1c1141d7e89ca39a6a541e5d348487ffc21c0d6
+- scene: 0133_006_GP_00800_01600_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: fc60ed367d15f9fb56ad0c491ed9e936827368ef8c962399204c4f89e7d674fa
+  noisy:
+    bytes: 11554120
+    compressed_bytes: 11380391
+    crc32: 8d8f8ee9
+    sha256: e290c260c11ea769e2923150c213da6ac43fc7ee71ae3880d549e5be1507f6d8
+  ground_truth:
+    bytes: 44000116
+    compressed_bytes: 43980525
+    crc32: cab4a2f4
+    sha256: ff37e0f18c194d4819f22d1448c8e478a66efe338a95a53c8e1611a1bbb314d3
+- scene: 0134_006_IP_00100_00100_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: db32fe6f29164419a36a5355b2094622a011c6b05221b939fffca877f0b25782
+  noisy:
+    bytes: 24032201
+    compressed_bytes: 23739664
+    crc32: 26e74e5d
+    sha256: 7dba3c7386a56d1d232c39feee13fd051d316ea7f998afe09e6a3cc255bde584
+  ground_truth:
+    bytes: 43834322
+    compressed_bytes: 43814741
+    crc32: c3b3a482
+    sha256: 7379fdd82e8c1b2050ac19dffd53f962fd7e721b8e6efc7b64fd9f65bdbc6044
+- scene: 0134_006_IP_00100_00100_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: cc19d010e6c4286538250b956703b9602f1e162ae5b8677792e05f46f9741248
+  noisy:
+    bytes: 24033686
+    compressed_bytes: 23741547
+    crc32: b92e04e8
+    sha256: 2a6aa87aecfc795e9a62b9613ecb06faf61daeb1f8bef706289d92dae3b093af
+  ground_truth:
+    bytes: 43834504
+    compressed_bytes: 43814950
+    crc32: f81a22e0
+    sha256: e7e460dc27d8c3ce13d0a96918dd3cae4fef44a336beae17b3ba60eb5ff296fe
+- scene: 0135_006_IP_00400_00400_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0e1a3835850cdc003e24a9b3c3dd37dd9269274e9d40a16bf83675f87c748c61
+  noisy:
+    bytes: 20919121
+    compressed_bytes: 20560366
+    crc32: 04270d1d
+    sha256: e0cf0eced6f1aceffdf8f0e1905ff70109574066f498f475940fd1ceecca0164
+  ground_truth:
+    bytes: 43990004
+    compressed_bytes: 43970458
+    crc32: 7466b234
+    sha256: 32614236caebd565a03946d7ee1c20c752a41b1a1445d8707ea0a8a863c7f2f8
+- scene: 0135_006_IP_00400_00400_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: fbff9c3250e1d08d042559c0864d9fdd970d157ec5b3216c993bc60938ccb135
+  noisy:
+    bytes: 20824708
+    compressed_bytes: 20472694
+    crc32: 86befae1
+    sha256: 072e77689255ce4cbb31c86477ae9b95435b96ba674b8ed0f086b007882a134f
+  ground_truth:
+    bytes: 43992645
+    compressed_bytes: 43973077
+    crc32: ff470b51
+    sha256: 81fe4bf69730868a25b3f1ca5e59af661783fd9687dd1ab708cfbd1bb5f0d795
+- scene: 0136_006_IP_00800_00800_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 2a9d137542b07b13f32996857edacde8e287617d8636651c02a96667ab28a65d
+  noisy:
+    bytes: 18265475
+    compressed_bytes: 17845372
+    crc32: 81fecd52
+    sha256: abff9b0e7938c0b8ad2ee4376b75b403d71a3c34051a501ff598dab6bc0106c8
+  ground_truth:
+    bytes: 43873026
+    compressed_bytes: 43853466
+    crc32: daa21439
+    sha256: a5f13e00295ec17eaa49ba6b861d7e3dae852e9072369b8fefc9f4a58b61b3cd
+- scene: 0136_006_IP_00800_00800_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8fce4b7078ee420ee80f65f042f260de9444bf38a8a03ca361068e6b38f11bd4
+  noisy:
+    bytes: 18107404
+    compressed_bytes: 17694361
+    crc32: b77d555e
+    sha256: 2fea7ebb66935db1f3e6b7d66fedb5d9b7f74943a26e10e5345b36eb9f6d7158
+  ground_truth:
+    bytes: 43874649
+    compressed_bytes: 43855145
+    crc32: f0131931
+    sha256: fdc9accbdc196415af50cc73f31068f14a1fd42441e96ec3c9724e8197ae6edc
+- scene: 0137_006_IP_01600_01600_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e58fb2e4ebdc6555e737e83b72112705c21f03cc34e5dd742693ec2a1a2cfaba
+  noisy:
+    bytes: 15654631
+    compressed_bytes: 15252261
+    crc32: 2d9f8f89
+    sha256: fff562c1092ebf025a270e5b58c3e72cc5c8251a14fea66446ec45eaead3e044
+  ground_truth:
+    bytes: 43945456
+    compressed_bytes: 43925777
+    crc32: c8941cd2
+    sha256: c2ddaf0aa5b3a35c916255c307b5c0d5c01373af855925b8f81b799f4f73603b
+- scene: 0137_006_IP_01600_01600_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 9ba5f8a0d3e524cbc3774f5bb1f9a61a4a0dd56accd5f9a8edfa12120006ca17
+  noisy:
+    bytes: 15588689
+    compressed_bytes: 15190533
+    crc32: b10c1fa4
+    sha256: 220393061595f8e92ff114b4eb18053cd41e776f5365550bc40566b640db64c9
+  ground_truth:
+    bytes: 43944802
+    compressed_bytes: 43925133
+    crc32: 3da6b6ef
+    sha256: 9e634a3ba9fc0dba93db35e4d186ef9e6cf98c0f9b220854b09418606affda63
+- scene: 0138_006_IP_00100_00100_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 838ac6ee28c3812bab408dc063f122b767405f244aaa29e594e1922c1bee3dbb
+  noisy:
+    bytes: 15857697
+    compressed_bytes: 15425059
+    crc32: f95b5cf4
+    sha256: 7f627327ccf6ba42caa08c350f6afbb85ac108553fb6112c9a92b5d20971d84c
+  ground_truth:
+    bytes: 43954522
+    compressed_bytes: 43934934
+    crc32: eff0e999
+    sha256: 4c63c28df50358003f8c30af1f15dd320c5a61e14fa56985b51ff8bbd76fca5d
+- scene: 0138_006_IP_00100_00100_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: a00d3b1750db365b44b0ca922887317be184e6e68e0bff27d6dc061de5dd13aa
+  noisy:
+    bytes: 15762757
+    compressed_bytes: 15338709
+    crc32: 3a5d6218
+    sha256: 8ed007a723bb7fb1c9db240bbe2446668eb7ae471541023563ac35b353a23341
+  ground_truth:
+    bytes: 43963447
+    compressed_bytes: 43943876
+    crc32: e58c7635
+    sha256: dc50d388c3cd07514d68ac491897dd72d1d5caf832cd9a815c6153e2ba946be5
+- scene: 0139_006_IP_00200_00200_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 42288769bddf3e240fdfb02015b4fbe894f9092658fcc8285c90ac54621184a5
+  noisy:
+    bytes: 16309949
+    compressed_bytes: 15895010
+    crc32: 9d444464
+    sha256: 108bb1eb6b4b9db383833612ed33e291ad97942f2fd6ff9cf61c3682139da8ce
+  ground_truth:
+    bytes: 43923648
+    compressed_bytes: 43903979
+    crc32: 1a2cd3ac
+    sha256: 5474fcdd1934d631e5680443b073c126ef244cf26fb9999802e1ad369fd407cc
+- scene: 0139_006_IP_00200_00200_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 064f8fb19a85c57b47e13ad83980732baf9ce397612973e8916e18bd91cca544
+  noisy:
+    bytes: 15993893
+    compressed_bytes: 15592372
+    crc32: 20b99357
+    sha256: 65058f5f397a341ffa36eba7e6a5dbe2954be664fdc059580edae9281a9a7542
+  ground_truth:
+    bytes: 43931994
+    compressed_bytes: 43912346
+    crc32: 64f3928f
+    sha256: 537014abd4f432b6281bf90fc67da32b13ba81ed0fcef23faf3f84aba62d5683
+- scene: 0140_006_IP_00800_00800_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 956adfdd25a0188d238032be4cf4291ed5dcfe6c36f2ed7ded7e37b0a2f46cb8
+  noisy:
+    bytes: 11799214
+    compressed_bytes: 11482425
+    crc32: 7c83e2d8
+    sha256: 09bbe49053c44476c2c2d1ef0855ddeef096b8eb02ccfda312705c0973a65ae7
+  ground_truth:
+    bytes: 43678267
+    compressed_bytes: 43658540
+    crc32: b58b1abd
+    sha256: af8732582392f13331d224bcdd00694aa6a9451f85e8a8240444fa1a0a038189
+- scene: 0140_006_IP_00800_00800_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c49cab311330ebf06845bc17a529b380dc91e5876d590bdd704e436cf13b37ad
+  noisy:
+    bytes: 11506469
+    compressed_bytes: 11215789
+    crc32: a55560e0
+    sha256: 63ddcff53839588a7d56b9eb30e4f467ecf640e13a1964e5c4c43bee90de2fce
+  ground_truth:
+    bytes: 43666057
+    compressed_bytes: 43646414
+    crc32: 3f484e6f
+    sha256: a094a8fb16fcb14a00c82243c038d66ff7b757e0199a6d8e9367ddea9e80bceb
+- scene: 0142_007_N6_00100_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 02487a27917befbada60ad4f05ad34d84be912bdad6e212f3a5812307909c72d
+  noisy:
+    bytes: 20485799
+    compressed_bytes: 20156090
+    crc32: 38510fe9
+    sha256: 2c5d7adb02e22b4b8b0001e543c2ff0202bd3b5d4c1f61993f89848ba7f7dc5f
+  ground_truth:
+    bytes: 46794099
+    compressed_bytes: 46775506
+    crc32: ce0c9f94
+    sha256: 98efba1be653ee8f3ff15f16ed15d6cc1517b26d7e8a71a7669623b7f2a4c631
+- scene: 0142_007_N6_00100_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c25745dbc3cd54820540ec9623903e60fcad103af292eac95bacf30da89a6531
+  noisy:
+    bytes: 20639195
+    compressed_bytes: 20294954
+    crc32: b717f74a
+    sha256: e21399ce522b784dbd85d3ce6c4d9dbce8adda15da15a27529b21f3b2e83f428
+  ground_truth:
+    bytes: 46792184
+    compressed_bytes: 46773605
+    crc32: ac525cb1
+    sha256: e913c794af7cc75e97853af10a5bfd0880c9023c7f9059a46de477c39d83bb73
+- scene: 0144_007_N6_01600_01600_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 57f00ebf9c6064176fbb30798e3d81c101b744778cc2fc624fcf01dcb4b2081b
+  noisy:
+    bytes: 19816938
+    compressed_bytes: 19532850
+    crc32: c24d54d0
+    sha256: c5f2de9fa85810c0555831f65ac05d7611975ff91d5e1183781858bd3ca85b14
+  ground_truth:
+    bytes: 46804355
+    compressed_bytes: 46785828
+    crc32: 3c64a388
+    sha256: b7f3c8317fcb85599dd0418d9940ef599eff1aff06795c1b529d7b86e5bfd496
+- scene: 0144_007_N6_01600_01600_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8c677449840efbe505a8e10e60da63095a76a54fbdc6548917b34ee3a9875d67
+  noisy:
+    bytes: 19865470
+    compressed_bytes: 19575640
+    crc32: 4baa5730
+    sha256: db6b5aa1ad123372a13b6ca35d09e0c4a60ee296d64bfd7c343911ecbd6a37ac
+  ground_truth:
+    bytes: 46809572
+    compressed_bytes: 46791051
+    crc32: 8a1b03d9
+    sha256: 009c7a6d25578242be160bb41d1fef68d0bb7daa777c34209899699e98316504
+- scene: 0145_007_N6_03200_03200_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 50e3ff59700e88a286bc3e7c61eb5398d391afe21f94d539ad51fce093ba6200
+  noisy:
+    bytes: 16524029
+    compressed_bytes: 16277683
+    crc32: 6618f235
+    sha256: 3d6f1e7ea42f751d11ce70f77441fe37b809bd263e1b2b5a6fb7501d44658591
+  ground_truth:
+    bytes: 46788165
+    compressed_bytes: 46769564
+    crc32: 05037935
+    sha256: 8e8b930118250c56b87e7acc03345737c7acff8bd3e25f451e5ca42c61a602b9
+- scene: 0145_007_N6_03200_03200_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 47e7dc757defbd43e0d55349999883d923682ce4a681cd0fef9f91e3c9ba22f8
+  noisy:
+    bytes: 16367975
+    compressed_bytes: 16133878
+    crc32: 42539c5d
+    sha256: 4ad3984d54ae7fc04ffc6769633071170aac7880eeff807884a82ec2cd592b2e
+  ground_truth:
+    bytes: 46802764
+    compressed_bytes: 46784228
+    crc32: af6401eb
+    sha256: 3826e3c6a65f9b1ffacdf91945a35aaf7c634c5470b6e9cd45f3e37215af9ef0
+- scene: 0146_007_N6_00400_00400_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5e94b1a93b36a09d7ad86ef3ee0e2427509cb6c0487d8a5abc6a7d2d8a48dbe2
+  noisy:
+    bytes: 22019260
+    compressed_bytes: 21710659
+    crc32: 4c4d5f1d
+    sha256: ffe2a165611f100a116fbccbac4b3bfe59e89bbb6c48ff82f9807adbeeb754a1
+  ground_truth:
+    bytes: 46757307
+    compressed_bytes: 46738677
+    crc32: 66d629d6
+    sha256: 113b87afc2df5a85aeb73753f3bd183ed05803151b6324a081bf37ce842e58f6
+- scene: 0146_007_N6_00400_00400_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4ee62fc0ec0b25236796c2f99dc60979a7bcb483732269e2641b40a14da222d1
+  noisy:
+    bytes: 21735299
+    compressed_bytes: 21425298
+    crc32: d4bf8c49
+    sha256: a672edc49b3f89f4fdbaf052f239e0084e9673275ced552f05c7df222633090f
+  ground_truth:
+    bytes: 46757180
+    compressed_bytes: 46738585
+    crc32: 934daf95
+    sha256: c4897603d8613f056c8c4de5c6b88f41135f24dba9d9a8f1e951ac3b881409d8
+- scene: 0147_007_G4_00100_00100_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c9b4f78ffcf672dd5a5319889dd92ededcebb93b8bf7065ebacb7d252d5ec4a1
+  noisy:
+    bytes: 17727376
+    compressed_bytes: 17381268
+    crc32: 8410c30a
+    sha256: fc5010e309f8c3074102a689bb83d369c955b714f4358814a70f855961f7feb2
+  ground_truth:
+    bytes: 56636382
+    compressed_bytes: 56613139
+    crc32: 2e96ec4e
+    sha256: 2554cd5ae66091deba83e2e1ade2a7ef370e3083fdac8e7ee42cf7893cd2fca4
+- scene: 0147_007_G4_00100_00100_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ccac3d736246d60a8b223b0f4f0f2ee71205df16db58a22e29b728c3265d8feb
+  noisy:
+    bytes: 18060049
+    compressed_bytes: 17709545
+    crc32: 33784e3e
+    sha256: 56a1d1b44273bd519e0e34bb58f5771cdee5c8f5bb2a0c99a82f90244db99448
+  ground_truth:
+    bytes: 56638148
+    compressed_bytes: 56614763
+    crc32: 5b7581d4
+    sha256: f18043f7f8b2c90511a77ada7b027cb2939313dde982ac52d5e021bd9d3493c4
+- scene: 0149_007_G4_00800_00800_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 8ecf52660a11885d1bd0ea42d7aef367fbd5c06ff4d3aa532c170af14ff5d31b
+  noisy:
+    bytes: 17585888
+    compressed_bytes: 17313034
+    crc32: 1003b699
+    sha256: a926194e82aaf4cc9904054f3755eb152c754ab8fd52d21cc8d9b8a88ae71efc
+  ground_truth:
+    bytes: 56556694
+    compressed_bytes: 56533352
+    crc32: 26f130c2
+    sha256: 2c8fe12c26f24ce0665d442a8c421331921a28ad96e35b8d7b5b826953d3de51
+- scene: 0149_007_G4_00800_00800_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 1305a75bbc5f7bec2c42ef8efae99293d0e183d0bc119899a53daebdadb65b5f
+  noisy:
+    bytes: 18002494
+    compressed_bytes: 17709814
+    crc32: c9770fdb
+    sha256: 28a1d303c4bc73d1eab136ffc0df22c92905917ba0b5766ca04c60f2140bb40a
+  ground_truth:
+    bytes: 56560160
+    compressed_bytes: 56536701
+    crc32: 40fd9b97
+    sha256: 80fb848c2e927d72e0a82423b48ab53486584126d314ffe83d99f089ac3aa072
+- scene: 0150_007_S6_00100_00100_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5696a8627a40ac98054e2403eb646e3eb4c219a149a980b9ad6738931ec7be86
+  noisy:
+    bytes: 21822476
+    compressed_bytes: 21532332
+    crc32: caa62a3b
+    sha256: d0055f593f05d5c57a0dbd5b350409ab452644a24382eaf15c74b3ea88551bfc
+  ground_truth:
+    bytes: 56950306
+    compressed_bytes: 56927077
+    crc32: abd64e55
+    sha256: 6826476cfdf4560ea638c57eee7100823a59803ff8d4a3e38f720986b3417e61
+- scene: 0150_007_S6_00100_00100_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 546a327e59c76036ea40bc90b09fcf76e7ccbfe316d6811e4b802557df25e4cd
+  noisy:
+    bytes: 21936969
+    compressed_bytes: 21641096
+    crc32: 7ab90f5d
+    sha256: b7c1786e5d6e332ded3d8ae3d987edce72a9e6ffa297b7407bf0d6b7e9644e53
+  ground_truth:
+    bytes: 56959232
+    compressed_bytes: 56936038
+    crc32: 6d93b277
+    sha256: dd57758bccb5d1ac9ab2e6042ea6997cca1373a4f8e680f0a21b703bd80ec796
+- scene: 0151_007_S6_00800_00800_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f9a1850717b46f452e080741725ce6a49c0fd80aa17bb1f1ea45bef0567b183c
+  noisy:
+    bytes: 24661375
+    compressed_bytes: 24423552
+    crc32: f4083256
+    sha256: 17cda608888e106534a7817f07fc7c7114f98a2ab11222322c015bd5a0cf2add
+  ground_truth:
+    bytes: 56837008
+    compressed_bytes: 56813781
+    crc32: ad6437e0
+    sha256: 418fae22890ad3bd301b8bd5fed2a3bf61a9552af6e9966a0e1e0ba062f578fe
+- scene: 0151_007_S6_00800_00800_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 3f37a0ea494e6b8b71355d6b24e0248375a548d6e28ca542c41e3b5fc5951c20
+  noisy:
+    bytes: 24462042
+    compressed_bytes: 24227797
+    crc32: cdd754b7
+    sha256: 5a1de2a89d13094d75361e8c09129ae7ffafbaf5317f0ab762084583f9b7808c
+  ground_truth:
+    bytes: 56845883
+    compressed_bytes: 56822702
+    crc32: a8d69918
+    sha256: be03e53c2676d61737bf8c8a4ee307cb74c452b8606391c0f6be24fd8ef01068
+- scene: 0152_007_S6_01600_01600_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 42287daf95e76e7175dc4cb2ad71ae854cb2646a8b1848e1a12f382a055ea4eb
+  noisy:
+    bytes: 23457766
+    compressed_bytes: 23181563
+    crc32: 5a9447c0
+    sha256: 4873fff4d3b4e56b272ab66c857edcaf9ab92e9ad7d76f49e427dfeb3d2ed04c
+  ground_truth:
+    bytes: 56711718
+    compressed_bytes: 56688318
+    crc32: 8db4b78c
+    sha256: d38b05a5f19bd21a22770a3026534757989a4a299661b639d61cb9984767e281
+- scene: 0152_007_S6_01600_01600_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ac84c2d019e094394aa182fc47f8291f610e9bf9dbd062d79fbfce37ab998c2a
+  noisy:
+    bytes: 23623260
+    compressed_bytes: 23376017
+    crc32: 5f64754f
+    sha256: 340e6ca4f0da8ef5a4bb9471c49c2695c506bd58201b7d56f93d58b6c3133a4f
+  ground_truth:
+    bytes: 56717634
+    compressed_bytes: 56694366
+    crc32: 2f7d127f
+    sha256: 65064db546a6cffdd529a2d60de9ce2f6a2eb8611525f74267c8ccb523accdfd
+- scene: 0154_007_S6_00400_00400_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c0029b78525c06b0fd9a180e840e96f38f8074445570e3f7fb53e0bfb8a8a140
+  noisy:
+    bytes: 23787251
+    compressed_bytes: 23533885
+    crc32: 88e91c59
+    sha256: 2dabddd3dd5b50b86a0056dd9a4a9d33ca229388e0176c768d838ca5ce48224c
+  ground_truth:
+    bytes: 56940085
+    compressed_bytes: 56916819
+    crc32: fc4718f9
+    sha256: eed879f750affd9cf133677ebe68533caad41892ad027dd26ea9daf0105aaf94
+- scene: 0154_007_S6_00400_00400_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: a48be08765901b3f788ee3359aeb08eeda0dd69cbedfa053eaa59ab447a7f20d
+  noisy:
+    bytes: 23781192
+    compressed_bytes: 23530962
+    crc32: 04b6bc5a
+    sha256: b08cd0867d52177a6b40a00ba4b38eb0958097e481260388a01acc2ce1cc6fcf
+  ground_truth:
+    bytes: 56937205
+    compressed_bytes: 56914047
+    crc32: 36b9c6f7
+    sha256: 82f8a3a46aec19ef7893bf5d653a6dbf9fde4a9b8fa466c4e8bd58ab5db44c54
+- scene: 0155_007_GP_00100_00100_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e50b786ae115bdb634ee365135492d30b6b22cdeca7b87276aa43a9b76965a8d
+  noisy:
+    bytes: 17700065
+    compressed_bytes: 17379830
+    crc32: c96d73af
+    sha256: 92e645767aed91ce2d0e87c84711be0da03428795182faa39cd91530d2008f45
+  ground_truth:
+    bytes: 44192992
+    compressed_bytes: 44173641
+    crc32: 360919f5
+    sha256: 23d3e8197106c9f102c8efebebaa6378e6b17856d72660de6f984c4f0abb78f8
+- scene: 0155_007_GP_00100_00100_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 92930dcf275877fd67a953fd472a8b0c29601d4d12b52eddc58323f0eb4bfe38
+  noisy:
+    bytes: 17565846
+    compressed_bytes: 17256985
+    crc32: 142243d4
+    sha256: 4a7ddefdcd15d5c9e748a45e0f982ca17b056cba69979c865e9cca348eea2622
+  ground_truth:
+    bytes: 44194263
+    compressed_bytes: 44174862
+    crc32: 7f3d4bd5
+    sha256: f9437f87c2e2365fdc5b5ad4f5d36d5bdc56a086d89240ed90a28003048221a8
+- scene: 0156_007_GP_00800_00800_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 47c00cd3912b9adb9c5eb5a8856b7857c32d74d10d4d3bfbf04c98fe950e30b8
+  noisy:
+    bytes: 19248473
+    compressed_bytes: 18949645
+    crc32: 9edf03da
+    sha256: 55f7be0b3b4f6027b07d3c019d382ddac7ac93ea734dbf74f0c4c0c92661d0f4
+  ground_truth:
+    bytes: 44197562
+    compressed_bytes: 44178112
+    crc32: 713e6bee
+    sha256: b828172379404cbdf45a5ec23e121cf1ffd3a9340e7a26e88508376241c2dd7f
+- scene: 0156_007_GP_00800_00800_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 1639d0c362554244b434f2e08ee8b8e7b854f9d08f96859a487fba8b53f56e36
+  noisy:
+    bytes: 18924866
+    compressed_bytes: 18639619
+    crc32: df39f81d
+    sha256: b467827323da190dc3d894396b3048bed05806f936aa2bfa387b7fc153467c00
+  ground_truth:
+    bytes: 44202081
+    compressed_bytes: 44182719
+    crc32: b5ce921b
+    sha256: 5715634bd3359fcbf2598afba84da1fbd783a27975c1e897ae4aaa4376835b87
+- scene: 0157_007_GP_01600_01600_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0479277f466e77d6622728fef68c0b781ff72a57809cd5bf632805324ff30c96
+  noisy:
+    bytes: 19399243
+    compressed_bytes: 19128507
+    crc32: dbd506e4
+    sha256: febe62db2dfc33a197dc470b71ca295d72f68d72f6aeb757a0d52c7ca48b402b
+  ground_truth:
+    bytes: 44166313
+    compressed_bytes: 44146822
+    crc32: 6e25260e
+    sha256: 9a49ee0111dca8b48df00c6078d26e321617ca72a933dd7ff5d81052178344d3
+- scene: 0157_007_GP_01600_01600_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 417f3138c604227293d6691a8252d08b55818c4db3dab30293da50251ba605e6
+  noisy:
+    bytes: 20254245
+    compressed_bytes: 19954808
+    crc32: 503a8f07
+    sha256: b4d55ed06f857dae5167211715ddb0cfdb35f0f009a1ad11b207d69ce5a3c05e
+  ground_truth:
+    bytes: 44177132
+    compressed_bytes: 44157728
+    crc32: f4829e13
+    sha256: 9ac5ebd8e56128cf0802e6b95a714a1c015e21fb1f8f32d418b0ee499872563a
+- scene: 0159_007_IP_00100_00100_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: a2f802465efd6f8b797d9aef6edd2244be637977679f48d2556d00d47a200752
+  noisy:
+    bytes: 17586038
+    compressed_bytes: 17149123
+    crc32: 71aae846
+    sha256: d469b2d7e436514242ba8fccc26cf2ded19dcb3671c159c39a004160d1e288b9
+  ground_truth:
+    bytes: 43592720
+    compressed_bytes: 43573161
+    crc32: a159c383
+    sha256: 8264bc428c082427aa2bd932da87041bbb9765be64535dd4eba36c2b55fe4727
+- scene: 0159_007_IP_00100_00100_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6cb71b0a829ddcef2b7ec26f2ada4229d2da61bb71fa064d40cba9a663a48699
+  noisy:
+    bytes: 17602746
+    compressed_bytes: 17164342
+    crc32: 298ddd72
+    sha256: 212ea9a137e2fc3d00b8a6b700054573c892e043e9e424ed982e452aa9f9a99e
+  ground_truth:
+    bytes: 43590898
+    compressed_bytes: 43571328
+    crc32: b253e5dc
+    sha256: 037b972add26fca6a002e38220a93e55218868ab1c0301de797bca1805f7164e
+- scene: 0160_007_IP_00400_00400_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7b511901d28984888fe8e5a4c38b39429ebd55eae115d0714a24884709ff6d29
+  noisy:
+    bytes: 15418759
+    compressed_bytes: 15029183
+    crc32: e2f2f537
+    sha256: dd447a00196dd63f20b1bd1284221d2547bfddbcd373b12ef0f28f2d983c6427
+  ground_truth:
+    bytes: 43515197
+    compressed_bytes: 43495607
+    crc32: 7af46ba7
+    sha256: 0f091256a076c5a6a209772d765da547b7b8a3525a8e64e563fe2eee902e4b60
+- scene: 0160_007_IP_00400_00400_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 50c449b3c8cd3104b39b74502ca261d6af158c7432bc25342414367cc77ddea6
+  noisy:
+    bytes: 15537631
+    compressed_bytes: 15135814
+    crc32: 6ac8d434
+    sha256: 460b190bdcde2007bc6afe191e58e5fd892223b68f89b1b6311824ad651973e3
+  ground_truth:
+    bytes: 43514583
+    compressed_bytes: 43494963
+    crc32: 903e8387
+    sha256: adc3530ec40f3503f431cb0f0c559d9116f605bdda8106af8111b3ca37b8b4a1
+- scene: 0161_007_IP_00800_00800_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 77dfa126c45454e4bca93e4f2e66f968e4be723de58c2bbc8defbb2d1bc5ee9b
+  noisy:
+    bytes: 13351645
+    compressed_bytes: 12993210
+    crc32: bbc89f40
+    sha256: 8b8715d5e1972c652aedf55a8bb009e80c86669eb56c2314bb9f8eaf90c9a5c0
+  ground_truth:
+    bytes: 43575414
+    compressed_bytes: 43555859
+    crc32: 4cbf7ce8
+    sha256: cc28a08c959835997562a8b5ffae2c6809828d8145ee48c56f736a2823181899
+- scene: 0161_007_IP_00800_00800_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6d89c74fba16d07c308480887e7857a846b5b5cd564d157affcb0c6c86b2a2f3
+  noisy:
+    bytes: 12957976
+    compressed_bytes: 12632180
+    crc32: 459fd293
+    sha256: cc45abe79f9bd76ae5458177eb2d08b034133b033ecb02be2fe559cff746754a
+  ground_truth:
+    bytes: 43576204
+    compressed_bytes: 43556696
+    crc32: 1927fa28
+    sha256: ee949c17b9e047ef009b2358194f466f11ddc8a809b4b628ae74e26a037041a0
+- scene: 0163_007_IP_00100_00100_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e5ea7f3c8a57e61cdd8ab08bc7b326a1f25d626efe660eba72562e3850fb95e7
+  noisy:
+    bytes: 25146133
+    compressed_bytes: 24888464
+    crc32: 206c880d
+    sha256: 56bf668556b7268d0b1e8ce61309da10408bd169f930df0ae5dedcf42a978b10
+  ground_truth:
+    bytes: 43475531
+    compressed_bytes: 43455882
+    crc32: '80225344'
+    sha256: d51e726252f242563c2093b2240f1f56bf534431b8de4db3dee040e72debd17d
+- scene: 0163_007_IP_00100_00100_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4798a3eb388a66a231143fa29d5a857a53407f33ae38b88f98e879c3992f6cd4
+  noisy:
+    bytes: 25128827
+    compressed_bytes: 24871134
+    crc32: 14211d20
+    sha256: 50916a37f066773c57cec382d50b642fbefd4b1eef37b8ff0de3e65783f2a3d1
+  ground_truth:
+    bytes: 43476358
+    compressed_bytes: 43456747
+    crc32: f2259c5a
+    sha256: 0bc0e875649eba4831852eed1bf26d05e554f36a0932bd391964dd2bd2165e07
+- scene: 0164_007_IP_00400_00400_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5bf6b3c0146e3ddf28c33dfd5c2ca2e0038ba464e875a0e50f7ce8947a793fcc
+  noisy:
+    bytes: 20420954
+    compressed_bytes: 20020093
+    crc32: cd76efaf
+    sha256: 0c93ba6c257828de6cb0cfdd50b0f370ddae698447e36907ebbc9d06b68cda0f
+  ground_truth:
+    bytes: 43520435
+    compressed_bytes: 43500851
+    crc32: 541f786c
+    sha256: 57eec248bb6921fa0809890617ded13e405e9a07899cfd24e783efaabc2f00ce
+- scene: 0164_007_IP_00400_00400_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4d58e0ce1d0b478f2857e9ad4b3d536595863e45c506153c250c374853179d64
+  noisy:
+    bytes: 20337990
+    compressed_bytes: 19945731
+    crc32: 9534910b
+    sha256: a0e28213a667f0ffb3cdc5d85db683467e0ce0bc380ef81e872c696061720ed8
+  ground_truth:
+    bytes: 43522294
+    compressed_bytes: 43502720
+    crc32: 08b41baf
+    sha256: 4097db03dd7684f67aadf8eacb6f41ca6e5ab677457e39673ad79880964af2c7
+- scene: 0165_007_IP_00800_00800_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 1060192b268ecfd8d72cb3e9a123566e9f5fe647043353320c536bc18b12f1bb
+  noisy:
+    bytes: 17482889
+    compressed_bytes: 17073677
+    crc32: ce7dbf82
+    sha256: 326db898a57c9656bf9b51c07d5699ae5906984cf3470a8ab571a3f1e8539f14
+  ground_truth:
+    bytes: 43657356
+    compressed_bytes: 43637858
+    crc32: 9dc1f3ca
+    sha256: 6cdba02159d15251d79d8df4cf394e0fd21b7482ba1754534a51244253fa3fd6
+- scene: 0165_007_IP_00800_00800_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: ea3f26b0db768dd05e5362e2001d6bdbad5650893aa2aedf52bb534e3c3ef3a2
+  noisy:
+    bytes: 17516851
+    compressed_bytes: 17104811
+    crc32: 543feae7
+    sha256: 528889070db072685f3c5f538e43338bf3f4772deace3106707c10a2f6126f94
+  ground_truth:
+    bytes: 43665104
+    compressed_bytes: 43645628
+    crc32: df8d5b98
+    sha256: d8d78a224f7ee5b2026b9bb21bb7bcca522ce183fb113739dc98506e8bbb424b
+- scene: 0166_007_IP_01600_01600_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f7f5849ef2275a25fd1a15dc0ccdbd955d327a076bc90c5b5be06f7265c5140c
+  noisy:
+    bytes: 15476821
+    compressed_bytes: 15070304
+    crc32: d40d1a2e
+    sha256: 92248ea1dd93010a0d974211a801cac5868d634d7f4661aa815ff1ff7be2b06c
+  ground_truth:
+    bytes: 43484078
+    compressed_bytes: 43464502
+    crc32: ae913792
+    sha256: d8a5da49b680da171705266e36dc1766289b237657b86e535f061e036061f552
+- scene: 0166_007_IP_01600_01600_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: eb62718f7ec1a32fb2ef537c556b9865e039e5a01ce9de1ed88b65b93af11aa5
+  noisy:
+    bytes: 14956684
+    compressed_bytes: 14583459
+    crc32: 37ed75d3
+    sha256: 1cd8ddad3bd53995b5cde720c6bd70b4b4c18af18f0a58af921d1dfc59581320
+  ground_truth:
+    bytes: 43494032
+    compressed_bytes: 43474491
+    crc32: 3df990a7
+    sha256: 62a4e164bb2926620a9c07ca886650af065ea08511e09ef0a71d10e7bdd349a0
+- scene: 0167_008_N6_00100_00050_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: ab783bd36a2e4385c047c4651970bbb5f154ee824fdf5a782acadd9754255927
+  noisy:
+    bytes: 13914950
+    compressed_bytes: 13705976
+    crc32: 232944a2
+    sha256: 625d388e03817f04f4fde877fa1b99c5d69b4dc9f1d7cf23064a5f5dcfeb357e
+  ground_truth:
+    bytes: 47094124
+    compressed_bytes: 47075531
+    crc32: 0ef80b5c
+    sha256: 098b5ee97c29edd6a52884d749b38cdd434c3459cb2ffb8d0b355541eeadbf20
+- scene: 0167_008_N6_00100_00050_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 977248869815ad3788beeb25746011b0818b4d36404ad2a28161b70bd4500ef2
+  noisy:
+    bytes: 13806612
+    compressed_bytes: 13597814
+    crc32: c403d241
+    sha256: 4c1f8b2cb1c96def1d9223efc4a886c6d6d9b47163bd0978a786b6e855fa4865
+  ground_truth:
+    bytes: 47089233
+    compressed_bytes: 47070630
+    crc32: 2e6f69bd
+    sha256: 8032b2c694c41439033f3ee79c4b514a3576315560107d3741a2df4b4edebb70
+- scene: 0168_008_N6_00400_00200_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c576ed8fa5894fb23a205c57f50b3b9e93afbd4fcb94e5936c53df2d0364aca5
+  noisy:
+    bytes: 14353798
+    compressed_bytes: 14163452
+    crc32: c41383ad
+    sha256: 5fbd08ed36e89b7cc8e24b351aca275340d550e7a72b4ad3fd4bf7c6c51874a1
+  ground_truth:
+    bytes: 46938382
+    compressed_bytes: 46919792
+    crc32: 5e130338
+    sha256: c27d46cd80fe390b87f00c921bc0a1a74aa666096b9488e93073cf2f39f7aee1
+- scene: 0168_008_N6_00400_00200_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 35801024749676ca579037c6cf3ca4c09a74b4324a9a5eb96f1c0f9316b632ef
+  noisy:
+    bytes: 14188005
+    compressed_bytes: 14002099
+    crc32: a4090366
+    sha256: 6583c6ff28f50ae08ee7aeca74c24eb502b9a8495687677a57266add11c0d6e9
+  ground_truth:
+    bytes: 46942984
+    compressed_bytes: 46924381
+    crc32: 973482b9
+    sha256: ea00109f45d79b949a8df43f9e82ce4f823b950c9bbafdcca65d5c06ae889ca5
+- scene: 0169_008_N6_00800_00400_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c458d55a7a15e6c2f6dc41ec0bbce00ab39aa4316b548cb18492bab8dcbc21b1
+  noisy:
+    bytes: 13716217
+    compressed_bytes: 13504486
+    crc32: 531ff16d
+    sha256: 26ad725b9949f95baff51aa5332caa471aaaea70872829ff67f71918a5cfc0ca
+  ground_truth:
+    bytes: 46920084
+    compressed_bytes: 46901499
+    crc32: 0570c2d5
+    sha256: 5970b0ad29cefc20dd6bb51fc1de5b20fdec271b4140d733116340ea8ed88b9d
+- scene: 0169_008_N6_00800_00400_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8cd0d3c07621c489e10f3d2d21aa4415aa9007ad9dc1fafc6f1b9ea1de486fd6
+  noisy:
+    bytes: 14108375
+    compressed_bytes: 13883172
+    crc32: 53f0f769
+    sha256: 03411e5497d64c973d031b2f1dfe2f38e63f69c5736d4fbd5df42f4fba9b9807
+  ground_truth:
+    bytes: 46933106
+    compressed_bytes: 46914520
+    crc32: dfade99b
+    sha256: 25fb673035c920d4868d781d8c99c2406d931dcadda26aab86dde8ab73f1a73d
+- scene: 0170_008_N6_01600_00800_4400_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: d22fec6e2918d369b58c8d603eb7323f9cedf504d3ca7896dde3438a9375f302
+  noisy:
+    bytes: 13708857
+    compressed_bytes: 13480963
+    crc32: 388b056c
+    sha256: 4e6b6f0307753902c4da2a918a4e51c6625e0cd56b4cb6b6bce2b39ecd6c219a
+  ground_truth:
+    bytes: 46708648
+    compressed_bytes: 46690060
+    crc32: 5371bb11
+    sha256: acd31062ba6cd924d1c5d4185f582b5186376b9928d7bade8f559909660139c7
+- scene: 0170_008_N6_01600_00800_4400_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c3ae5c2b09ab1862ee77d320cd2d531c434ab1241c9ca8d4d31c500f38e76037
+  noisy:
+    bytes: 13688587
+    compressed_bytes: 13466326
+    crc32: f830a95f
+    sha256: e73eec1ce15c185eae61de0e700919aab075079b1ddd13e3c492db6b1ef69084
+  ground_truth:
+    bytes: 46665694
+    compressed_bytes: 46646980
+    crc32: c794e24d
+    sha256: 735f106b86ee505a8b9ebf54544fb868695bad1987f37e1b6925397fc6279aab
+- scene: 0172_008_G4_00100_00100_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 004efb347611dfa66987eaa7d6a39508b422bb8f607e2170fee2ceb0d0242b3f
+  noisy:
+    bytes: 21361186
+    compressed_bytes: 21087718
+    crc32: 118d7130
+    sha256: deace4cbbe7f8d7403bdfc0cd960994e9e8af0e3cc3aacfc3a3fe3e17cf9edbd
+  ground_truth:
+    bytes: 56984737
+    compressed_bytes: 56961514
+    crc32: 659b6645
+    sha256: 0daafc1d19c8d2f92c3d48df0863ab497e1d3feb68fe07cd7e0c1b7387c910ec
+- scene: 0172_008_G4_00100_00100_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c6aa1202d1f1da6f53238ea92e706d7963694820a688585463a3a7ced4971fd8
+  noisy:
+    bytes: 21418575
+    compressed_bytes: 21139265
+    crc32: '58223740'
+    sha256: 0b3df199890421cd340f1bcaae8842c6711c2f13a6214fd91d85fa7eddecfb39
+  ground_truth:
+    bytes: 56999632
+    compressed_bytes: 56976325
+    crc32: c10964cc
+    sha256: a907eaa36c3d08cdf627628f22199c4894a5e0d215c5fc1ddaec898398c91bfa
+- scene: 0173_008_G4_00400_00400_4400_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: f1e2d2de5515f9435de3820e88f94bd456215fc52ad71789b272153a7db2cd22
+  noisy:
+    bytes: 21898779
+    compressed_bytes: 21651034
+    crc32: 957d9ec2
+    sha256: 98196dce58b66eac54d4e676f0d7ded39689b9df5e82ead1888ebbb714c96240
+  ground_truth:
+    bytes: 56906349
+    compressed_bytes: 56883178
+    crc32: 0ace031b
+    sha256: f9bf42bc5f09e14eef3e35d0d4e6e3518a666f38942bef00f2a7a85b57058070
+- scene: 0173_008_G4_00400_00400_4400_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 1aece8b4e5c20c8727c0a78f1532596ea06a756ab7952900f85b83b5106bce62
+  noisy:
+    bytes: 21709240
+    compressed_bytes: 21476037
+    crc32: 303042b5
+    sha256: 15c18fa828d1ee6833af74e03eed6b03eb4c0858ff447933e70ad8e912b6d7f3
+  ground_truth:
+    bytes: 56929029
+    compressed_bytes: 56905732
+    crc32: c341aa22
+    sha256: 13d9531e68d8e54b607a473ee2c512b1e373d5cb3dc920afc0d60f9b4bded533
+- scene: 0175_008_S6_00100_00025_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 05e1dee37e158760cd9fb3b4220a13d0cdf632fe90d138928eb71f9015b1c452
+  noisy:
+    bytes: 22768172
+    compressed_bytes: 22534432
+    crc32: f9ed125f
+    sha256: 93bd426308602bb44ea7437d442430e87b501159809ca249504d1a72152192f4
+  ground_truth:
+    bytes: 57124747
+    compressed_bytes: 57101638
+    crc32: adf2a904
+    sha256: 40e69f77e9b04246def940bb6ad66534bf7d70b7f053fa891f8ea4e9078bfb55
+- scene: 0175_008_S6_00100_00025_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 285a51c2bbb345c921e51d844919367f028b7801cc1af1b0c5c98383807412c2
+  noisy:
+    bytes: 22812871
+    compressed_bytes: 22578355
+    crc32: ec168f24
+    sha256: 7d14b53997e8a4a21a9f47d862d85688c4df6d186de3003c139cd2fbbf43e98b
+  ground_truth:
+    bytes: 57138323
+    compressed_bytes: 57115288
+    crc32: 98d84de0
+    sha256: c1484ecb764a520bfad3c2595615ee0a6945c262c8d8b52189d0bcc99872ebe6
+- scene: 0177_008_S6_00800_00200_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: aed843ba638910249745f7d21d4e51700431604f07983e55ee6f9f3e96570118
+  noisy:
+    bytes: 24229215
+    compressed_bytes: 24001188
+    crc32: 99d0a45b
+    sha256: ecbbf4a8be23e65949648f4045dd291dbb6c02f4bbf962232f63aad7921958f4
+  ground_truth:
+    bytes: 57005614
+    compressed_bytes: 56982488
+    crc32: 8bff6b98
+    sha256: eb9edefd9042bf5e2fcac8f5a15b1ea15cf4cd6f9f3197cfb84cb0c31f331458
+- scene: 0177_008_S6_00800_00200_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: a135d882dc7b578e3f2dd328f230b057dbb63c56837d648fa2a28b76388ebaf4
+  noisy:
+    bytes: 23972559
+    compressed_bytes: 23738920
+    crc32: b9b796df
+    sha256: e46ff4a0e417d466838dde32b1f32e7c14f884f4d3a1d483f18b2653055c9efd
+  ground_truth:
+    bytes: 57010498
+    compressed_bytes: 56987312
+    crc32: cb446ba6
+    sha256: dfcd72379c5927354e3c3f32f501430aeadf64e82967226ffde21e59e8199b70
+- scene: 0178_008_S6_01600_00400_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5c60c73e5ca9f26300062ab10cc5326b354e1445b726ec0fa4703d72e2924474
+  noisy:
+    bytes: 23184802
+    compressed_bytes: 22937408
+    crc32: d58ded7a
+    sha256: e50d84fe1f68205f4d31d7834968a102092ef2b391d959353fc4eab925443afe
+  ground_truth:
+    bytes: 56895640
+    compressed_bytes: 56872346
+    crc32: 35814f20
+    sha256: 4581d0cf3a75009f285fdd4dc35af4dd199d81ee1eea5ad0a0b29eb13c379307
+- scene: 0178_008_S6_01600_00400_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 13c5c111a35e75ba406d8ecaf2d423bb25818ab3ac79beba2209eda3e761b004
+  noisy:
+    bytes: 23046542
+    compressed_bytes: 22787507
+    crc32: 2d0196a8
+    sha256: 702968adbfab7d2872bbb1abad7cc1181f6cac009a04b723da705a99cd505994
+  ground_truth:
+    bytes: 56995299
+    compressed_bytes: 56972006
+    crc32: 68ed7706
+    sha256: a0de70eebc8102fce943db70337aa7909e70299bb7b4f59469c2a07fc410c3b1
+- scene: 0179_008_S6_03200_00800_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 14cc2bd7715c8b70b80110414331bb34e1e5ee8611ae4d5d73cef0558abddb06
+  noisy:
+    bytes: 22453992
+    compressed_bytes: 22192139
+    crc32: 23bd510f
+    sha256: 9d0e73003ec7d4ffb11ab61a9da7774ef9aaa3f3b2643dea8882b0476e665028
+  ground_truth:
+    bytes: 57007719
+    compressed_bytes: 56984325
+    crc32: 8259c204
+    sha256: 45a85a7413cfd00f0100a903a71ccd6b19127782c4cac61bf53e6e3524982aab
+- scene: 0179_008_S6_03200_00800_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4b5f4af6033b61bce69735af8679d6b540b5fac3be8450f17dc40eb754f371ca
+  noisy:
+    bytes: 22699098
+    compressed_bytes: 22462690
+    crc32: 2a4e9bb5
+    sha256: f1afe5b7e1bec3e411a2a3e7080a841194a66df1f3e54984a52e85bf91614d8f
+  ground_truth:
+    bytes: 57003546
+    compressed_bytes: 56980139
+    crc32: 24a8aa0d
+    sha256: 42e515a1c1de822727f6e822d3e0d43d6fefbe4df8bb950a7d4926acd2f51334
+- scene: 0180_008_GP_00100_00100_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: bae76184cc189549d6473d2e93c9130d50223bdcccd4c01640effb7ef57ecbc7
+  noisy:
+    bytes: 16497076
+    compressed_bytes: 16281531
+    crc32: a12e76a3
+    sha256: 86927268b3ad0341150a31b21bfda83410aad024095b6e5ecc5cb151a52464eb
+  ground_truth:
+    bytes: 44444676
+    compressed_bytes: 44425362
+    crc32: 40209d93
+    sha256: dd332656756b7b54d5733dbb0b28287e9b68846d0573bdab8288672881c9c70d
+- scene: 0180_008_GP_00100_00100_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 2384a65ddf35bf8ddc1e3b1f937bbe08dbf96dc7807fbb17b69c755578cd5319
+  noisy:
+    bytes: 16630416
+    compressed_bytes: 16402630
+    crc32: a069c880
+    sha256: 4c5d949d0d993c18da653b5d75c0888093aab13dbc1444efa57f6e44d36f4711
+  ground_truth:
+    bytes: 44454715
+    compressed_bytes: 44435366
+    crc32: c7e3ce33
+    sha256: 40b2ec7931ef34172c4d1231a4b7a39b70c183401d3e541b5bd9c8166db3ce7d
+- scene: 0181_008_GP_00800_00800_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 7a5626da77eb5764a349336aae679aa74d4081628b255983df844714539e1d60
+  noisy:
+    bytes: 17029873
+    compressed_bytes: 16843785
+    crc32: 7c534fae
+    sha256: 03bf4cb3f279fecb21694de4062beafe3f40dee49dc938d44f2b20ca884fdf9c
+  ground_truth:
+    bytes: 44395890
+    compressed_bytes: 44376403
+    crc32: fccdd571
+    sha256: 492bc204ac1c6c05429d3a48c0a176f307d53e5e1944432f557dcf24d5fef4cc
+- scene: 0181_008_GP_00800_00800_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 8460d5a38bfeeca88ad0643295ff7afa8ca83346c9e43a250fafcaa5967d2225
+  noisy:
+    bytes: 16734746
+    compressed_bytes: 16570561
+    crc32: 991fd7d4
+    sha256: 5f6fade3b73ad6dba1e291b358ff2db41e9d110f68ffd5a90e52b96f9272813e
+  ground_truth:
+    bytes: 44400590
+    compressed_bytes: 44381213
+    crc32: c2d0afec
+    sha256: 8dadca92a0e0aea3c7803a95697c32d7f76cabd008619320927b1f325c9591cf
+- scene: 0182_008_GP_03200_03200_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: a81ecde7d625eb064bd96e64b7a55473c1dd64e7787e3d877925e6de5e088bbc
+  noisy:
+    bytes: 16673370
+    compressed_bytes: 16483023
+    crc32: 960c823a
+    sha256: 853406f214fdb5912a50ad3722f19a8a192d9461b26916d978b700f1979dab55
+  ground_truth:
+    bytes: 44210918
+    compressed_bytes: 44191457
+    crc32: 8a80322a
+    sha256: c8d8205b5a27d73ed6fb65ed29d0ac90af8b82caa44d72d636a10903073082ef
+- scene: 0182_008_GP_03200_03200_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c143eeb8b8048524a8be80765def91522ef3725d5cbc35634549847602bbd1df
+  noisy:
+    bytes: 17048251
+    compressed_bytes: 16851472
+    crc32: 1ee478fe
+    sha256: 703b1a8799d3be453de0d92b79f7a609a4f0f0a0eb28fac51d3c4c4308e8faf6
+  ground_truth:
+    bytes: 44216963
+    compressed_bytes: 44197500
+    crc32: 8e3379c8
+    sha256: cff4fa0e43de7532668a9f4c871285da34b804174ea57e90a97e6beacdc781bd
+- scene: 0184_008_IP_00100_00100_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: dcadbac7f839a1a01fea04af04ade08a74d9ecf947f63853785336425fb4ffbe
+  noisy:
+    bytes: 15347907
+    compressed_bytes: 14983119
+    crc32: 4fb3d904
+    sha256: 4906ec7b9f72385c6aec2215fde0b8ff991388b2354b1528fecad265b8270475
+  ground_truth:
+    bytes: 43980900
+    compressed_bytes: 43961264
+    crc32: e8558bb0
+    sha256: c034e8ed0a0b8b3918004b302429437bed32e629f12aa2b92676bb74ee501ce9
+- scene: 0184_008_IP_00100_00100_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: bcfc1508838504737ab9724004e35c8fe9b0428db81bdd3f16738cec38a64e7c
+  noisy:
+    bytes: 15355364
+    compressed_bytes: 14991212
+    crc32: 1e13e107
+    sha256: 12888f68161406c1934d34401f2ae73f355d47c5d717408792d8c0af5eaf373c
+  ground_truth:
+    bytes: 44008127
+    compressed_bytes: 43988566
+    crc32: c673881e
+    sha256: fef8b8f83cb19edcaf6bb5d545b43fc5f34b2c3ce6995285b421ec871e5ce723
+- scene: 0185_008_IP_00400_00400_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c6ee2285e3b415df03ebe84877dcb69915c223466494cdc0629ded3cbc432b1c
+  noisy:
+    bytes: 12703781
+    compressed_bytes: 12395583
+    crc32: 54eb3b3d
+    sha256: 758ba44c83acef5433a90ebeb0fc8a42296a64644a51316be061f3fb0ac93d63
+  ground_truth:
+    bytes: 43875038
+    compressed_bytes: 43855548
+    crc32: a58e0653
+    sha256: 172eaf0e1d8af1a6234f7c72a4e142bff9cc2b53c3b867531d1a202588248ed2
+- scene: 0185_008_IP_00400_00400_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 28c06d83b7896f99b069031c15c18ddc0690c74e09b5ab990c6e10145117f8ec
+  noisy:
+    bytes: 12832568
+    compressed_bytes: 12519641
+    crc32: 22fb584e
+    sha256: a81b12354c878185990aaa2baaaca07ebdc7ff6bd7777f98427971ecc86d069b
+  ground_truth:
+    bytes: 43898637
+    compressed_bytes: 43879065
+    crc32: 77badf57
+    sha256: 68280b23a45dbaaaf66a48f030546643a65a8067f5cfd5777c872be11da5de5f
+- scene: 0186_008_IP_00800_00800_3200_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 642842601a3514d867394089c87a83302d65b2c65fa06561c27bcf7cd684ddd7
+  noisy:
+    bytes: 10675921
+    compressed_bytes: 10393379
+    crc32: 9e7bb521
+    sha256: 2f70889ab700d9b5af4912dbe6d6ff2268f99b9495f173140418245ff0b17239
+  ground_truth:
+    bytes: 43716712
+    compressed_bytes: 43697149
+    crc32: d4ef5142
+    sha256: f124c8e5f130517258e010447fc3b260e21f931a3517db43370d6da2678a7049
+- scene: 0186_008_IP_00800_00800_3200_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: baedec2213ec9792ad2a1da2e3d51f422b2f17b0f276e4fa29653a33d398834b
+  noisy:
+    bytes: 10657769
+    compressed_bytes: 10378843
+    crc32: a6e5f1bc
+    sha256: b6f6f8a057517b8af79ce3de5608f234321e6b4e625855aa399297eddb8d04db
+  ground_truth:
+    bytes: 43717933
+    compressed_bytes: 43698184
+    crc32: 8fbf285c
+    sha256: f5718e89f17252c464506c8e550583f7b00478247170bd830617e7cc5dc337c7
+- scene: 0188_008_IP_00100_00100_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 5c8583968a0f49b0025267b6a27031f13ba6e69b83323def20c36d2acff9c10f
+  noisy:
+    bytes: 23536737
+    compressed_bytes: 23265915
+    crc32: 7ed75deb
+    sha256: 57c67bd0ee0b8acc7d34d20b8671d4445019bd78a34ac4fec28921a45a3294c0
+  ground_truth:
+    bytes: 43839708
+    compressed_bytes: 43820170
+    crc32: a42f5fd4
+    sha256: af361e4310157639665ea365157b077554281c660fc802297133b7fbb36da031
+- scene: 0188_008_IP_00100_00100_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 4b09200242ebab38c36e73b373faada0d7721808418c39a4f6b792b1bd3f48a3
+  noisy:
+    bytes: 23580072
+    compressed_bytes: 23309511
+    crc32: 6d38152b
+    sha256: a537a76593163022149b555cd3b74737c7dcaea84d4bed11159476e7a1962cbb
+  ground_truth:
+    bytes: 43849439
+    compressed_bytes: 43829807
+    crc32: ad049aea
+    sha256: cf0ea11ec8577ded1c182fa5c2dbdf0e4d998f76c078b5c7783efa8d4729697d
+- scene: 0189_008_IP_00400_00400_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: bc6f3839bbf7fcedbe7a44ddfc463ca2fe8b693c3fbf2c3a56740c50a3315731
+  noisy:
+    bytes: 20117956
+    compressed_bytes: 19770804
+    crc32: 257a956e
+    sha256: 15aedf35bb0dee8ca1174923869921cbe827655eeed881962b2ec31bf99005cf
+  ground_truth:
+    bytes: 43828086
+    compressed_bytes: 43808580
+    crc32: b4d13ac5
+    sha256: ce039795879902cd40884b64c6d30a4646d255407f58bd77fe9134177701bcf6
+- scene: 0189_008_IP_00400_00400_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d52ae2c13952cd3bf4565dbadf251b9ccae9e5f13e661c7a80453afcf28950b3
+  noisy:
+    bytes: 20141315
+    compressed_bytes: 19796523
+    crc32: 3f0a145d
+    sha256: 3c1d570c16148cd6b58d15cdd9d474f5e77a651eed68cf0769877dd6764dd5b8
+  ground_truth:
+    bytes: 43840466
+    compressed_bytes: 43820886
+    crc32: 42d5c827
+    sha256: 188c0024d489f78a0a51095bbddfa896f7c12419c983d7cc43a1a5f6308211c7
+- scene: 0190_008_IP_00800_00800_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 4aa9d9528ad329c1bcde9744672c003dab9a76b65b5e831fa3095ca8d1c77b81
+  noisy:
+    bytes: 17867149
+    compressed_bytes: 17457165
+    crc32: 8276f5f2
+    sha256: aad419925fe6bd122ef472215fcf7d3edfd764fb6ef6f731a7caef03132d8a2b
+  ground_truth:
+    bytes: 43770922
+    compressed_bytes: 43751298
+    crc32: 376c2e1b
+    sha256: a2c5ce18e769955c7e9659c410f4c02a4b88602691341ddec2f657b15752c87d
+- scene: 0190_008_IP_00800_00800_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 99157dcbb919a6376736e8664b6572e07af02d85c4bc4a0f06662e32bdfa7634
+  noisy:
+    bytes: 17335457
+    compressed_bytes: 16936293
+    crc32: f3116645
+    sha256: b2d957816680c406a09f1d32ccd44ed1f4d821c66ceb7de60a900073ca8e11ec
+  ground_truth:
+    bytes: 43782403
+    compressed_bytes: 43762824
+    crc32: '60651384'
+    sha256: a2715224ee95907d9e247be0faf492e09c506399e77bf6cd301032be8ee002a1
+- scene: 0191_008_IP_01600_01600_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: a4c1d3976a290432df68c5cde9932d7b9940bb808837a501e526c28c93def9ea
+  noisy:
+    bytes: 14461214
+    compressed_bytes: 14112593
+    crc32: 5b18fc0b
+    sha256: 6d243c496e03f6ec6e5157e00ca0ff65da31e2ff03a2e9859644c1ffcaf24cfe
+  ground_truth:
+    bytes: 43698559
+    compressed_bytes: 43678796
+    crc32: eafcbf73
+    sha256: b04ae4fb579f60af168b8e8b75658c716cd209ad3e3e29e769b961f0027010af
+- scene: 0191_008_IP_01600_01600_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 6de93ce62767c022816cb8a79fcce5e9b9f10c80142fa4da8d663b7143679f04
+  noisy:
+    bytes: 14215472
+    compressed_bytes: 13883474
+    crc32: 3c046d37
+    sha256: 2892b17fde6bf25536594491087de8a015a968275f78eb49d77d9ecf831e8277
+  ground_truth:
+    bytes: 43726678
+    compressed_bytes: 43707045
+    crc32: 86ffb36a
+    sha256: 91cca5b026dc8a1040d0cb2d1b1bcaab4b384a6993d0672710d944e618a466a8
+- scene: 0192_009_IP_00100_00200_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: c2049aa96a122b0ed546163114010a0d93b98cfbabccc39e130cf757fb719392
+  noisy:
+    bytes: 21014438
+    compressed_bytes: 20629759
+    crc32: 4b1155ac
+    sha256: 4a29aee3252b43bfee6bf640996bbcad4c3e731dd896ccf57fabfbbcb9c9ecc4
+  ground_truth:
+    bytes: 43595441
+    compressed_bytes: 43575874
+    crc32: 9801f7c1
+    sha256: 2050b7fb04031b4e8c84cac3a7709020046649436d1076ac24aab454281ce0de
+- scene: 0192_009_IP_00100_00200_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 612b292f1aec2051b100171078e74b044e2b95482a85ce1c122ce93bddabcaf8
+  noisy:
+    bytes: 21019353
+    compressed_bytes: 20636765
+    crc32: 9fcd0b21
+    sha256: bd8983a221d5d43120fe6f1eb4ea6ee257d0a6086044d53f5b4742a58d6f454a
+  ground_truth:
+    bytes: 43596884
+    compressed_bytes: 43577358
+    crc32: 23ef012d
+    sha256: 0d46cba5b9c670cf48311f02f56aa3fb13c7acc64e289d6900653404b5259a7e
+- scene: 0193_009_IP_00800_02000_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 672c3581904e1f7681d6a4461c319bffbdc1695b988556ced2e338e6dcab0ca9
+  noisy:
+    bytes: 15790456
+    compressed_bytes: 15384236
+    crc32: f23cc59f
+    sha256: a71e8cb680e7856ff65d6d8bfab49a25d503aeb8d69e26a591542441568c9c9d
+  ground_truth:
+    bytes: 43652796
+    compressed_bytes: 43633377
+    crc32: f8a61272
+    sha256: 874c98eda71e5ac66606abaf77af729b80abb5bf74c19fa0e72b00bf7e0fc8d1
+- scene: 0193_009_IP_00800_02000_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c36a17ebabfe3299112d31fe5a657a144a48fea63e6f0a4ee06ea50aef143c7b
+  noisy:
+    bytes: 15768226
+    compressed_bytes: 15359963
+    crc32: 9cca5289
+    sha256: 472db841b740c8bdecfc2d9af479d68260ae418a15d90f37eeea2fbc23821e4e
+  ground_truth:
+    bytes: 43674232
+    compressed_bytes: 43654760
+    crc32: 5062cd81
+    sha256: e7d8e9a6d4cae0d8e4c8b866e4b07d7bb6bb41a3cbff065a4aa08afabc533190
+- scene: 0194_009_IP_01600_04000_3200_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 6d4c6364b5c6bea76d674f681d124c5bb53eafe9b122717fc494e78de0ca74e4
+  noisy:
+    bytes: 14693884
+    compressed_bytes: 14302546
+    crc32: 379a4419
+    sha256: ad49d0976bc4f9f2f45d5119ad6033040c5e037bb995f7699d13bd496712d80f
+  ground_truth:
+    bytes: 43657858
+    compressed_bytes: 43638306
+    crc32: 9780458b
+    sha256: 62e3853cac0b2f08f66a7048c07a0404ec83fc07f0b23abc1365a378a0741c3d
+- scene: 0194_009_IP_01600_04000_3200_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: bef085edc529887210cab9cf6e578d676d9eb5d0dc380cb0ff84c1660538cce7
+  noisy:
+    bytes: 14980396
+    compressed_bytes: 14586732
+    crc32: 24b36bae
+    sha256: 4e8b83e263047a46ff2d537428a2c2c0a930d6e5285825c780fbd6f83ab5eacf
+  ground_truth:
+    bytes: 43685398
+    compressed_bytes: 43665780
+    crc32: 8e2daa45
+    sha256: e77c6a3c3856399d32da754bf12212ee297ac57feb16a2c0658605e2344f9111
+- scene: 0195_009_IP_01600_04000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: ae555b4253c05e27b3f72fa7f66bf7a5d5829d4c1d1cac83c318f5d98e37b4d3
+  noisy:
+    bytes: 9480258
+    compressed_bytes: 9247357
+    crc32: 87a68e59
+    sha256: cb3140f47d3b5e29d70a04b8436f99fdd0df4bb3a2bb0e5770ea2b4fb1814573
+  ground_truth:
+    bytes: 43189941
+    compressed_bytes: 43170190
+    crc32: 8d7b632e
+    sha256: 7c0b0f3425fa3d92514b3a9b3fd9db613394e7b4744c60614a887a8db3ef22c9
+- scene: 0195_009_IP_01600_04000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: b595d6baf5db96e5445ec3ab117221de12a718d0a1f1119190dacbb1bb72f00a
+  noisy:
+    bytes: 9472790
+    compressed_bytes: 9239794
+    crc32: 0bc5b251
+    sha256: 32215ad6cebccefa35d56ba6b7f6227dc9254cefdaf8ac86dbddba8aa03842dc
+  ground_truth:
+    bytes: 43203093
+    compressed_bytes: 43183294
+    crc32: f254ef22
+    sha256: e521dcdc7bec8e3dceaf4e61765fa493752358643fde700e99a44e66233d7c56
+- scene: 0196_009_IP_00800_02000_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: a2bd354dc0595868acd24b5e647411e35ed70cd15185d3902211b146849479d0
+  noisy:
+    bytes: 11212455
+    compressed_bytes: 10918234
+    crc32: a085735d
+    sha256: 0e062f2ebd1166409a64dd53c27cc34155c5914d6fceff09357db1600eae7dea
+  ground_truth:
+    bytes: 43459978
+    compressed_bytes: 43440294
+    crc32: 5624db6a
+    sha256: 29d530c3f5e8c5694b2cbcb13b196c02b3061c4752388da05cc094702f4f8617
+- scene: 0196_009_IP_00800_02000_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 74b5859d1bbd59c6643e3d8375019b24c5d80a6978b83a51e487d1ed1cb76434
+  noisy:
+    bytes: 11256008
+    compressed_bytes: 10957792
+    crc32: 7cec227a
+    sha256: 7e402d68f0aa868a3148a0cc9903ac03cf3fbfd133ddc7a77704621a9b343a11
+  ground_truth:
+    bytes: 43467104
+    compressed_bytes: 43447637
+    crc32: 2b390784
+    sha256: eed1fe82e0fa301ed787ca1b9f6d06826eeccf59484c5043a239501a30872fdf
+- scene: 0197_009_IP_00100_00200_5500_L
+  frame_index: 10
+  source: fallback
+  receipt_sha256: e916359190e754efa9b88b5d2aa1021301efb1b3d7e98aeb1a4ccce8849f01c1
+  noisy:
+    bytes: 13334531
+    compressed_bytes: 12922225
+    crc32: 815b62f2
+    sha256: 779c6330a2b46c3b77cb7b1ade4571b539e8c245bfce3aaf5425fb7d562d05b5
+  ground_truth:
+    bytes: 43656048
+    compressed_bytes: 43636475
+    crc32: caa31511
+    sha256: f738bc51359e13d925c85a894fbef15c54814108e31f2f470130a2b8a03badc9
+- scene: 0197_009_IP_00100_00200_5500_L
+  frame_index: 20
+  source: fallback
+  receipt_sha256: d2587a20073df5100ad5b0d5c8b5a2c5d3854fb018cbc2e1badc4958a0c39c62
+  noisy:
+    bytes: 13022133
+    compressed_bytes: 12643748
+    crc32: f580815f
+    sha256: d5ae3585de5a4934a452b6b5c607593e8aa0fdd758a52f0d4010ab0543a0eedc
+  ground_truth:
+    bytes: 43666850
+    compressed_bytes: 43647313
+    crc32: 18d9fc0e
+    sha256: 658a2e4b758d751458e0d29815f2e4720d75e3d6f8c2e31f8211ae9cc8049d87
+- scene: 0198_010_GP_00100_00200_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 0e1146186a000d4e1ddb10b0e6b3b210c1644f2ffa8b3f3364aa87ceb597beed
+  noisy:
+    bytes: 18569435
+    compressed_bytes: 18180630
+    crc32: dda646cd
+    sha256: d7c85d699dcdbd2c042c16e96e8727a7db93f40b42711228b56a8f60cb41ad1f
+  ground_truth:
+    bytes: 43801251
+    compressed_bytes: 43781804
+    crc32: b6ec812f
+    sha256: a95a2846965c5fb13ce56b871e1bbbc2747e8abf897f296eaf9e9bd9e9414a23
+- scene: 0198_010_GP_00100_00200_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: f4f2ac8606cbc5d90cb6579c95d23b65be406f8c8d493b9ec40fe3cc4b310205
+  noisy:
+    bytes: 18405350
+    compressed_bytes: 18019934
+    crc32: ee4aa450
+    sha256: e181c7617f2ebeddb9ab976de3364cbdb765b41a430021ee18e5a053d5e8f652
+  ground_truth:
+    bytes: 43805167
+    compressed_bytes: 43785767
+    crc32: 03435f89
+    sha256: abcc1ed096204b23a424b912b00035d4938232be70042e50f544db8fe73fadbf
+- scene: 0199_010_GP_00800_01600_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 159bb644a0275e85db1dfed2dd2705ec660b867212ac17d9739ef8a147df578e
+  noisy:
+    bytes: 19593850
+    compressed_bytes: 19260181
+    crc32: 8235353f
+    sha256: 84087da834a1e5572791dd88aa917632a8389499b59408ac3ac91da7c5076050
+  ground_truth:
+    bytes: 43788061
+    compressed_bytes: 43768606
+    crc32: 486fe18e
+    sha256: dad8bc133235abad57b6b46f650b31460d3e5e3363c3d817253e048e39d04995
+- scene: 0199_010_GP_00800_01600_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: c4ae3455796862a7392a63705709d5c8597b639026e406ed614ac9657fbc2d16
+  noisy:
+    bytes: 19486444
+    compressed_bytes: 19150699
+    crc32: 608545e6
+    sha256: b376e847d32eee00ef589b4e1c62cb409cefbf9de7aa58851dca7ac662b3fd24
+  ground_truth:
+    bytes: 43781971
+    compressed_bytes: 43762504
+    crc32: d0bdde6e
+    sha256: ccce12b7a5aea76f070ca7b7f58475730dfccd6d460e543cad469415c6bc7abd
+- scene: 0200_010_GP_01600_03200_5500_N
+  frame_index: 10
+  source: fallback
+  receipt_sha256: 23a419e9efeee66ccd8be41ff4917833006391eade99e128f50a6449dc5be23f
+  noisy:
+    bytes: 19879298
+    compressed_bytes: 19562414
+    crc32: a2c8f45d
+    sha256: 191677803182c9ab6554c355b3b867e099af27a1ebeedd46605ca5852506779f
+  ground_truth:
+    bytes: 43797204
+    compressed_bytes: 43777772
+    crc32: 39c870e6
+    sha256: 68fcf32f6c992ed040863785b5bd0ee1a87ca764103f09706c3ee50f5c021655
+- scene: 0200_010_GP_01600_03200_5500_N
+  frame_index: 20
+  source: fallback
+  receipt_sha256: 30a9b4ce344d1af6ec1cde10ef45ac9d7d56370e36bce97f1c9cbb4127b6a789
+  noisy:
+    bytes: 19783411
+    compressed_bytes: 19473910
+    crc32: 65bdabb6
+    sha256: f205104b74dbbe96de037518e68c0091c1f7d6d8b2f3de4f87ebf596e86d5a01
+  ground_truth:
+    bytes: 43795543
+    compressed_bytes: 43776001
+    crc32: 25c3db7b
+    sha256: dd4cc80267555f800e84dd1dbd0edac44230776d10352d2c49f083ec5715dc99
+limitations:
+- 收据证明公开 SIDD RAW 获取完整性，不代表目标 Sensor 域覆盖
+- 公开数据技术验证不等于麒麟 9000 实机画质、性能或稳定性放行

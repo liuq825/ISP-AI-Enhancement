@@ -1,11 +1,15 @@
-"""验证训练检查点、余弦调度与随机状态恢复的确定性。"""
+"""验证训练检查点、联合蒸馏、余弦调度与随机状态恢复的确定性。"""
 
+import json
+import math
 from pathlib import Path
 
 import torch
 import yaml
 
+from isp_ai_enhancement.data.manifest import read_manifest
 from isp_ai_enhancement.data.synthetic import generate_smoke_dataset
+from isp_ai_enhancement.models.nafnet import NAFNetRaw
 from isp_ai_enhancement.training.engine import train_from_config
 
 
@@ -124,3 +128,91 @@ def test_resume_and_qat_initialization_are_checkpoint_safe(tmp_path: Path) -> No
     qat_keys = set(qat_checkpoint["model_state"])
     assert any("activation_fake_quant.max_abs" in key for key in qat_keys)
     assert any("observer_initialized" in key for key in qat_keys)
+
+
+def test_training_logs_feature_and_attention_distillation_terms(tmp_path: Path) -> None:
+    """训练器应组合输出、feature、attention 三路蒸馏并保存语义状态。"""
+
+    manifest = generate_smoke_dataset(
+        tmp_path / "distill-data",
+        samples=8,
+        height=32,
+        width=32,
+    )
+    student_config = tmp_path / "student.yaml"
+    student_config.write_text(
+        "model:\n"
+        "  name: nafnet_raw\n"
+        "  input_channels: 16\n"
+        "  output_channels: 4\n"
+        "  width: 4\n"
+        "  encoder_blocks: [1, 1, 1, 1]\n"
+        "  middle_blocks: 1\n"
+        "  decoder_blocks: [1, 1, 1, 1]\n"
+        "  expansion_spec: baseline\n",
+        encoding="utf-8",
+    )
+    teacher_config = tmp_path / "teacher.yaml"
+    teacher_config.write_text(
+        student_config.read_text(encoding="utf-8").replace("width: 4", "width: 8"),
+        encoding="utf-8",
+    )
+    teacher_checkpoint = tmp_path / "teacher.pt"
+    torch.save(
+        NAFNetRaw(
+            width=8,
+            encoder_blocks=(1, 1, 1, 1),
+            middle_blocks=1,
+            decoder_blocks=(1, 1, 1, 1),
+        ).state_dict(),
+        teacher_checkpoint,
+    )
+    output_dir = tmp_path / "distill-run"
+    config_path = _write_training_config(
+        tmp_path / "distill.yaml",
+        manifest=manifest,
+        model_config=student_config,
+        output_dir=output_dir,
+    )
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    config["epochs"] = 1
+    config["scheduler"]["t_max"] = 1
+    config["teacher_config"] = str(teacher_config)
+    config["teacher_checkpoint"] = str(teacher_checkpoint)
+    config["gradient_accumulation_steps"] = 2
+    config["loss"].update(
+        {
+            "teacher_output": 0.10,
+            "teacher_feature": 0.15,
+            "teacher_attention": 0.10,
+            "feature_keys": ["enc2", "middle"],
+            "attention_keys": ["enc3", "middle"],
+        }
+    )
+    config_path.write_text(
+        yaml.safe_dump(config, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    checkpoint = torch.load(
+        train_from_config(config_path),
+        map_location="cpu",
+        weights_only=False,
+    )
+    history = [
+        json.loads(line)
+        for line in (output_dir / "history.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    step_record = next(item for item in history if "loss" in item)
+    assert "loss_teacher_output" in step_record
+    assert "loss_teacher_feature" in step_record
+    assert "loss_teacher_attention" in step_record
+    assert step_record["gradient_accumulation_steps"] == 2
+    train_records = len(
+        [record for record in read_manifest(manifest) if record.split == "train"]
+    )
+    train_batches = math.ceil(train_records / config["batch_size"])
+    assert checkpoint["global_step"] == math.ceil(train_batches / 2)
+    assert any(
+        key.startswith("_attention_key_") for key in checkpoint["distiller_state"]
+    )

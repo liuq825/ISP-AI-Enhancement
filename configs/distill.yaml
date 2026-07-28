@@ -1,19 +1,32 @@
-# 学生模型的商用品质研发配置；该用途不等于已经取得正式生产授权。
+# Student 的 feature + attention 联合蒸馏配置；输出蒸馏仅保留为低权重辅助项。
+# 该用途面向商用级技术指标研发，不等于已经取得正式生产授权。
 seed: 20260726
 device: cuda
 student_config: configs/model_student.yaml
 teacher_config: configs/model_teacher.yaml
-teacher_checkpoint: checkpoints/teacher.pt
+teacher_checkpoint: runs/teacher/best.pt
 context_config: configs/context.yaml
-manifest: data/production/manifest.jsonl
-output_dir: runs/student_distill
+manifest: data/sidd_training/manifest.jsonl
+output_dir: runs/student_feature_attention_distill
 data_policy:
   # commercial_grade 校验公开数据研发用途，但不触发未来量产审批门禁。
   purpose: commercial_grade
   catalog: resources/datasets.yaml
+data_requirements:
+  min_train_records: 3200
+  min_val_records: 64
+  min_train_source_pairs: 200
+  min_val_source_pairs: 4
+  min_train_scene_groups: 6
+  min_val_scene_groups: 1
+  required_train_sensors: [sidd_GP, sidd_IP, sidd_S6, sidd_N6, sidd_G4]
+  required_train_iso_buckets: [low, medium, high, extreme]
+  required_train_modes: [single]
 epochs: 100
-batch_size: 8
-num_workers: 8
+# Teacher+Student 同时前向时优先控制峰值显存；8 个 micro-batch 累积为一次更新。
+batch_size: 1
+gradient_accumulation_steps: 8
+num_workers: 2
 crop_size: 256
 learning_rate: 0.0001
 weight_decay: 0.0
@@ -24,10 +37,12 @@ scheduler:
   t_max: 100
   eta_min: 0.000001
 loss:
-  # 前三项为真值监督，后两项分别约束教师输出和中间特征。
+  # 前三项为真值监督；输出仅作弱辅助，主蒸馏信号来自 feature 与空间 attention。
   charbonnier: 1.0
   gradient: 0.10
   color: 0.05
-  teacher_output: 0.30
-  teacher_feature: 0.10
-  feature_keys: [enc2, enc4, middle, dec2]
+  teacher_output: 0.10
+  teacher_feature: 0.15
+  teacher_attention: 0.10
+  feature_keys: [enc2, enc3, enc4, middle, dec2]
+  attention_keys: [enc3, enc4, middle, dec1, dec2]

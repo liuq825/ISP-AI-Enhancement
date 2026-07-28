@@ -13,7 +13,11 @@ from .governance import (
     validate_data_requirements,
 )
 from .manifest import ManifestRecord, read_manifest, validate_manifest
-from .sidd import import_sidd_dataset, import_sidd_validation_blocks
+from .sidd import (
+    import_sidd_dataset,
+    import_sidd_validation_blocks,
+    write_sidd_import_audit_receipt,
+)
 from .sidd_catalog import build_sidd_range_config
 from .sidd_remote import (
     fetch_sidd_raw_frames,
@@ -39,6 +43,7 @@ __all__ = [
     "load_context_config",
     "read_manifest",
     "sidd_subset_status",
+    "write_sidd_import_audit_receipt",
     "write_sidd_subset_audit_receipt",
     "validate_data_policy",
     "validate_data_requirements",
